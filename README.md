@@ -1,8 +1,8 @@
 # node-lua
 A node completation of lua which support sync and async remote procedure call, and task-multiplexing support(in muti-thread mode with no useless wakeup)
 
-# usefull api
-## tcp api
+## usefull api
+### tcp api
 1.	result, listen_socket = tcp.listen(addr, port[, backlog, [void (*listen_callback)(result, listen_socket, addr, port[, backlog])]])
 	--listen_callback is a once callback, blocking if callback is nil.
 	
@@ -44,24 +44,26 @@ A node completation of lua which support sync and async remote procedure call, a
 	
 14. tcp.set_nodelay(socket, enable)
 
-15. result, error = context.send(handle, data) --QUERY
+### context api
+1.	result, error = context.send(handle, data) --QUERY
 
-16. result, query_data = context.query(handle, data[, timeout [, query_callback(result, query_data, handle, data[, timeout])]]) --QUERY(real query)
+2.	result, query_data = context.query(handle, data[, timeout [, query_callback(result, query_data, handle, data[, timeout])]]) --QUERY(real query)
 	--query_callback is a once callback, blocking if callback is nil.
 	
-17. result, error = context.reply(handle, session, data) --REPLY
+3.	result, error = context.reply(handle, session, data) --REPLY
 
-18. result, data, recv_handle, session = context.recv(handle[, timeout])
+4.	result, data, recv_handle, session = context.recv(handle[, timeout])
 	--recv_callback is a continues callback, blocking if callback is nil.
 	
-19. result, data, recv_handle, session = context.recv(handle[, recv_callback(result, data, recv_handle, session, handle)])
+5.	result, data, recv_handle, session = context.recv(handle[, recv_callback(result, data, recv_handle, session, handle)])
 	--recv_callback is a continues callback, blocking if callback is nil.
 	
-20. result, error = context.wait(handle[, timeout[, callback(result, error, handle[, timeout])]])
+6.	result, error = context.wait(handle[, timeout[, callback(result, error, handle[, timeout])]])
 	--connect_callback is a once callback, blocking if callback is nil.
-	
-21. timer.sleep(seconds)
 
-22.	timer.timeout(seconds, ..., void (*callback)(...))
+### timer api	
+1.	timer.sleep(seconds)
 
-23.	timer.loop(interval, repeat_time, ..., void (*callback)(...))
+2.	timer.timeout(seconds, ..., void (*callback)(...))
+
+3.	timer.loop(interval, repeat_time, ..., void (*callback)(...))

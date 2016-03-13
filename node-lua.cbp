@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="node-lua" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/node-lua" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/node-lua" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="deps/lua/lapi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lapi.h" />
+		<Unit filename="deps/lua/latomic.h" />
+		<Unit filename="deps/lua/lauxlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lauxlib.h" />
+		<Unit filename="deps/lua/lbaselib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lbitlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lcode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lcode.h" />
+		<Unit filename="deps/lua/lcorolib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lctype.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lctype.h" />
+		<Unit filename="deps/lua/ldblib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ldebug.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ldebug.h" />
+		<Unit filename="deps/lua/ldo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ldo.h" />
+		<Unit filename="deps/lua/ldump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lfunc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lfunc.h" />
+		<Unit filename="deps/lua/lgc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lgc.h" />
+		<Unit filename="deps/lua/linit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/liolib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/llex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/llex.h" />
+		<Unit filename="deps/lua/llimits.h" />
+		<Unit filename="deps/lua/lmathlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lmem.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lmem.h" />
+		<Unit filename="deps/lua/loadlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lobject.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lobject.h" />
+		<Unit filename="deps/lua/lopcodes.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lopcodes.h" />
+		<Unit filename="deps/lua/loslib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lparser.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lparser.h" />
+		<Unit filename="deps/lua/lstate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lstate.h" />
+		<Unit filename="deps/lua/lstring.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lstring.h" />
+		<Unit filename="deps/lua/lstrlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ltable.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ltable.h" />
+		<Unit filename="deps/lua/ltablib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ltm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/ltm.h" />
+		<Unit filename="deps/lua/lua.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lua.h" />
+		<Unit filename="deps/lua/lua.hpp" />
+		<Unit filename="deps/lua/luac.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/luaconf.h" />
+		<Unit filename="deps/lua/lualib.h" />
+		<Unit filename="deps/lua/lundump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lundump.h" />
+		<Unit filename="deps/lua/lvm.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lvm.h" />
+		<Unit filename="deps/lua/lzio.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/lua/lzio.h" />
+		<Unit filename="deps/uv/include/uv-private/ngx-queue.h" />
+		<Unit filename="deps/uv/include/uv-private/tree.h" />
+		<Unit filename="deps/uv/include/uv-private/uv-linux.h" />
+		<Unit filename="deps/uv/include/uv.h" />
+		<Unit filename="deps/uv/src/unix/aix.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/async.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/cygwin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/darwin-proctitle.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/darwin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/dl.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/error.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/freebsd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/fs.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/fsevents.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/getaddrinfo.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/internal.h" />
+		<Unit filename="deps/uv/src/unix/kqueue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/linux-core.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/linux-inotify.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/linux-syscalls.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/linux-syscalls.h" />
+		<Unit filename="deps/uv/src/unix/loop-watcher.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/loop.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/netbsd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/openbsd.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/pipe.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/poll.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/process.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/proctitle.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/signal.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/stream.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/sunos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/tcp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/thread.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/threadpool.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/timer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/tty.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="deps/uv/src/unix/udp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/buffer.cpp" />
+		<Unit filename="src/buffer.h" />
+		<Unit filename="src/common.h" />
+		<Unit filename="src/config.h" />
+		<Unit filename="src/context.cpp" />
+		<Unit filename="src/context.h" />
+		<Unit filename="src/context_lua.cpp" />
+		<Unit filename="src/context_lua.h" />
+		<Unit filename="src/context_mgr.cpp" />
+		<Unit filename="src/context_mgr.h" />
+		<Unit filename="src/context_queue.cpp" />
+		<Unit filename="src/context_queue.h" />
+		<Unit filename="src/endian.cpp" />
+		<Unit filename="src/endian.h" />
+		<Unit filename="src/endian_conv.cpp" />
+		<Unit filename="src/endian_conv.h" />
+		<Unit filename="src/errors.cpp" />
+		<Unit filename="src/errors.h" />
+		<Unit filename="src/gqueue.cpp" />
+		<Unit filename="src/gqueue.h" />
+		<Unit filename="src/handle_base_def.h" />
+		<Unit filename="src/lbuffer.cpp" />
+		<Unit filename="src/lbuffer.h" />
+		<Unit filename="src/lcororep.cpp" />
+		<Unit filename="src/lua_handle_base.cpp" />
+		<Unit filename="src/lua_handle_base.h" />
+		<Unit filename="src/lua_tcp_handle.cpp" />
+		<Unit filename="src/lua_tcp_handle.h" />
+		<Unit filename="src/lua_timer_handle.cpp" />
+		<Unit filename="src/lua_timer_handle.h" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/message.cpp" />
+		<Unit filename="src/message.h" />
+		<Unit filename="src/message_queue.cpp" />
+		<Unit filename="src/message_queue.h" />
+		<Unit filename="src/mqueue.cpp" />
+		<Unit filename="src/mqueue.h" />
+		<Unit filename="src/network.cpp" />
+		<Unit filename="src/network.h" />
+		<Unit filename="src/node_lua.cpp" />
+		<Unit filename="src/node_lua.h" />
+		<Unit filename="src/ref_sessions.cpp" />
+		<Unit filename="src/ref_sessions.h" />
+		<Unit filename="src/ref_sessions_mgr.cpp" />
+		<Unit filename="src/ref_sessions_mgr.h" />
+		<Unit filename="src/request.h" />
+		<Unit filename="src/singleton.h" />
+		<Unit filename="src/tcp_handle.cpp" />
+		<Unit filename="src/tcp_handle.h" />
+		<Unit filename="src/timer_mgr.h" />
+		<Unit filename="src/utils.cpp" />
+		<Unit filename="src/utils.h" />
+		<Unit filename="src/uv_handle_base.cpp" />
+		<Unit filename="src/uv_handle_base.h" />
+		<Unit filename="src/uv_tcp_handle.cpp" />
+		<Unit filename="src/uv_tcp_handle.h" />
+		<Unit filename="src/uv_timer_handle.cpp" />
+		<Unit filename="src/uv_timer_handle.h" />
+		<Unit filename="src/worker.h" />
+		<Unit filename="src/worker_mgr.cpp" />
+		<Unit filename="src/worker_mgr.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

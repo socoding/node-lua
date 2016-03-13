@@ -1,0 +1,59 @@
+#ifndef COMMON_H_
+#define COMMON_H_
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include "config.h"
+
+#ifdef WIN32
+#define FORCE_INLINE __forceinline
+#else
+#define FORCE_INLINE inline
+#endif
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
+#define container_of(ptr, type, member) \
+  ((type *) ((char *) (ptr) - offsetof(type, member)))
+
+//to be fix : fix me
+#ifdef RELEASE
+#define WPAssert( assertion ) { if( !(assertion) ) { fprintf( stderr, "\n%s:%i ASSERTION FAILED:\n  %s\n", __FILE__, __LINE__, #assertion ); } }
+#else
+#define WPAssert( assertion ) { if( !(assertion) ) { fprintf( stderr, "\n%s:%i ASSERTION FAILED:\n  %s\n", __FILE__, __LINE__, #assertion ); assert(assertion); } }
+#endif
+
+#define ASSERT(x) WPAssert(x)
+
+#if defined(_MSC_VER) && _MSC_VER < 1600
+# include "uv-private/stdint-msvc2008.h"
+#else
+# include <stdint.h>
+#endif
+
+#include "uv.hpp"
+#include "lua.hpp"
+#include "latomic.h"
+#include "utils.h"
+#include "errors.h"
+
+#define nl			(singleton_ref(node_lua_t))
+#define nl_malloc	malloc
+#define nl_free		free
+#define nl_calloc	calloc
+#define nl_realloc	realloc
+#define nl_strdup	strdup
+
+#if defined __GNUC__
+#define likely(x) __builtin_expect ((x), 1)
+#define unlikely(x) __builtin_expect ((x), 0)
+#else
+#define likely(x) (x)
+#define unlikely(x) (x)
+#endif
+
+#define nl_max(a,b)            (((a) > (b)) ? (a) : (b))
+#define nl_min(a,b)            (((a) < (b)) ? (a) : (b))
+
+#endif

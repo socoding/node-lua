@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{7c03bb16-2521-4ab0-a841-7bd27036fa0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{e600479a-b609-4082-a3a9-66d9c02d217d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\buffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\config.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\context.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\context_lua.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\context_mgr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\network.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\node_lua.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\singleton.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\request.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\worker_mgr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\worker.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lbuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\errors.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\message_queue.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\context_queue.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\endian_conv.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ref_sessions.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ref_sessions_mgr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timer_mgr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uv_handle_base.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua_handle_base.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uv_tcp_handle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua_tcp_handle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uv_timer_handle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lua_timer_handle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\handle_base_def.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\buffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\context.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\context_lua.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\context_mgr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lcororep.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\node_lua.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\utils.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\worker_mgr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lbuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\errors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\message_queue.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\context_queue.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\endian_conv.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ref_sessions.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ref_sessions_mgr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uv_handle_base.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua_handle_base.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uv_tcp_handle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua_tcp_handle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uv_timer_handle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lua_timer_handle.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

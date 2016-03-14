@@ -37,7 +37,9 @@ static const luaL_Reg loadedlibs[] = {
   {LUA_BITLIBNAME, luaopen_bit32},
   {LUA_MATHLIBNAME, luaopen_math},
   {LUA_DBLIBNAME, luaopen_debug},
+#if defined(LUA_CACHELIB)
   {LUA_CACHELIB, luaopen_cache},
+#endif
   {NULL, NULL}
 };
 

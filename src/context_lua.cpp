@@ -128,7 +128,9 @@ void context_lua_t::lua_open_libs(lua_State *L)
 		{LUA_BITLIBNAME, luaopen_bit32},
 		{LUA_MATHLIBNAME, luaopen_math},
 		{LUA_DBLIBNAME, luaopen_debug},
+#if defined(LUA_CACHELIB)
 		{LUA_CACHELIB, luaopen_cache},
+#endif
 		{LUA_TCPLIBNAME, luaopen_tcp},
 		{LUA_BUFFERLIBNAME, luaopen_buffer},
 		{LUA_CONTEXTLIBNAME, luaopen_context},

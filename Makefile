@@ -7,7 +7,7 @@ PLATFORM = $(shell sh -c 'uname -s | tr "[A-Z]" "[a-z]"')
 endif
 
 define MAKE_PLATFORM
-	pushd deps/lua && make $(2); rm -f liblua.so liblua.dylib; popd
+	pushd deps/lua && make $(2); popd
 	pushd deps/uv  && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; popd
 	pushd src      && make PLATFORM=$(1) RELEASE=$(3); popd
 endef
@@ -30,4 +30,7 @@ clean:
 	pushd src      && make clean; popd
 
 install:
-	mv src/node-lua ./
+	cp -f src/node-lua ./node-lua
+	cp -f src/node-lua /usr/local/bin/
+	cp deps/lua/libnlua.so ./libnlua.so
+	cp deps/lua/libnlua.so /usr/lib/libnlua.so

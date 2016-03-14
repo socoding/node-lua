@@ -17,7 +17,7 @@ INCLUDE_PATH := ../deps/lua ../deps/uv/include
 LIBRARY_PATH := ../deps/lua ../deps/uv
 
 ## need libs, add at here
-LIBS := lua uv m
+LIBS := nlua uv m
 
 ## define CFLAGS
 CFLAGS += -g -pedantic -O3 -Wall -Wextra -Wno-unused-parameter 

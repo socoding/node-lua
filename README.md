@@ -1,6 +1,6 @@
 # node-lua
 1.	A node complementation of lua which supports sync and async remote procedure call, and task-multiplexing support(in multi-threads with no useless wakeup).
-2.	It is a simple script engine or complex server engine which supports a massive of independent lua contexts (or named services) running on multi-threads which restricted to the cpu core count.
+2.	It can be used as a simple script engine or complex server engine which supports a massive of independent lua contexts (or named services) running on multi-threads which restricted to the cpu core count.
 3.	The lua context will suspend when it calls a sync and async remote procedure call using lua coroutine inside the core c codes.
 4.	The remote procedure call can be called within the lua coroutine where the user created and it won't impact the normal coroutine procedure.
 5.	A context starts with a lua file as the entry. The process will exit automaticly when all contexts ends or terminated and a context will exit automaticly when all its sync and async remote procedure call ends or terminates.

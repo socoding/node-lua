@@ -134,7 +134,9 @@ static luaL_Reg lbuffer[] = {
 	{ "find", lbuffer_find },
 	{ "tostring", lbuffer_tostring },
 	{ "valid", lbuffer_valid },
-	{ "release", lbuffer_release},
+	{ "release", lbuffer_release },
+	{ "__gc", lbuffer_release },
+	{ "__tostring", lbuffer_tostring },
 	{ NULL, NULL },
 };
 
@@ -153,12 +155,7 @@ buffer_t* create_buffer(lua_State* L)
 	if (luaL_newmetatable(L, BUFFER_METATABLE)) { /* create new metatable */
 		lua_pushvalue(L, -1);
 		lua_setfield(L, -2, "__index");
-		lua_pushcfunction(L, lbuffer_release);
-		lua_setfield(L, -2, "__gc");
-		for (luaL_Reg* lib = lbuffer; lib->func; lib++) {
-			lua_pushcfunction(L, lib->func);
-			lua_setfield(L, -2, lib->name);
-		}
+		luaL_setfuncs(L, lbuffer, 0);
 	}
 	lua_setmetatable(L, -2);
 	return ret;

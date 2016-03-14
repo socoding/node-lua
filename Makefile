@@ -7,9 +7,12 @@ PLATFORM = $(shell sh -c 'uname -s | tr "[A-Z]" "[a-z]"')
 endif
 
 define MAKE_PLATFORM
-	pushd deps/lua && make $(2); popd
-	pushd deps/uv  && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; popd
-	pushd src      && make PLATFORM=$(1) RELEASE=$(3); popd
+	##main essential builds
+	pushd deps/lua  && make $(2); popd
+	pushd deps/uv   && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; popd
+	pushd src       && make PLATFORM=$(1) RELEASE=$(3); popd
+	##not essential builds
+	pushd clib/mime && make PLATFORM=$(1) RELEASE=$(3); popd
 endef
 
 ifeq (darwin,$(PLATFORM)) 
@@ -25,12 +28,18 @@ release:
 	$(call MAKE_PLATFORM,$(PLATFORM),$(LUA_PLATFORM),RELEASE)
 	
 clean:
-	pushd deps/lua && make clean; popd
-	pushd deps/uv  && make clean; popd
-	pushd src      && make clean; popd
+	##main essential builds
+	pushd deps/lua  && make clean; popd
+	pushd deps/uv   && make clean; popd
+	pushd src       && make clean; popd
+	##not essential builds
+	pushd clib/mime && make clean; popd
 
 install:
+	##main essential install
 	cp -f src/node-lua ./node-lua
 	cp -f src/node-lua /usr/local/bin/
 	cp deps/lua/libnlua.so ./libnlua.so
 	cp deps/lua/libnlua.so /usr/lib/libnlua.so
+	##not essential install
+	cp clib/mime/mime.so clib/mime.so

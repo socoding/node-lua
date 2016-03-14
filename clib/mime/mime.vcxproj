@@ -64,7 +64,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>lua.lib</AdditionalDependencies>
+      <AdditionalDependencies>nlua.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\deps\lua;</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>

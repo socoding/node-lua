@@ -1,7 +1,7 @@
 # node-lua
 
 ## description
-1.	A node complementation of lua which supports sync and rpc, and task-multiplexing support in multi-threads without harmless wakeup.
+1.	Node-lua is a node complementation of lua which supports sync and rpc, and task-multiplexing support in multi-threads without harmless wakeup.
 2.	It can be used as a simple script engine or complex server engine which supports a massive of independent lua contexts (or named services) running on multi-threads which restricted to the cpu core count.
 3.	The lua context will suspend itself when it calls a sync and async rpc using lua coroutine inside the core c codes.
 4.	The rpc can be called within the lua coroutine where the user creates and it won't impact the normal coroutine procedure.
@@ -21,44 +21,44 @@ make release && make install
 
 ## usefull api
 ### tcp api
-1.	result, listen_socket = tcp.listen(addr, port[, backlog, [void (*listen_callback)(result, listen_socket, addr, port[, backlog])]])
+1.	result, listen_socket = tcp.listen(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])
 	--listen_callback is a once callback, blocking if callback is nil.
 	
-2.	result, listen_socket = tcp.listens(sock_name[, void (*listen_callback)(result, listen_socket, sock_name)])
+2.	result, listen_socket = tcp.listens(sock_name[, listen_callback(result, listen_socket, sock_name)])
 	--listen_callback is a once callback, blocking if callback is nil.
 
-3.	result, listen_socket = tcp.listen6(addr, port[, backlog, [void (*listen_callback)(result, listen_socket, addr, port[, backlog])]])
+3.	result, listen_socket = tcp.listen6(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])
 	--listen_callback is a once callback, blocking if callback is nil.
 	
 4.	result, accept_socket = tcp.accept(listen_socket[, timeout])
 	--accept_callback is a continues callback, blocking if callback is nil.
 
-5.	result, accept_socket = tcp.accept(listen_socket[, void (*accept_callback)(result, accept_socket, listen_socket)])
+5.	result, accept_socket = tcp.accept(listen_socket[, accept_callback(result, accept_socket, listen_socket)])
 	--accept_callback is a continues callback, blocking if callback is nil.
 	
-6. 	result, connect_socket = tcp.connect(host_addr, host_port[, timeout [, void (*connect_callback)(result, connect_socket, host_addr, host_port[, timeout])]])
+6. 	result, connect_socket = tcp.connect(host_addr, host_port[, timeout [, connect_callback(result, connect_socket, host_addr, host_port[, timeout])]])
 	--connect_callback is a once callback, blocking if callback is nil.
 	
-7. 	result, connect_socket = tcp.connects(sock_name[, timeout [, void (*connect_callback)(result, connect_socket, host_addr, host_port[, timeout])]])
+7. 	result, connect_socket = tcp.connects(sock_name[, timeout [, connect_callback(result, connect_socket, host_addr, host_port[, timeout])]])
 	--connect_callback is a once callback, blocking if callback is nil.
 	
-8. 	result, connect_socket = tcp.connect6(host_addr, host_port[, timeout [, void (*connect_callback)(result, connect_socket, host_addr, host_port[, timeout])]])
+8. 	result, connect_socket = tcp.connect6(host_addr, host_port[, timeout [, connect_callback(result, connect_socket, host_addr, host_port[, timeout])]])
 	--connect_callback is a once callback, blocking if callback is nil.
 	
 9.  result, buffer = tcp.read(socket[, timeout])
 	--recv_callback is a continues callback, blocking if callback is nil.
 	
-10. result, buffer = tcp.read(socket[, void (*recv_callback)(result, buffer, socket)])
+10. result, buffer = tcp.read(socket[, recv_callback(result, buffer, socket)])
 	--recv_callback is a continues callback, blocking if callback is nil.
 	
-11. result, error = tcp.write(socket, buffer_or_lstring[, void (*send_callback)(result, error, socket, buffer_or_lstring)/bool safety])
+11. result, error = tcp.write(socket, buffer_or_lstring[, send_callback(result, error, socket, buffer_or_lstring)/bool safety])
 	--send_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.
 	
 12. tcp.set_rwopt(socket, option_table)
 	--set tcp_socket read and write options --e.g. { "read_head_endian" =  "L", "read_head_bytes" = 2, "read_head_max" = 65535, }
 	
-13. tcp.get_rwopt(socket)
-	--get tcp_socket read and write options
+13. option_table = tcp.get_rwopt(socket)
+	--get tcp_socket read and write options --e.g. { "read_head_endian" =  "L", "read_head_bytes" = 2, "read_head_max" = 65535, }
 	
 14. tcp.set_nodelay(socket, enable)
 
@@ -82,8 +82,8 @@ make release && make install
 ### timer api	
 1.	timer.sleep(seconds)
 
-2.	timer.timeout(seconds, ..., void (*callback)(...))
+2.	timer.timeout(seconds, ..., callback(...))
 
-3.	timer.loop(interval, repeat_time, ..., void (*callback)(...))
+3.	timer.loop(interval, repeat_time, ..., callback(...))
 
 ### buffer api

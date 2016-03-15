@@ -70,22 +70,17 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
-
-package.cpath = package.cpath ..";"..".\\clib\\?.dll"
--- print(context.self(), package.path)
--- print(context.self(), package.cpath)
-context.create("test.lua", 1, 2, 3)
-context.create("test.lua", 1, 2, 3)
-context.create("test.lua", 1, 2, 3)
-context.create("test.lua", 1, 2, 3)
-context.create("test.lua", 1, 2, 3)
-local a = 0
-for i = 1, 100 do
-	a = a + 1
+if context.winos then
+	package.cpath = package.cpath ..";".."..\\clib\\?.dll"
+	package.path = package.path ..";".."..\\lualib\\?.lua"
+else
+	package.cpath = package.cpath ..";".."../clib/?.so"
+	package.path = package.path ..";".."../lualib/?.lua"
 end
 
-print(context.self(), context.thread(), package.path)
-print(context.self(), context.thread(), package.cpath)
+for i = 1, 32 do
+	context.create("test.lua", 1, 2, 3)
+end
 do return end
 
 local ret, sock = tcp.listen("0.0.0.0", 8801)

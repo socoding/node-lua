@@ -1,4 +1,5 @@
 # node-lua
+
 ## description
 1.	A node complementation of lua which supports sync and rpc, and task-multiplexing support in multi-threads without harmless wakeup.
 2.	It can be used as a simple script engine or complex server engine which supports a massive of independent lua contexts (or named services) running on multi-threads which restricted to the cpu core count.
@@ -7,13 +8,17 @@
 5.	A context starts with a lua file as the entry. The process will exit automaticly when all contexts ends or terminates and a context will exit automaticly when all its sync and async remote procedure call ends or terminates.
 6.	A optimized task scheduling is used with a thread based context queue which reduces the thread race condition and work-stealing algorithm is used in the task scheduling.
 7.  A more friendly tcp api is embed in this engine with sync and async implementation which is much more convenient to build a tcp server.
+
 ## build & install
-First, git clone https://github.com/socoding/node-lua.git
-Then for windows, just open node-lua.sln and build the whole solution. The excutable target node-lua.exe and nlua.dll is generated in the root path.
-For linux or other unix-like system,
-	cd node-lua
-	make && make install 			##debug version
-	make release && make install 	##release version
+
+For windows, just open node-lua.sln and build the whole solution. For linux or other unix-like system
+
+```
+git clone https://github.com/socoding/node-lua.git
+cd node-lua
+make && make install
+make release && make install
+
 ## usefull api
 ### tcp api
 1.	result, listen_socket = tcp.listen(addr, port[, backlog, [void (*listen_callback)(result, listen_socket, addr, port[, backlog])]])

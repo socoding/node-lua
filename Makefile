@@ -1,10 +1,5 @@
 .PHONY: all release clean install
 
-ARCH = x64
-ifeq ($(shell getconf LONG_BIT), 32)
-    ARCH = x86
-endif
-
 ifdef PLATFORM
 override PLATFORM := $(shell echo $(PLATFORM) | tr "[A-Z]" "[a-z]")
 else
@@ -40,15 +35,20 @@ clean:
 	##not essential builds
 	pushd clib/mime && make clean; popd
 
+# Where to install. The installation starts in the src and doc directories,
+# so take care if INSTALL_TOP is not an absolute path.
+INSTALL_TOP= /usr/local
+INSTALL_BIN= $(INSTALL_TOP)/bin
+INSTALL_LIB= $(INSTALL_TOP)/lib
+INSTALL= cp -p
+MKDIR= mkdir -p
+
 install:
+	mkdir -p /usr/local/bin /usr/local/lib
 	##main essential install
 	cp -f src/node-lua ./node-lua
-	cp -f src/node-lua /usr/local/bin/
+	cp -f src/node-lua /usr/local/bin/node-lua
 	cp deps/lua/libnlua.so ./libnlua.so
-ifeq (x86,$(ARCH)) 
-	cp deps/lua/libnlua.so /usr/lib/libnlua.so
-else
-	cp deps/lua/libnlua.so /usr/lib64/libnlua.so
-endif
+	cp deps/lua/libnlua.so /usr/local/lib/libnlua.so
 	##not essential install
 	cp clib/mime/mime.so clib/mime.so

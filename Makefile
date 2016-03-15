@@ -1,5 +1,10 @@
 .PHONY: all release clean install
 
+ARCH = x64
+ifeq ($(shell getconf LONG_BIT), 32)
+    ARCH = x86
+endif
+
 ifdef PLATFORM
 override PLATFORM := $(shell echo $(PLATFORM) | tr "[A-Z]" "[a-z]")
 else
@@ -40,6 +45,10 @@ install:
 	cp -f src/node-lua ./node-lua
 	cp -f src/node-lua /usr/local/bin/
 	cp deps/lua/libnlua.so ./libnlua.so
+ifeq (x86,$(ARCH)) 
 	cp deps/lua/libnlua.so /usr/lib/libnlua.so
+else
+	cp deps/lua/libnlua.so /usr/lib64/libnlua.so
+endif
 	##not essential install
 	cp clib/mime/mime.so clib/mime.so

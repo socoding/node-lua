@@ -19,7 +19,7 @@ SYSCFLAGS=
 SYSLDFLAGS=
 SYSLIBS=
 
-MYCFLAGS=
+MYCFLAGS=-fPIC
 MYLDFLAGS=
 MYLIBS=
 MYOBJS=
@@ -61,7 +61,7 @@ $(LUA_A): $(BASE_O)
 	$(RANLIB) $@
 
 $(LUA_SO):$(CORE_O) $(LIB_O)
-	$(CC) -o $@ $(LDFLAGS) -fPIC -shared $? $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) -shared $? $(LIBS)
 
 $(LUA_T): $(LUA_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)

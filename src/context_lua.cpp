@@ -1184,6 +1184,12 @@ int luaopen_context(lua_State *L)
 			{ NULL, NULL },
 	};
 	luaL_newlib(L, l);
+#ifdef CC_MSVC
+	lua_pushboolean(L, 1);
+#else
+	lua_pushboolean(L, 0);
+#endif
+	lua_setfield(L, -2, "winos");
 	return 1;
 }
 

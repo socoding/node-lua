@@ -7,7 +7,7 @@
 4.	The rpc can be called within the lua coroutine where the user creates and it won't impact the normal coroutine procedure.
 5.	A context starts with a lua file as the entry. The process will exit automaticly when all contexts ends or terminates and a context will exit automaticly when all its sync and async remote procedure call ends or terminates.
 6.	A optimized task scheduling is used with a thread based context queue which reduces the thread race condition and work-stealing algorithm is used in the task scheduling.
-7.  A more friendly tcp api is embed in this engine with sync and async implementation which is much more convenient to build a tcp server.
+7.  A more friendly tcp api is embeded in this engine with sync and async implementation which is much more convenient to build a tcp server.
 
 ## build & install
 

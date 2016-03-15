@@ -12,12 +12,12 @@
 ## build & install
 
 For windows, just open node-lua.sln and build the whole solution. For linux or other unix-like system
-
 ```
 git clone https://github.com/socoding/node-lua.git
 cd node-lua
 make && make install
 make release && make install
+```
 
 ## usefull api
 ### tcp api

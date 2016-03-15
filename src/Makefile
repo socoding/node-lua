@@ -34,7 +34,7 @@ endif
 
 ifeq (darwin,$(PLATFORM))
 LDFLAGS += -undefined dynamic_lookup \
-		   -framework Foundation \
+           -framework Foundation \
            -framework CoreServices \
            -framework ApplicationServices
 endif

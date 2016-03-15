@@ -28,7 +28,7 @@ endif
 LDFLAGS += -shared
 
 ifeq (darwin,$(PLATFORM))
-LDFLAGS += -bundle -undefined dynamic_lookup \
+LDFLAGS += -undefined dynamic_lookup \
 		   -framework Foundation \
            -framework CoreServices \
            -framework ApplicationServices

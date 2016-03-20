@@ -29,7 +29,14 @@ endif
 LDFLAGS += 
 
 ifeq (sunos,$(PLATFORM))
-LIBS += nsl socket
+HAVE_DTRACE ?= 1
+CFLAGS += -D__EXTENSIONS__ -D_XOPEN_SOURCE=500
+LIBS += kstat nsl sendfile socket 
+endif
+
+ifeq (aix,$(PLATFORM))
+CFLAGS += -D_ALL_SOURCE -D_XOPEN_SOURCE=500
+LIBS += perfstat 
 endif
 
 ifeq (darwin,$(PLATFORM))
@@ -41,6 +48,30 @@ endif
 
 ifeq (linux,$(PLATFORM))
 LIBS += dl rt
+endif
+
+ifeq (freebsd,$(PLATFORM))
+ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
+HAVE_DTRACE ?= 1
+endif
+LIBS += kvm
+endif
+
+ifeq (dragonfly,$(PLATFORM))
+LIBS += kvm
+endif
+
+ifeq (netbsd,$(PLATFORM))
+LIBS += kvm
+endif
+
+ifeq (openbsd,$(PLATFORM))
+LIBS += kvm
+endif
+
+ifeq ($(HAVE_DTRACE), 1)
+INCLUDE_PATH += src/unix
+CFLAGS += -DHAVE_DTRACE
 endif
 
 ## get all source files  

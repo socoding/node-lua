@@ -6,13 +6,15 @@ else
 PLATFORM = $(shell sh -c 'uname -s | tr "[A-Z]" "[a-z]"')
 endif
 
+ROOT_PATH = $(shell pwd')
+
 define MAKE_PLATFORM
 	##main essential builds
-	pushd deps/lua  && make $(2); popd
-	pushd deps/uv   && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; popd
-	pushd src       && make PLATFORM=$(1) RELEASE=$(3); popd
+	cd deps/lua  && make $(2); cd $(ROOT_PATH)
+	cd deps/uv   && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; cd $(ROOT_PATH)
+	cd src       && make PLATFORM=$(1) RELEASE=$(3); cd $(ROOT_PATH)
 	##not essential builds
-	pushd clib/mime && make PLATFORM=$(1) RELEASE=$(3); popd
+	cd clib/mime && make PLATFORM=$(1) RELEASE=$(3); cd $(ROOT_PATH)
 endef
 
 ifeq (darwin,$(PLATFORM)) 
@@ -29,11 +31,11 @@ release:
 	
 clean:
 	##main essential builds
-	pushd deps/lua  && make clean; popd
-	pushd deps/uv   && make clean; popd
-	pushd src       && make clean; popd
+	cd deps/lua  && make clean; cd $(ROOT_PATH)
+	cd deps/uv   && make clean; cd $(ROOT_PATH)
+	cd src       && make clean; cd $(ROOT_PATH)
 	##not essential builds
-	pushd clib/mime && make clean; popd
+	cd clib/mime && make clean; cd $(ROOT_PATH)
 
 # Where to install. The installation starts in the src and doc directories,
 # so take care if INSTALL_TOP is not an absolute path.

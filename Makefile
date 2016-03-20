@@ -6,7 +6,7 @@ else
 PLATFORM = $(shell sh -c 'uname -s | tr "[A-Z]" "[a-z]"')
 endif
 
-ROOT_PATH = $(shell pwd')
+ROOT_PATH = $(shell pwd)
 
 define MAKE_PLATFORM
 	##main essential builds

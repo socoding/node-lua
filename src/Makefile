@@ -29,7 +29,7 @@ endif
 LDFLAGS += 
 
 ifeq (sunos,$(PLATFORM))
-HAVE_DTRACE ?= 1
+# HAVE_DTRACE ?= 1
 CFLAGS += -D__EXTENSIONS__ -D_XOPEN_SOURCE=500
 LIBS += kstat nsl sendfile socket 
 endif
@@ -51,9 +51,9 @@ LIBS += dl rt
 endif
 
 ifeq (freebsd,$(PLATFORM))
-ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
-HAVE_DTRACE ?= 1
-endif
+# ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
+# HAVE_DTRACE ?= 1
+# endif
 LIBS += kvm pthread
 endif
 
@@ -69,10 +69,10 @@ ifeq (openbsd,$(PLATFORM))
 LIBS += kvm
 endif
 
-ifeq ($(HAVE_DTRACE), 1)
-INCLUDE_PATH += src/unix
-CFLAGS += -DHAVE_DTRACE
-endif
+# ifeq ($(HAVE_DTRACE), 1)
+# INCLUDE_PATH += src/unix
+# CFLAGS += -DHAVE_DTRACE
+# endif
 
 ## get all source files  
 SRCS += $(wildcard $(SRC_PATH)/*.cpp)

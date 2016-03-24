@@ -30,8 +30,8 @@ private:
 	static int32_t accept_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t listen_callback_adjust(lua_State* L);
 	static int32_t accept_callback_adjust(lua_State* L);
-	static int32_t listen_yield_continue(lua_State* L);
-	static int32_t accept_yield_continue(lua_State* L);
+	static int32_t listen_yield_continue(lua_State* L, int status, lua_KContext ctx);
+	static int32_t accept_yield_continue(lua_State* L, int status, lua_KContext ctx);
 	static int32_t accept_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat);
 
 private:
@@ -66,7 +66,7 @@ private:
 	static int32_t write_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t read_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t connect_callback_adjust(lua_State* L);
-	static int32_t connect_yield_continue(lua_State* L);
+	static int32_t connect_yield_continue(lua_State* L, int status, lua_KContext ctx);
 	static int32_t read_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat);
 
 public:

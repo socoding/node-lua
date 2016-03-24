@@ -26,7 +26,7 @@ int32_t lua_timer_handle_t::sleep_yield_finalize(lua_State *root_coro, lua_State
 	return UV_OK;
 }
 
-int32_t lua_timer_handle_t::sleep_yield_continue(lua_State* L)
+int32_t lua_timer_handle_t::sleep_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	return 0;
 }

@@ -1,7 +1,7 @@
 #include "common.h"
 #include "context_lua.h"
 
-static int lua_coresume (lua_State *L);
+static int32_t coresume_continue(lua_State *L, int status, lua_KContext ctx);
 
 static int auxresume (lua_State *L, lua_State *co, int narg) {
 	int status, stacks;
@@ -23,7 +23,7 @@ static int auxresume (lua_State *L, lua_State *co, int narg) {
 	context_lua_t *lctx = context_lua_t::lua_get_context(L);
 	while (((status = lua_resume(co, L, narg)) == LUA_YIELD) && lctx->yielding_up()) { /* can happen only when status == LUA_YIELD */
 		if ((stacks = lua_checkstack(L, LUA_MINSTACK)) && lua_yieldable(L)) { /* reserve LUA_MINSTACK stack for resume result */
-			return lua_yieldk(L, 0, 0, lua_coresume); /* yield again! n(0) result to yield and ctx(0) is not allowed */
+			return lua_yieldk(L, 0, 0, coresume_continue); /* yield again! n(0) result to yield and ctx(0) is not allowed */
 		} else { /* lua_gettop(co) must be 0 since context_lua_t::lua_yield_send yield 0 result */
 			int yieldup_status = stacks ? NL_EYIELD : NL_ESTACKLESS;
 			lctx->yielding_finalize(NULL, yieldup_status);
@@ -49,7 +49,6 @@ static int auxresume (lua_State *L, lua_State *co, int narg) {
 	}
 }
 
-
 static int lua_coresume (lua_State *L) {
 	lua_State *co = lua_tothread(L, 1);
 	int r;
@@ -67,6 +66,10 @@ static int lua_coresume (lua_State *L) {
 	}
 }
 
+static int32_t coresume_continue(lua_State *L, int status, lua_KContext ctx)
+{
+	return lua_coresume(L);
+}
 
 static int lua_auxwrap (lua_State *L) {
 	lua_State *co = lua_tothread(L, lua_upvalueindex(1));

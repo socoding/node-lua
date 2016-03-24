@@ -38,7 +38,7 @@ public:
 
 private:
 	static int32_t sleep_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
-	static int32_t sleep_yield_continue(lua_State* L);
+	static int32_t sleep_yield_continue(lua_State* L, int status, lua_KContext ctx);
 	static int32_t timer_callback_adjust(lua_State* L);
 
 public:

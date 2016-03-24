@@ -97,6 +97,9 @@
     <ClCompile Include="lzio.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="lutf8lib.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lapi.h">
@@ -175,6 +178,9 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="lzio.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="lprefix.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

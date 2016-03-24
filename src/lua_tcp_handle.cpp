@@ -143,7 +143,7 @@ int32_t lua_tcp_listen_handle_t::listen_yield_finalize(lua_State *root_coro, lua
 	return UV_OK;
 }
 
-int32_t lua_tcp_listen_handle_t::listen_yield_continue(lua_State* L)
+int32_t lua_tcp_listen_handle_t::listen_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	uv_tcp_listen_handle_t* listen_handle = (uv_tcp_listen_handle_t*)lua_touserdata(L, -3);
 	if (listen_handle) {
@@ -226,7 +226,7 @@ int32_t lua_tcp_listen_handle_t::accept_yield_finalize(lua_State *root_coro, lua
 	return UV_OK;
 }
 
-int32_t lua_tcp_listen_handle_t::accept_yield_continue(lua_State* L)
+int32_t lua_tcp_listen_handle_t::accept_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	uv_tcp_socket_handle_t* accept_handle = (uv_tcp_socket_handle_t*)lua_touserdata(L, -3);
 	if (accept_handle) {
@@ -487,7 +487,7 @@ int32_t lua_tcp_socket_handle_t::connect_callback_adjust(lua_State* L)
 	return 2;
 }
 
-int32_t lua_tcp_socket_handle_t::connect_yield_continue(lua_State* L)
+int32_t lua_tcp_socket_handle_t::connect_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	uv_tcp_socket_handle_t* connect_handle = (uv_tcp_socket_handle_t*)lua_touserdata(L, -3);
 	if (connect_handle) {

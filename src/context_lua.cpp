@@ -331,7 +331,7 @@ int32_t context_lua_t::yielding_finalize(lua_State *root_coro, int32_t status)
 	return m_shared->m_yielding_status;
 }
 
-int32_t context_lua_t::common_yield_continue(lua_State* L)
+int32_t context_lua_t::common_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	if (!lua_toboolean(L, -4) && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
 		context_lua_t::lua_throw(L, -3);
@@ -340,7 +340,7 @@ int32_t context_lua_t::common_yield_continue(lua_State* L)
 	return 2;
 }
 
-int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_finalize_t fnz, void* fnz_ud, lua_CFunction yieldk, int64_t timeout)
+int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_finalize_t fnz, void* fnz_ud, lua_KFunction yieldk, int64_t timeout)
 {
 	int stacks;
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
@@ -359,7 +359,7 @@ int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_
 			lua_pushinteger(L, NL_EYIELD);
 			lua_pushnil(L);
 			lua_pushnil(L);
-			return (yieldk == NULL) ? 4 : yieldk(L);
+			return (yieldk == NULL) ? 4 : yieldk(L, LUA_YIELD, 0);
 		} else { /* error jump directly */
 			lctx->yielding_finalize(NULL, NL_ESTACKLESS);
 			return luaL_error(L, "attempt to yield across a stack-less coroutine");
@@ -384,9 +384,8 @@ int32_t context_lua_t::lua_ref_callback_entry_finish(lua_State *L, int32_t statu
 	return 0; //return none result out!!!
 }
 
-int32_t context_lua_t::lua_ref_callback_entry_continue(lua_State *L)
+int32_t context_lua_t::lua_ref_callback_entry_continue(lua_State *L, int status, lua_KContext ctx)
 {
-	int status = lua_getctx(L, NULL);
 	return lua_ref_callback_entry_finish(L, (status == LUA_YIELD));
 }
 
@@ -942,7 +941,7 @@ int32_t context_lua_t::context_query_yield_finalize(lua_State *root_coro, lua_St
 	return UV_OK;
 }
 
-int32_t context_lua_t::context_query_yield_continue(lua_State* L)
+int32_t context_lua_t::context_query_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	if (!lua_toboolean(L, -4)) {
 		int32_t ret = context_lua_t::lua_get_context(L)->get_yielding_status();
@@ -1037,7 +1036,7 @@ int32_t context_lua_t::context_recv_yield_finalize(lua_State *root_coro, lua_Sta
 	return UV_OK;
 }
 
-int32_t context_lua_t::context_recv_yield_continue(lua_State* L)
+int32_t context_lua_t::context_recv_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	if (!lua_toboolean(L, -4) && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
 		context_lua_t::lua_throw(L, -3);
@@ -1090,7 +1089,7 @@ int32_t context_lua_t::context_wait_yield_finalize(lua_State *root_coro, lua_Sta
 	}
 	return UV_OK;
 }
-int32_t context_lua_t::context_wait_yield_continue(lua_State* L)
+int32_t context_lua_t::context_wait_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
 	if (!lua_toboolean(L, -4)) {
 		int32_t ret = context_lua_t::lua_get_context(L)->get_yielding_status();

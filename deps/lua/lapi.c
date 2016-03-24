@@ -1025,7 +1025,7 @@ cloneproto (lua_State *L, const Proto *src) {
     const TValue *s=&src->k[i];
     TValue *o=&f->k[i];
     if (ttisstring(s)) {
-      TString * str = luaS_newlstr(L,svalue(s),tsvalue(s)->len);
+      TString * str = luaS_newlstr(L,svalue(s),vslen(s));
       setsvalue2n(L,o,str);
     } else {
       setobj(L,o,s);
@@ -1071,7 +1071,6 @@ static void
 lua_initsharedproto(lua_State *L, Proto *p, const TValue *val, const TValue *gt) {
 	int i;
 	TValue cl;
-	UpVal *up;
 	LClosure *pcl = luaF_newLclosure(L, 1);
 	pcl->p = p;
 	p->sp->refnum  = 2;  //initial as 2
@@ -1109,7 +1108,7 @@ LUA_API void* lua_initsharedclosure(lua_State *L) {
 
 		reg = hvalue(&G(L)->l_registry);
 		gt = luaH_getint(reg, LUA_RIDX_GLOBALS);
-		setnvalue(&val, cast_num(1));
+		setivalue(&val, cast_int(1));
 		setobj2t(L, luaH_set(L, hvalue(gt), cl), &val);
 		invalidateTMcache(hvalue(gt));
 		--L->top;

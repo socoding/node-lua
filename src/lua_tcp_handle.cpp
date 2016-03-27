@@ -45,17 +45,7 @@ static int32_t lua_tcp_is_closed(lua_State* L)
 	return 1;
 }
 
-static int32_t get_local_fd(lua_State* L)
-{
-	lua_handle_base_t* handle = lua_check_tcp_handle(L, 1);
-	if (handle != NULL) {
-		lua_pushinteger(L, handle->get_handle_ref());
-		return 1;
-	}
-	return 0;
-}
-
-static int32_t get_remote_fd(lua_State* L)
+static int32_t get_fd(lua_State* L)
 {
 	lua_handle_base_t* handle = lua_check_tcp_handle(L, 1);
 	if (handle != NULL) {
@@ -82,10 +72,8 @@ lua_tcp_listen_handle_t* lua_tcp_listen_handle_t::create_tcp_listen_socket(uv_tc
 		lua_setfield(L, -2, "close");
 		lua_pushcfunction(L, lua_tcp_is_closed);
 		lua_setfield(L, -2, "is_closed");
-		lua_pushcfunction(L, get_local_fd);
-		lua_setfield(L, -2, "local_fd");
-		lua_pushcfunction(L, get_remote_fd);
-		lua_setfield(L, -2, "remote_fd");
+		lua_pushcfunction(L, get_fd);
+		lua_setfield(L, -2, "fd");
 	}
 	lua_setmetatable(L, -2);
 	return socket;
@@ -385,10 +373,8 @@ lua_tcp_socket_handle_t* lua_tcp_socket_handle_t::create_tcp_socket(uv_tcp_socke
 		lua_setfield(L, -2, "set_nodelay");
 		lua_pushcfunction(L, lua_tcp_is_closed);
 		lua_setfield(L, -2, "is_closed");
-		lua_pushcfunction(L, get_local_fd);
-		lua_setfield(L, -2, "local_fd");
-		lua_pushcfunction(L, get_remote_fd);
-		lua_setfield(L, -2, "remote_fd");
+		lua_pushcfunction(L, get_fd);
+		lua_setfield(L, -2, "fd");
 	}
 	lua_setmetatable(L, -2);
 	return socket;
@@ -930,8 +916,7 @@ int luaopen_tcp(lua_State *L)
 		{ "set_nodelay", lua_tcp_socket_handle_t::set_nodelay },
 		{ "close", lua_tcp_close },
 		{ "is_closed", lua_tcp_is_closed },
-		{ "local_fd", get_local_fd },
-		{ "remote_fd", get_remote_fd },
+		{ "fd", get_fd },
 		{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

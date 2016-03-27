@@ -2,6 +2,7 @@
 #include "network.h"
 #include "uv_handle_base.h"
 #include "lua_handle_base.h"
+#include "context_lua.h"
 
 char lua_handle_base_t::m_lua_ref_table_key = 0;
 
@@ -155,3 +156,4 @@ int32_t lua_handle_base_t::is_closed(lua_State* L)
 	lua_pushboolean(L, handle == NULL || handle->is_closed());
 	return 1;
 }
+

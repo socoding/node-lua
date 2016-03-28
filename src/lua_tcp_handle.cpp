@@ -527,6 +527,37 @@ int32_t lua_tcp_socket_handle_t::connect_yield_continue(lua_State* L, int status
 
 int32_t lua_tcp_socket_handle_t::write2(lua_State* L)
 {
+	int64_t fd = luaL_checkinteger(L, 1);
+	if (fd <= 0) {
+		return 0;
+	}
+	const char *s = NULL;
+	uint32_t length;
+	buffer_t* buffer = NULL;
+	if (((s = lua_tolstring(L, 2, (size_t*)&length)) == NULL) && ((buffer = (buffer_t*)luaL_testudata(L, 2, BUFFER_METATABLE)) == NULL)) {
+		luaL_argerror(L, 2, "string expected");
+	}
+	if (buffer) {
+		length = (uint32_t)buffer_data_length(*buffer);
+	}
+	if (length == 0) {
+		return 0;
+	}
+	request_t request;
+	request.m_type = REQUEST_TCP_WRITE2;
+	request.m_length = REQUEST_SIZE(request_tcp_write2_t, 0);
+	request.m_tcp_write2.m_fd = fd;
+	if (s) {
+		request.m_tcp_write2.m_length = length; /* length > 0 */
+		request.m_tcp_write2.m_string = (const char*)nl_memdup(s, length);
+		if (!request.m_tcp_write2.m_string) {
+			return luaL_error(L, "attempt to send data(length %lu) failed: memory not enough", length);
+		}
+	} else {
+		request.m_tcp_write2.m_length = 0;
+		request.m_tcp_write2.m_buffer = buffer_grab(*buffer);
+	}
+	singleton_ref(network_t).send_request(request);
 	return 0;
 }
 
@@ -915,6 +946,7 @@ int luaopen_tcp(lua_State *L)
 		{ "connect6", lua_tcp_socket_handle_t::connect6 },
 		{ "connects", lua_tcp_socket_handle_t::connects },
 		{ "write", lua_tcp_socket_handle_t::write },
+		{ "write2", lua_tcp_socket_handle_t::write2 },
 		{ "read", lua_tcp_socket_handle_t::read },
 		{ "set_rwopt", lua_tcp_socket_handle_t::set_rwopt },
 		{ "get_rwopt", lua_tcp_socket_handle_t::get_rwopt },

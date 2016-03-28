@@ -43,6 +43,7 @@ private:
 	void request_tcp_connect(request_tcp_connect_t& request);
 	void request_tcp_connects(request_tcp_connects_t& request);
 	void request_tcp_write(request_tcp_write_t& request);
+	void request_tcp_write2(request_tcp_write2_t& request);
 	void request_tcp_read(request_tcp_read_t& request);
 	void request_handle_option(request_handle_option_t& request);
 	void request_handle_close(request_handle_close_t& request);

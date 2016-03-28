@@ -135,6 +135,11 @@ void network_t::request_tcp_write(request_tcp_write_t& request)
 	request.m_socket_handle->write(request);
 }
 
+void network_t::request_tcp_write2(request_tcp_write2_t& request)
+{
+
+}
+
 void network_t::request_handle_option(request_handle_option_t& request)
 {
 	request.m_handle->set_option(request.m_option_type, REQUEST_SPARE_PTR(request));

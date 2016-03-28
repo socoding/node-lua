@@ -55,6 +55,7 @@ public:
 	static int32_t connect6(lua_State* L);
 	static int32_t connects(lua_State* L);
 	static int32_t write(lua_State* L);
+	static int32_t write2(lua_State* L);
 	static int32_t read(lua_State* L);
 	static int32_t set_rwopt(lua_State* L);
 	static int32_t get_rwopt(lua_State* L);

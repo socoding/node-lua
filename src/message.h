@@ -14,15 +14,17 @@ enum data_type {
 	TBOOLEAN		= 1,
 	USERDATA		= 2, //light userdata
 	NUMBER			= 3,
-	BUFFER			= 4, //need to be freed
-	STRING			= 5, //need to be freed
-	TERROR			= 6  //
+	INTEGER			= 4, //support after lua53
+	BUFFER			= 5, //need to be freed
+	STRING			= 6, //need to be freed
+	TERROR			= 7  //
 };
 
 typedef union data_t {
 	bool		m_bool;
 	void	   *m_userdata;
 	double		m_number;
+	int64_t     m_integer;
 	buffer_t	m_buffer;
 	char	   *m_string;
 	int32_t		m_error;
@@ -54,6 +56,7 @@ enum message_type {
 #define message_bool(msg)			((msg).m_data.m_bool)
 #define message_userdata(msg)		((msg).m_data.m_userdata)
 #define message_number(msg)			((msg).m_data.m_number)
+#define message_integer(msg)		((msg).m_data.m_integer)
 #define message_buffer(msg)			((msg).m_data.m_buffer)
 #define message_string(msg)			((msg).m_data.m_string)
 #define message_error(msg)			((msg).m_data.m_error)
@@ -63,6 +66,7 @@ enum message_type {
 #define message_is_bool(msg)		(TBOOLEAN == message_data_type(msg))
 #define message_is_userdata(msg)	(USERDATA == message_data_type(msg))
 #define message_is_number(msg)		(NUMBER == message_data_type(msg))
+#define message_is_integer(msg)		(INTEGER == message_data_type(msg))
 #define message_is_buffer(msg)		(BUFFER == message_data_type(msg))
 #define message_is_string(msg)		(STRING == message_data_type(msg))
 #define message_is_error(msg)		(TERROR == message_data_type(msg))
@@ -105,6 +109,10 @@ public:
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, double number)
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, NUMBER)) { m_data.m_number = number; }
+	
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, int64_t integer)
+			: m_source(source), m_session(session),
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, INTEGER)) { m_data.m_integer = integer; }
 
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, char *string)
 			: m_source(source), m_session(session),

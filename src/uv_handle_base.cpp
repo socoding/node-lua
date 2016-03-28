@@ -70,7 +70,7 @@ void uv_handle_base_t::close()
 	if (m_handle) {
 		uv_close(m_handle, on_closed);
 	} else if (m_lua_ref != LUA_REFNIL) {
-		singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_HANDLE_CLOSE, (double)get_handle_set());
+		singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_HANDLE_CLOSE, (int64_t)get_handle_set());
 		delete this;
 	}
 }
@@ -79,7 +79,7 @@ void uv_handle_base_t::on_closed(uv_handle_t* handle)
 {
 	uv_handle_base_t* tcp_handle = (uv_handle_base_t*)handle->data;
 	if (tcp_handle->m_lua_ref != LUA_REFNIL) {
-		singleton_ref(node_lua_t).context_send(tcp_handle->m_source, 0, tcp_handle->m_lua_ref, RESPONSE_HANDLE_CLOSE, (double)(tcp_handle->get_handle_set()));
+		singleton_ref(node_lua_t).context_send(tcp_handle->m_source, 0, tcp_handle->m_lua_ref, RESPONSE_HANDLE_CLOSE, (int64_t)(tcp_handle->get_handle_set()));
 	}
 	delete tcp_handle;
 }

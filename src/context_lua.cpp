@@ -71,7 +71,7 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 	}
 	printf("[alert] context:0x%08x init: %s\n", m_handle, args); /* to be implemented : put reason to another context and output it */
 	nl_free(args);
-	return singleton_ref(node_lua_t).context_send(this, m_handle, 0, LUA_CTX_INIT, (double)argc);
+	return singleton_ref(node_lua_t).context_send(this, m_handle, 0, LUA_CTX_INIT, (int64_t)argc);
 }
 
 bool context_lua_t::deinit(const char *arg)
@@ -537,6 +537,9 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 	case NUMBER:
 		lua_pushnumber(L, message_number(message));
 		return;
+	case INTEGER:
+		lua_pushinteger(L, message_integer(message));
+		return;
 	case BUFFER:
 		create_buffer(L, message_buffer(message));
 		return;
@@ -675,7 +678,7 @@ void context_lua_t::on_dropped(message_t& message)
 		}
 		return;
 	case LUA_CTX_WAIT:
-		singleton_ref(node_lua_t).context_send(message.m_source, (uint32_t)message_number(message), LUA_REFNIL, LUA_CTX_WAKEUP, UV_OK);
+		singleton_ref(node_lua_t).context_send(message.m_source, (uint32_t)message_integer(message), LUA_REFNIL, LUA_CTX_WAKEUP, UV_OK);
 		return;
 	default:
 		break;
@@ -684,7 +687,7 @@ void context_lua_t::on_dropped(message_t& message)
 
 void context_lua_t::lua_ctx_init(message_t& message)
 {
-	int32_t argc = (int32_t)message_number(message);
+	int32_t argc = (int32_t)message_integer(message);
 	int32_t envc = lua_gettop(m_lstate) - argc;
 	const char *file = lua_tostring(m_lstate, 1);
 	if (luaL_loadfile(m_lstate, file) == LUA_OK) {
@@ -759,7 +762,7 @@ void context_lua_t::response_tcp_read(message_t& response)
 
 void context_lua_t::response_handle_close(message_t& response)
 {
-	lua_handle_base_t::release_ref(m_lstate, response.m_session, (handle_set)(int32_t)message_number(response));
+	lua_handle_base_t::release_ref(m_lstate, response.m_session, (handle_set)(int32_t)message_integer(response));
 }
 
 void context_lua_t::response_tcp_closing(message_t& response)
@@ -827,8 +830,13 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 	buffer_t* buffer;
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
-		message.m_type = MAKE_MESSAGE_TYPE(msg_type, NUMBER);
-		message.m_data.m_number = (double)lua_tonumber(L, idx);
+		if (lua_isinteger(L, idx)) {
+			message.m_type = MAKE_MESSAGE_TYPE(msg_type, INTEGER);
+			message.m_data.m_integer = (int64_t)lua_tointeger(L, idx);
+		} else {
+			message.m_type = MAKE_MESSAGE_TYPE(msg_type, NUMBER);
+			message.m_data.m_number = (double)lua_tonumber(L, idx);
+		}
 		message.m_source = lua_get_context_handle(L);
 		return UV_OK;
 	case LUA_TSTRING:
@@ -870,7 +878,11 @@ int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t handle, 
 	context_t* ctx = lua_get_context(L);
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
-		ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (double)lua_tonumber(L, idx));
+		if (lua_isinteger(L, idx)) {
+			ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (int64_t)lua_tointeger(L, idx));
+		} else {
+			ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (double)lua_tonumber(L, idx));
+		}
 		break;
 	case LUA_TSTRING:
 		ret = singleton_ref(node_lua_t).context_send_string_safe(handle, ctx->get_handle(), session, msg_type, lua_tostring(L, idx));
@@ -1076,7 +1088,7 @@ int32_t context_lua_t::context_wait_yield_finalize(lua_State *root_coro, lua_Sta
 {
 	if (root_coro != NULL) {
 		context_lua_t* lctx = context_lua_t::lua_get_context(root_coro);
-		if (singleton_ref(node_lua_t).context_send(destination, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT, (double)destination)) {
+		if (singleton_ref(node_lua_t).context_send(destination, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT, (int64_t)destination)) {
 			int32_t session = lctx->m_context_wait_sessions.push_blocking(destination, root_coro);
 			int64_t timeout = lctx->get_yielding_timeout();
 			if (timeout > 0) {
@@ -1141,7 +1153,7 @@ int32_t context_lua_t::context_wait(lua_State *L)
 	}
 	if (callback > 0) { //nonblocking
 		lua_settop(L, callback);
-		if (singleton_ref(node_lua_t).context_send(handle, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT, (double)handle)) {
+		if (singleton_ref(node_lua_t).context_send(handle, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT, (int64_t)handle)) {
 			lctx->m_context_wait_sessions.make_nonblocking_callback(handle, L, callback - 1, common_callback_adjust, &session);
 			if (timeout > 0) {
 				context_lua_t::lua_ref_timer(L, session, timeout, 0, false, (void*)handle, context_wait_timeout);

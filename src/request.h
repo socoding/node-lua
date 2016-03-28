@@ -91,6 +91,17 @@ struct request_tcp_write_t {
 	REQUEST_SPARE_REGION
 };
 
+/* write by shared fd */
+struct request_tcp_write2_t {
+	uint64_t m_fd;
+	uint32_t m_length;
+	union {
+		const char* m_string;
+		buffer_t m_buffer;
+	};
+	REQUEST_SPARE_REGION
+};
+
 struct request_handle_option_t {
 	uv_handle_base_t *m_handle;
 	uint8_t m_option_type;
@@ -123,6 +134,7 @@ struct request_t {
 		request_tcp_connects_t m_tcp_connects;
 		request_tcp_read_t m_tcp_read;
 		request_tcp_write_t m_tcp_write;
+		request_tcp_write2_t m_tcp_write2;
 		request_handle_option_t m_handle_option;
 		request_handle_close_t m_handle_close;
 		request_timer_start_t m_timer_start;

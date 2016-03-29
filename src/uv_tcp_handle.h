@@ -171,10 +171,6 @@ private:
 
 private:
 	static write_shared_map_t m_write_shared_sockets;
-	//static uv_tcp_socket_handle_t* get_write_shared_socket(int64_t fd) {
-	//	write_shared_map_t::iterator it = m_write_shared_sockets.find(fd);
-	//	return it != m_write_shared_sockets.end() ? it->second : NULL;
-	//}
 };
 
 #endif

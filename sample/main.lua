@@ -70,6 +70,7 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
+
 if context.winos then
 	package.cpath = package.cpath ..";".."..\\clib\\?.dll"
 	package.path = package.path ..";".."..\\lualib\\?.lua"
@@ -78,20 +79,40 @@ else
 	package.path = package.path ..";".."../lualib/?.lua"
 end
 
-for i = 1, 32 do
-	context.create("test.lua", 1, 2, 3)
-end
-do return end
+-- for i = 1, 32 do
+	-- context.create("test.lua", 1, 2, 3)
+-- end
+-- do return end
 
 local ret, sock = tcp.listen("0.0.0.0", 8801)
 if not ret then
 	print("tcp.listens failed: ", context.strerror(sock))
 else
 	print("tcp.listens success: ", sock)
-	sock:accept(function(result, accept_sock) print("sock:accept", result, accept_sock) sock:close() accept_sock:set_nodelay(false) accept_sock:write("hello world!") end)
+	sock:accept(function(result, accept_sock) 
+		print("sock:accept", result, accept_sock)
+		sock:close()
+		--accept_sock:set_nodelay(false)
+		accept_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
+		accept_sock:set_wshared(true)
+		print("accept_sock:fd", accept_sock:fd())
+		tcp.write2(accept_sock:fd(), "hello world!")
+		accept_sock:write("hello world!")
+		tcp.write2(accept_sock:fd(), "hello world!")
+		tcp.write2(accept_sock:fd(), "hello world!")
+		accept_sock:write("hello world!")
+	end)
 	local ret, con_sock = tcp.connect("127.0.0.1", 8801)
 	if ret then
 		print("tcp.connect", ret, con_sock)
+		con_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
+		con_sock:set_wshared(true)
+		local ret, buffer = con_sock:read()
+		print("tcp read", ret, ret and buffer:tostring())
+		local ret, buffer = con_sock:read()
+		print("tcp read", ret, ret and buffer:tostring())
+		local ret, buffer = con_sock:read()
+		print("tcp read", ret, ret and buffer:tostring())
 		local ret, buffer = con_sock:read()
 		print("tcp read", ret, ret and buffer:tostring())
 	else

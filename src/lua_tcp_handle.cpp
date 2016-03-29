@@ -371,6 +371,8 @@ lua_tcp_socket_handle_t* lua_tcp_socket_handle_t::create_tcp_socket(uv_tcp_socke
 		lua_setfield(L, -2, "get_rwopt");
 		lua_pushcfunction(L, lua_tcp_socket_handle_t::set_nodelay);
 		lua_setfield(L, -2, "set_nodelay");
+		lua_pushcfunction(L, lua_tcp_socket_handle_t::set_wshared);
+		lua_setfield(L, -2, "set_wshared");
 		lua_pushcfunction(L, lua_tcp_is_closed);
 		lua_setfield(L, -2, "is_closed");
 		lua_pushcfunction(L, lua_tcp_get_fd);
@@ -962,6 +964,7 @@ int luaopen_tcp(lua_State *L)
 		{ "set_rwopt", lua_tcp_socket_handle_t::set_rwopt },
 		{ "get_rwopt", lua_tcp_socket_handle_t::get_rwopt },
 		{ "set_nodelay", lua_tcp_socket_handle_t::set_nodelay },
+		{ "set_wshared", lua_tcp_socket_handle_t::set_wshared },
 		{ "close", lua_tcp_close },
 		{ "is_closed", lua_tcp_is_closed },
 		{ "fd", lua_tcp_get_fd },

@@ -878,9 +878,12 @@ int32_t lua_tcp_socket_handle_t::set_wshared(lua_State* L)
 {
 	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, 1, TCP_SOCKET_METATABLE);
 	if (!socket->is_closed()) {
-		socket->set_option(OPT_TCP_WSHARED, lua_toboolean(L, 2) ? "\x01\0" : "\x00\0", 2);
-		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
-		froze_head_option(handle->m_write_head_option);
+		bool enable = lua_toboolean(L, 2);
+		socket->set_option(OPT_TCP_WSHARED, enable ? "\x01\0" : "\x00\0", 2);
+		if (enable) {
+			uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
+			froze_head_option(handle->m_write_head_option);
+		}
 	}
 	return 0;
 }

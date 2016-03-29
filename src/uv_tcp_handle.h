@@ -6,6 +6,7 @@
 #include "uv_handle_base.h"
 #include <vector>
 #include <queue>
+#include <map>
 
 #define TCP_TRANSPORT_DEFAULT_ENDIAN	LITTLE_ENDIAN_VAL
 #define TCP_WRITE_UV_REQUEST_CACHE_MAX	32
@@ -28,6 +29,7 @@ typedef struct {
 
 enum tcp_option_type {
 	OPT_TCP_NODELAY,
+	OPT_TCP_WSHARED,
 };
 
 class uv_tcp_listen_handle_t : public uv_handle_base_t
@@ -54,6 +56,8 @@ private:
 										   since nonblocking may be treated as blocking in context thread. */
 };
 
+typedef std::map<int64_t, uv_tcp_socket_handle_t*> write_shared_map_t;
+
 class uv_tcp_socket_handle_t : public uv_handle_base_t
 {
 public:
@@ -70,6 +74,7 @@ public:
 		init_head_option(m_write_head_option);
 		buffer_make_invalid(m_read_buffer);
 	}
+	~uv_tcp_socket_handle_t();
 
 	friend class uv_tcp_listen_handle_t;
 	friend class lua_tcp_socket_handle_t;
@@ -87,18 +92,15 @@ public:
 	void connect_sock(request_tcp_connects_t& request);
 	void write(request_tcp_write_t& request);
 	void read(request_tcp_read_t& request);
+	static void write2(request_tcp_write2_t& request);
 public:
-	~uv_tcp_socket_handle_t()
-	{
-		clear_read_cached_buffers();
-		clear_write_cached_requests();
-	}
 	bool read_start_state() const
 	{
 		return m_has_noblocking_read || m_blocking_read_count > 0;
 	}
 	void set_option(uint8_t type, const char *option);
 	void set_tcp_nodelay(bool enable);
+	void set_tcp_wshared(bool enable);
 	uv_err_code get_read_error()  const { return m_read_error; }
 	uv_err_code get_write_error() const { return m_write_error; }
 	static void free_shared_read_buffer();
@@ -166,6 +168,13 @@ private:
 		}
 		m_write_cached_reqs.clear();
 	}
+
+private:
+	static write_shared_map_t m_write_shared_sockets;
+	//static uv_tcp_socket_handle_t* get_write_shared_socket(int64_t fd) {
+	//	write_shared_map_t::iterator it = m_write_shared_sockets.find(fd);
+	//	return it != m_write_shared_sockets.end() ? it->second : NULL;
+	//}
 };
 
 #endif

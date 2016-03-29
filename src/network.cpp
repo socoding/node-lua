@@ -137,7 +137,7 @@ void network_t::request_tcp_write(request_tcp_write_t& request)
 
 void network_t::request_tcp_write2(request_tcp_write2_t& request)
 {
-
+	uv_tcp_socket_handle_t::write2(request);
 }
 
 void network_t::request_handle_option(request_handle_option_t& request)
@@ -216,6 +216,9 @@ void network_t::process_request(request_t& request)
 		break;
 	case REQUEST_TCP_WRITE:
 		request_tcp_write(request.m_tcp_write);
+		break;
+	case REQUEST_TCP_WRITE2:
+		request_tcp_write2(request.m_tcp_write2);
 		break;
 	case REQUEST_TCP_READ:
 		request_tcp_read(request.m_tcp_read);

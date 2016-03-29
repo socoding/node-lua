@@ -112,7 +112,9 @@ bool lua_handle_base_t::set_option(uint8_t type, const char *option, uint8_t opt
 		request.m_length = REQUEST_SIZE(request_handle_option_t, option_len);
 		request.m_handle_option.m_handle = m_uv_handle;
 		request.m_handle_option.m_option_type = type;
-		memcpy(REQUEST_SPARE_PTR(request.m_handle_option), option, option_len);
+		if (option_len > 0) {
+			memcpy(REQUEST_SPARE_PTR(request.m_handle_option), option, option_len);
+		}
 		singleton_ref(network_t).send_request(request);
 		return true;
 	}

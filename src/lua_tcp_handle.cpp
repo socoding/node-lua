@@ -49,7 +49,7 @@ static int32_t lua_tcp_get_fd(lua_State* L)
 {
 	lua_handle_base_t* handle = lua_check_tcp_handle(L, 1);
 	if (handle != NULL) {
-		int64_t fd = ((int64_t)handle->get_handle_ref() % 1000000) + 1000000 * (int64_t)context_lua_t::lua_get_context_handle(L);
+		int64_t fd = TCP_SOCKET_MAKE_FD(handle->get_handle_ref(), context_lua_t::lua_get_context_handle(L));
 		lua_pushinteger(L, fd);
 		return 1;
 	}
@@ -865,9 +865,20 @@ int32_t lua_tcp_socket_handle_t::get_rwopt(lua_State* L)
 
 int32_t lua_tcp_socket_handle_t::set_nodelay(lua_State* L)
 {
-	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_testudata(L, 1, TCP_SOCKET_METATABLE);
+	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, 1, TCP_SOCKET_METATABLE);
 	if (!socket->is_closed() && socket->get_uv_handle_type() == UV_TCP) {
-		socket->set_option(OPT_TCP_NODELAY, lua_toboolean(L, 2) ? "\x01\0" : "\0\0", 2);
+		socket->set_option(OPT_TCP_NODELAY, lua_toboolean(L, 2) ? "\x01\0" : "\x00\0", 2);
+	}
+	return 0;
+}
+
+int32_t lua_tcp_socket_handle_t::set_wshared(lua_State* L)
+{
+	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, 1, TCP_SOCKET_METATABLE);
+	if (!socket->is_closed()) {
+		socket->set_option(OPT_TCP_WSHARED, lua_toboolean(L, 2) ? "\x01\0" : "\x00\0", 2);
+		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
+		froze_head_option(handle->m_write_head_option);
 	}
 	return 0;
 }

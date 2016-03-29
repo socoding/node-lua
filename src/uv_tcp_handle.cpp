@@ -2,6 +2,7 @@
 #include "network.h"
 #include "node_lua.h"
 #include "uv_tcp_handle.h"
+#include "lua_tcp_handle.h"
 
 void uv_tcp_listen_handle_t::on_accept(uv_stream_t* server, int status)
 {
@@ -84,6 +85,7 @@ void uv_tcp_listen_handle_t::accept(request_tcp_accept_t& request)
 #define LARGE_UNCOMPLETE_LIMIT	(1 * 1024)
 #define SHARED_READ_BUFFER_SIZE	(64 * 1024)
 uv_buf_t uv_tcp_socket_handle_t::m_shared_read_buffer = { 0, NULL, };
+write_shared_map_t uv_tcp_socket_handle_t::m_write_shared_sockets;
 
 void uv_tcp_socket_handle_t::make_shared_read_buffer()
 {
@@ -101,6 +103,13 @@ void uv_tcp_socket_handle_t::free_shared_read_buffer()
 		m_shared_read_buffer.base = NULL;
 		m_shared_read_buffer.len = 0;
 	}
+}
+
+uv_tcp_socket_handle_t::~uv_tcp_socket_handle_t()
+{
+	clear_read_cached_buffers();
+	clear_write_cached_requests();
+	m_write_shared_sockets.erase(TCP_SOCKET_MAKE_FD(m_lua_ref, m_source));
 }
 
 void uv_tcp_socket_handle_t::on_connect(uv_connect_t* req, int status)
@@ -165,6 +174,38 @@ void uv_tcp_socket_handle_t::on_write(uv_write_t* req, int status)
 		singleton_ref(node_lua_t).context_send(socket_handle->m_source, 0, uv_request->m_session, RESPONSE_TCP_WRITE, status == 0 ? UV_OK : socket_handle->m_write_error);
 	}
 	socket_handle->put_write_cached_request(uv_request);
+}
+
+void uv_tcp_socket_handle_t::write2(request_tcp_write2_t& request)
+{
+	write_shared_map_t::iterator it = m_write_shared_sockets.find(request.m_fd);
+	if (it != m_write_shared_sockets.end()) {
+		uv_tcp_socket_handle_t* handle = it->second;
+		if (!uv_is_closing((uv_handle_t*)handle)) {
+			request_tcp_write_t req;
+			uint32_t length;
+			req.m_session = LUA_REFNIL;
+			req.m_length = request.m_length;
+			if (request.m_length > 0) { /* is raw string */ 
+				req.m_string = request.m_string;
+				length = request.m_length;
+			} else {  /* is buffer */ 
+				req.m_buffer = request.m_buffer;
+				length = (uint32_t)buffer_data_length(request.m_buffer);
+			}
+			if (check_head_option_max(handle->m_write_head_option, length)) {
+				handle->write(req);
+				return;
+			}
+			/* to be fix : put error message "attempt to send data(length %lu) too long(max %lu)" */
+		}
+	}
+	/* write error had been occurred */
+	if (request.m_length > 0) {
+		nl_free((void*)request.m_string);
+	} else {
+		buffer_release(request.m_buffer);
+	}
 }
 
 /* We must response something to lua-service even error occurred. */
@@ -375,6 +416,9 @@ void uv_tcp_socket_handle_t::set_option(uint8_t type, const char *option)
 	case OPT_TCP_NODELAY:
 		set_tcp_nodelay(*option);
 		break;
+	case OPT_TCP_WSHARED:
+		set_tcp_wshared(*option);
+		break;
 	default:
 		break;
 	}
@@ -387,3 +431,14 @@ void uv_tcp_socket_handle_t::set_tcp_nodelay(bool enable)
 	}
 }
 
+void uv_tcp_socket_handle_t::set_tcp_wshared(bool enable)
+{
+	if (!uv_is_closing((uv_handle_t*)(m_handle))) {
+		int64_t fd = TCP_SOCKET_MAKE_FD(m_lua_ref, m_source);
+		if (enable) {
+			m_write_shared_sockets[fd] = this;
+		} else {
+			m_write_shared_sockets.erase(fd);
+		}
+	}
+}

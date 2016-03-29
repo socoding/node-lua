@@ -84,7 +84,7 @@ struct request_tcp_read_t {
 struct request_tcp_write_t {
 	uv_tcp_socket_handle_t *m_socket_handle;
 	uint32_t m_session;
-	uint32_t m_length;
+	uint32_t m_length; /* judge it's string or buffer */
 	union {
 		const char* m_string;
 		buffer_t m_buffer;
@@ -95,7 +95,7 @@ struct request_tcp_write_t {
 /* write by shared fd */
 struct request_tcp_write2_t {
 	uint64_t m_fd;
-	uint32_t m_length;
+	uint32_t m_length; /* judge it's string or buffer */
 	union {
 		const char* m_string;
 		buffer_t m_buffer;

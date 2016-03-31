@@ -158,4 +158,3 @@ int32_t lua_handle_base_t::is_closed(lua_State* L)
 	lua_pushboolean(L, handle == NULL || handle->is_closed());
 	return 1;
 }
-

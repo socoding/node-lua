@@ -171,50 +171,52 @@ void uv_tcp_socket_handle_t::on_write(uv_write_t* req, int status)
 		buffer_release(uv_request->m_buffer);
 	}
 	if (uv_request->m_session != LUA_REFNIL) {
-		singleton_ref(node_lua_t).context_send(socket_handle->m_source, 0, uv_request->m_session, RESPONSE_TCP_WRITE, status == 0 ? UV_OK : socket_handle->m_write_error);
+		singleton_ref(node_lua_t).context_send(uv_request->m_source, 0, uv_request->m_session, RESPONSE_TCP_WRITE, status == 0 ? UV_OK : socket_handle->m_write_error);
 	}
 	socket_handle->put_write_cached_request(uv_request);
 }
 
-void uv_tcp_socket_handle_t::write2(request_tcp_write2_t& request)
+void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
 {
-	write_shared_map_t::iterator it = m_write_shared_sockets.find(request.m_fd);
-	if (it != m_write_shared_sockets.end()) {
-		uv_tcp_socket_handle_t* handle = it->second;
-		if (!uv_is_closing((uv_handle_t*)handle)) {
-			request_tcp_write_t req;
-			uint32_t length;
-			req.m_session = LUA_REFNIL;
-			req.m_length = request.m_length;
-			if (request.m_length > 0) { /* is raw string */ 
-				req.m_string = request.m_string;
-				length = request.m_length;
-			} else {  /* is buffer */ 
-				req.m_buffer = request.m_buffer;
-				length = (uint32_t)buffer_data_length(request.m_buffer);
+	int32_t err = UV_UNKNOWN;
+	if (request.m_shared_write) {
+		write_shared_map_t::iterator it = m_write_shared_sockets.find(request.m_socket_fd);
+		if (it != m_write_shared_sockets.end()) {
+			uv_tcp_socket_handle_t* handle = it->second;
+			uint32_t length = request.m_length > 0 ? request.m_length : (uint32_t)buffer_data_length(request.m_buffer);
+			if (uv_is_closing((uv_handle_t*)handle)) {
+				err = NL_ETCPSCLOSED;
+			} else if (!check_head_option_max(handle->m_write_head_option, length)) {
+				err = NL_ETCPWRITELONG;
+			} else {
+				err = handle->write_handle(request);
 			}
-			if (check_head_option_max(handle->m_write_head_option, length)) {
-				handle->write(req);
-				return;
-			}
-			/* to be fix : put error message "attempt to send data(length %lu) too long(max %lu)" */
+		} else {
+			err = NL_ETCPNOWSHARED;
 		}
-	}
-	/* write error had been occurred */
-	if (request.m_length > 0) {
-		nl_free((void*)request.m_string);
 	} else {
-		buffer_release(request.m_buffer);
+		err = request.m_socket_handle->write_handle(request);
+	}
+	if (err != UV_OK) { /* write error had been occurred */
+		if (request.m_length > 0) {
+			nl_free((void*)request.m_string);
+		} else {
+			buffer_release(request.m_buffer);
+		}
+		if (request.m_session != LUA_REFNIL) {
+			singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_WRITE, (nl_err_code)err);
+		}
 	}
 }
 
 /* We must response something to lua-service even error occurred. */
-void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
+int32_t uv_tcp_socket_handle_t::write_handle(request_tcp_write_t& request)
 {
 	int result;
 	if (m_write_error == UV_OK) {
 		uv_buf_t uv_buf[] = { { 0, NULL }, { 0, NULL } };
 		write_uv_request_t* uv_request = get_write_cached_request();
+		uv_request->m_source = request.m_source;
 		uv_request->m_session = request.m_session;
 		uv_request->m_length = request.m_length;
 		if (request.m_length > 0) {
@@ -234,19 +236,11 @@ void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
 		} else {
 			result = uv_write(&uv_request->m_write_req, (uv_stream_t*)(m_handle), uv_buf + 1, 1, on_write);
 		}
-		if (result == 0) return;
+		if (result == 0) return UV_OK;
 		m_write_error = singleton_ref(network_t).last_error(); /* write error occurs */
 		put_write_cached_request(uv_request);
 	}
-	/* write error had been occurred */
-	if (request.m_length > 0) {
-		nl_free((void*)request.m_string);
-	} else {
-		buffer_release(request.m_buffer);
-	}
-	if (request.m_session != LUA_REFNIL) {
-		singleton_ref(node_lua_t).context_send(m_source, 0, request.m_session, RESPONSE_TCP_WRITE, m_write_error);
-	}
+	return m_write_error;
 }
 
 uv_buf_t uv_tcp_socket_handle_t::on_read_alloc(uv_handle_t* handle, size_t suggested_size)

@@ -57,7 +57,6 @@ public:
 	static int32_t connect6(lua_State* L);
 	static int32_t connects(lua_State* L);
 	static int32_t write(lua_State* L);
-	static int32_t write2(lua_State* L);
 	static int32_t read(lua_State* L);
 	static int32_t set_rwopt(lua_State* L);
 	static int32_t get_rwopt(lua_State* L);
@@ -67,6 +66,8 @@ public:
 private:
 	static int32_t _connect(lua_State* L, bool ipv6);
 	static int32_t connect_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
+	static int32_t write_handle(lua_State* L);
+	static int32_t write_fd(lua_State* L);
 	static int32_t write_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t read_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t connect_callback_adjust(lua_State* L);

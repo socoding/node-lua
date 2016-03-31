@@ -527,43 +527,80 @@ int32_t lua_tcp_socket_handle_t::connect_yield_continue(lua_State* L, int status
 	return 2;
 }
 
-int32_t lua_tcp_socket_handle_t::write2(lua_State* L)
+int32_t lua_tcp_socket_handle_t::write(lua_State* L)
+{
+	return !lua_isinteger(L, 1) ? write_handle(L) : write_fd(L);
+}
+
+int32_t lua_tcp_socket_handle_t::write_fd(lua_State* L)
 {
 	int64_t fd = luaL_checkinteger(L, 1);
-	if (fd <= 0) {
-		return 0;
-	}
 	const char *s = NULL;
 	uint32_t length;
 	buffer_t* buffer = NULL;
+	if (fd <= 0) {
+		return luaL_error(L, "invalid shared socket fd");
+	}
 	if (((s = lua_tolstring(L, 2, (size_t*)&length)) == NULL) && ((buffer = (buffer_t*)luaL_testudata(L, 2, BUFFER_METATABLE)) == NULL)) {
 		luaL_argerror(L, 2, "string expected");
 	}
 	if (buffer) {
 		length = (uint32_t)buffer_data_length(*buffer);
 	}
-	if (length == 0) {
+	bool safety = false;
+	bool nonblocking = false;
+	if (lua_gettop(L) >= 3) {
+		if (lua_isfunction(L, 3)) {
+			nonblocking = true;
+			lua_settop(L, 3);
+		} else {
+			safety = lua_toboolean(L, 3);
+		}
+	}
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+	if (length == 0) { /* empty string or buffer */
+		if (nonblocking) {
+			int32_t session = context_lua_t::lua_ref_callback(L, 2, LUA_REFNIL, context_lua_t::common_callback_adjust);
+			singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), session, RESPONSE_TCP_WRITE, UV_OK);
+		} else if (safety) { /* real blocking mode */
+			lua_pushboolean(L, true);
+			lua_pushinteger(L, UV_OK);
+			return 2;
+		}
 		return 0;
 	}
-	request_t request;
-	request.m_type = REQUEST_TCP_WRITE2;
-	request.m_length = REQUEST_SIZE(request_tcp_write2_t, 0);
-	request.m_tcp_write2.m_fd = fd;
+	request_t& request = lctx->get_yielding_request();
+	request.m_type = REQUEST_TCP_WRITE;
+	request.m_length = REQUEST_SIZE(request_tcp_write_t, 0);
+	request.m_tcp_write.m_socket_fd = fd;
+	request.m_tcp_write.m_source = lctx->get_handle();
+	request.m_tcp_write.m_shared_write = true;
 	if (s) {
-		request.m_tcp_write2.m_length = length; /* length > 0 */
-		request.m_tcp_write2.m_string = (const char*)nl_memdup(s, length);
-		if (!request.m_tcp_write2.m_string) {
+		request.m_tcp_write.m_length = length; /* length > 0 */
+		request.m_tcp_write.m_string = (const char*)nl_memdup(s, length);
+		if (!request.m_tcp_write.m_string) {
 			return luaL_error(L, "attempt to send data(length %lu) failed: memory not enough", length);
 		}
 	} else {
-		request.m_tcp_write2.m_length = 0;
-		request.m_tcp_write2.m_buffer = buffer_grab(*buffer);
+		request.m_tcp_write.m_length = 0;
+		request.m_tcp_write.m_buffer = buffer_grab(*buffer);
 	}
-	singleton_ref(network_t).send_request(request);
-	return 0;
+	if (nonblocking) { /*nonblocking callback mode*/
+		request.m_tcp_write.m_session = context_lua_t::lua_ref_callback(L, 2, LUA_REFNIL, context_lua_t::common_callback_adjust);
+		singleton_ref(network_t).send_request(request);
+		return 0;
+	} else { /* blocking mode */
+		if (!safety) { /* wait for nothing */
+			request.m_tcp_write.m_session = LUA_REFNIL;
+			singleton_ref(network_t).send_request(request);
+			return 0;
+		} else { /* real blocking mode */
+			return lctx->lua_yield_send(L, 0, write_yield_finalize, NULL, context_lua_t::common_yield_continue);
+		}
+	}
 }
 
-int32_t lua_tcp_socket_handle_t::write(lua_State* L)
+int32_t lua_tcp_socket_handle_t::write_handle(lua_State* L)
 {
 	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, 1, TCP_SOCKET_METATABLE);
 	if (socket->is_closed()) {
@@ -610,6 +647,8 @@ int32_t lua_tcp_socket_handle_t::write(lua_State* L)
 	request.m_type = REQUEST_TCP_WRITE;
 	request.m_length = REQUEST_SIZE(request_tcp_write_t, 0);
 	request.m_tcp_write.m_socket_handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
+	request.m_tcp_write.m_source = lctx->get_handle();
+	request.m_tcp_write.m_shared_write = false;
 	if (s) {
 		request.m_tcp_write.m_length = length; /* length > 0 */
 		request.m_tcp_write.m_string = (const char*)nl_memdup(s, length);
@@ -643,8 +682,10 @@ int32_t lua_tcp_socket_handle_t::write_yield_finalize(lua_State *root_coro, lua_
 		context_lua_t* lctx = context_lua_t::lua_get_context(root_coro);
 		request_t& request = lctx->get_yielding_request();
 		request.m_tcp_write.m_session = context_lua_t::lua_ref_yield_coroutine(root_coro);
-		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)((lua_tcp_socket_handle_t*)userdata)->m_uv_handle;
-		froze_head_option(handle->m_write_head_option);
+		if (userdata != NULL) {
+			uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)((lua_tcp_socket_handle_t*)userdata)->m_uv_handle;
+			froze_head_option(handle->m_write_head_option);
+		}
 		singleton_ref(network_t).send_request(request);
 	} else {  //yield failed, clear your data in case of memory leak.
 		context_lua_t* lctx = context_lua_t::lua_get_context(root_coro);
@@ -962,7 +1003,6 @@ int luaopen_tcp(lua_State *L)
 		{ "connect6", lua_tcp_socket_handle_t::connect6 },
 		{ "connects", lua_tcp_socket_handle_t::connects },
 		{ "write", lua_tcp_socket_handle_t::write },
-		{ "write2", lua_tcp_socket_handle_t::write2 },
 		{ "read", lua_tcp_socket_handle_t::read },
 		{ "set_rwopt", lua_tcp_socket_handle_t::set_rwopt },
 		{ "get_rwopt", lua_tcp_socket_handle_t::get_rwopt },

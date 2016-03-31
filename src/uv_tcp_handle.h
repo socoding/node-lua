@@ -84,15 +84,15 @@ private:
 	static void on_read(uv_stream_t* stream, ssize_t nread, uv_buf_t buf);
 	static uv_buf_t on_read_alloc(uv_handle_t* handle, size_t suggested_size); /* return tcp shared read buffer */
 	
+	int32_t write_handle(request_tcp_write_t& request);
 	void write_read_buffer(ssize_t nread, uv_buf_t buf);
 	void write_read_buffer_finish(uv_err_code err_code);
 	void clear_read_cached_buffers();
 public:
 	void connect_tcp(request_tcp_connect_t& request);
 	void connect_sock(request_tcp_connects_t& request);
-	void write(request_tcp_write_t& request);
 	void read(request_tcp_read_t& request);
-	static void write2(request_tcp_write2_t& request);
+	static void write(request_tcp_write_t& request);
 public:
 	bool read_start_state() const
 	{
@@ -125,12 +125,13 @@ private:
 private:
 	typedef struct {
 		uv_write_t m_write_req;
-		uint32_t m_session;
-		uint32_t m_length;
 		union {
 			const char* m_string;
 			buffer_t m_buffer;
 		};
+		uint32_t m_length;   /* judge it's string or buffer */
+		uint32_t m_source;
+		uint32_t m_session;
 		int8_t m_head_buffer[4];
 	} write_uv_request_t;
 

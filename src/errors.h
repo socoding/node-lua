@@ -5,7 +5,7 @@
 
 /* Expand this list if necessary. */
 #define NL_ERRNO_MAP(XX)															\
-  XX( 200, EYIELD,			"attempt to yield across a C-call boundary")				\
+  XX( 200, EYIELD,			"attempt to yield across a C-call boundary")			\
   XX( 201, EYIELDFNZ,		"yielding up finalize error")							\
   XX( 202, ESTACKLESS,		"attempt to yield across a stack-less coroutine")		\
   XX( 203, ETCPSCLOSED,		"tcp socket has been closed")							\
@@ -14,6 +14,8 @@
   XX( 206, ETRANSTYPE,		"transfer data type not supported")						\
   XX( 207, ENOREPLY,		"no reply")												\
   XX( 208, ETIMEOUT,		"timeout")												\
+  XX( 209, ETCPNOWSHARED,	"tcp socket not set write shared")						\
+  XX( 210, ETCPWRITELONG,	"attempt to send data too long")						\
 
 #define NL_ERRNO_GEN(val, name, s) NL_##name = val,
 typedef enum {

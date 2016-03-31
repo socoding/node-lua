@@ -7,7 +7,7 @@
 char lua_handle_base_t::m_lua_ref_table_key = 0;
 
 lua_handle_base_t::lua_handle_base_t(uv_handle_base_t* handle, lua_State* L)
-	: m_handle_set(handle->get_handle_set()), m_lua_ref(LUA_REFNIL), m_uv_handle(handle)
+	: m_handle_set(handle->get_handle_set()), m_lua_ref(handle->m_lua_ref), m_uv_handle(handle)
 {
 	grab_ref(L, this, m_handle_set);
 }
@@ -46,13 +46,19 @@ int32_t lua_handle_base_t::grab_ref(lua_State* L, lua_handle_base_t* handle, han
 {
 	push_ref_table(L, type);
 	lua_pushlightuserdata(L, handle);
-	ASSERT(handle != NULL);
-	ASSERT(handle->m_handle_set == type);
-	ASSERT(handle->m_uv_handle->m_lua_ref == LUA_REFNIL);
-	ASSERT(handle->m_lua_ref == LUA_REFNIL);
-	handle->m_uv_handle->m_lua_ref = handle->m_lua_ref = luaL_ref(L, -2);
-	lua_pop(L, 1); //pop lua_ref_table
-	return handle->m_lua_ref;
+	if (handle != NULL) {
+		ASSERT(type == handle->m_handle_set);
+		if (handle->m_lua_ref == LUA_REFNIL) {
+			handle->m_uv_handle->m_lua_ref = handle->m_lua_ref = luaL_ref(L, -2);
+		} else {
+			lua_rawseti(L, -2, handle->m_lua_ref);
+		}
+		lua_pop(L, 1);
+		return handle->m_lua_ref;
+	}
+	int32_t ref = luaL_ref(L, -2);
+	lua_pop(L, 1);
+	return ref;
 }
 
 /*
@@ -152,3 +158,4 @@ int32_t lua_handle_base_t::is_closed(lua_State* L)
 	lua_pushboolean(L, handle == NULL || handle->is_closed());
 	return 1;
 }
+

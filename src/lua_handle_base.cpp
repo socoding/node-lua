@@ -74,8 +74,10 @@ void lua_handle_base_t::release_ref(lua_State* L, int32_t ref, handle_set type)
 			lua_pushlightuserdata(L, NULL);
 			lua_rawseti(L, -3, ref);
 			lua_pop(L, 2);
-		} else {
+		} else if (!lua_isinteger(L, -1)) {
 			luaL_unref(L, -2, ref);
+			lua_pop(L, 2);
+		} else {
 			lua_pop(L, 2);
 		}
 	}

@@ -4,6 +4,16 @@
 #include "uv_tcp_handle.h"
 #include "lua_tcp_handle.h"
 
+#if defined (CC_MSVC)
+#define uv_tcp_fd(handle) ((handle)->socket)
+#elif defined(__APPLE__)
+int uv___stream_fd(uv_stream_t* handle);
+#define uv_tcp_fd(handle) (uv___stream_fd((uv_stream_t*) (handle)))
+#else
+#define uv_tcp_fd(handle) ((handle)->io_watcher.fd)
+#endif /* defined(__APPLE__) */
+
+
 void uv_tcp_listen_handle_t::on_accept(uv_stream_t* server, int status)
 {
 	uv_tcp_listen_handle_t *listen_handle = (uv_tcp_listen_handle_t*)(server->data);

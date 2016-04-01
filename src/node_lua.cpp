@@ -36,7 +36,7 @@ node_lua_t::node_lua_t(int argc, char* argv[], char* env[])
 	m_worker_mgr = new worker_mgr_t();
 	m_network->start();
 	m_worker_mgr->start();
-	context_create<context_lua_t>(argc, argv, env);
+	context_create<context_lua_t>(0, argc, argv, env);
 	m_worker_mgr->wait();
 	m_network->stop();
 	m_network->wait();

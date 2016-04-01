@@ -71,6 +71,11 @@ print("value", value1, value2)]]
 -- #endif
 
 
+
+local handle = context.create("test.lua")
+
+print(context.self, context.parent, handle)
+
 if context.winos then
 	package.cpath = package.cpath ..";".."..\\clib\\?.dll"
 	package.path = package.path ..";".."..\\lualib\\?.lua"

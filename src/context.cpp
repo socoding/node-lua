@@ -5,7 +5,8 @@
 #include "node_lua.h"
 
 context_t::context_t()
-	: m_handle(0),
+	: m_parent(0),
+	  m_handle(0),
 	  m_worker(NULL),
 	  m_inited(false),
 	  m_ref(1),
@@ -20,9 +21,10 @@ context_t::~context_t()
 
 }
 
-void context_t::on_registered( uint32_t handle )
+void context_t::on_registered(uint32_t parent, uint32_t handle)
 {
 	if (m_handle == 0) {
+		m_parent = parent;
 		m_handle = handle;
 		grab();
 	}

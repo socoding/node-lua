@@ -1,4 +1,5 @@
 --print(package.path)
+print(context.parent)
 package.path = package.path .. ";..\\lualib\\?.lua"
 package.cpath = package.cpath .. ";..\\clib\\?.dll"
 

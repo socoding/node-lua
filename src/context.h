@@ -8,6 +8,7 @@ class worker_t;
 class context_t {
 public:
 	context_t();
+	FORCE_INLINE uint32_t get_parent() const { return m_parent; }
 	FORCE_INLINE uint32_t get_handle() const { return m_handle; }
 	FORCE_INLINE void grab() { atomic_inc(m_ref); }
 	FORCE_INLINE void release() { if (atomic_dec(m_ref) == 1) delete this; }
@@ -22,7 +23,7 @@ public:
 	void attach_worker(worker_t* worker);
 	void detach_worker();
 
-	void on_registered(uint32_t handle); /* thread safe */
+	void on_registered(uint32_t parent, uint32_t handle); /* thread safe */
 	void on_retired(); /* thread safe */
 	bool push_message(message_t& message, bool& processing);
 	bool pop_message(message_t& message);
@@ -39,6 +40,7 @@ protected:
 	context_t(const context_t& ctx);
 	context_t& operator=(const context_t& ctx);
 
+	uint32_t m_parent;  /* parent handle */
 	uint32_t m_handle;  /* allocated handle */
 	worker_t* m_worker; /* attached worker */
 private:

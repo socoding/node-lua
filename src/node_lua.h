@@ -70,10 +70,10 @@ public:
 	}
 
 	template < class type >
-	uint32_t context_create(int32_t argc, char* argv[], char* env[]) {
+	uint32_t context_create(uint32_t parent, int32_t argc, char* argv[], char* env[]) {
 		uint32_t handle = 0;
 		type *ctx = new type();
-		if (m_ctx_mgr->register_context(ctx)) {
+		if (m_ctx_mgr->register_context(ctx, parent)) {
 			if (ctx->init(argc, argv, env)) {
 				ctx->set_inited(true);
 				handle = ctx->get_handle();

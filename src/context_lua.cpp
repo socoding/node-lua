@@ -801,7 +801,8 @@ int32_t context_lua_t::context_create(lua_State *L)
 	for (int32_t i = 0; i < argc; ++i) {
 		argv[i] = (char*)luaL_checkstring(L, i + 1);
 	}
-	uint32_t handle = singleton_ref(node_lua_t).context_create<context_lua_t>(argc, argv, env);
+	uint32_t parent = lua_get_context_handle(L);
+	uint32_t handle = singleton_ref(node_lua_t).context_create<context_lua_t>(parent, argc, argv, env);
 	lua_free_env(L, env);
 	if (handle > 0) {
 		lua_pushinteger(L, handle);
@@ -1185,7 +1186,6 @@ int luaopen_context(lua_State *L)
 			{ "strerror", context_lua_t::context_strerror },
 			{ "create", context_lua_t::context_create },
 			{ "destroy", context_lua_t::context_destroy },
-			{ "self", context_lua_t::context_self },
 			{ "thread", context_lua_t::context_thread },
 			{ "send", context_lua_t::context_send },
 			{ "query", context_lua_t::context_query },
@@ -1201,6 +1201,11 @@ int luaopen_context(lua_State *L)
 	lua_pushboolean(L, 0);
 #endif
 	lua_setfield(L, -2, "winos");
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+	lua_pushinteger(L, lctx->get_handle());
+	lua_setfield(L, -2, "self");
+	lua_pushinteger(L, lctx->get_parent());
+	lua_setfield(L, -2, "parent");
 	return 1;
 }
 

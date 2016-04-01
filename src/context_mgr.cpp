@@ -35,7 +35,7 @@ void context_mgr_t::expand_slot()
 	m_slot_cap = new_cap;
 }
 
-bool context_mgr_t::register_context( context_t* ctx )
+bool context_mgr_t::register_context(context_t* ctx, int32_t parent)
 {
 	uv_rwlock_wrlock(&m_lock);
 	if (m_ctx_size == MAX_CTX_SIZE || ctx->get_handle() != 0) {
@@ -54,7 +54,7 @@ bool context_mgr_t::register_context( context_t* ctx )
 				m_ctx_slot[hash] = ctx;
 				m_handle_index = handle + 1;
 				++m_ctx_size;
-				ctx->on_registered(handle);
+				ctx->on_registered(parent, handle);
 				uv_rwlock_wrunlock(&m_lock);
 				return true;
 			}

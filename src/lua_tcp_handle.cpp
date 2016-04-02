@@ -373,6 +373,14 @@ lua_tcp_socket_handle_t* lua_tcp_socket_handle_t::create_tcp_socket(uv_tcp_socke
 		lua_setfield(L, -2, "set_nodelay");
 		lua_pushcfunction(L, lua_tcp_socket_handle_t::set_wshared);
 		lua_setfield(L, -2, "set_wshared");
+		lua_pushcfunction(L, lua_tcp_socket_handle_t::get_local_addr);
+		lua_setfield(L, -2, "local_addr");
+		lua_pushcfunction(L, lua_tcp_socket_handle_t::get_remote_addr);
+		lua_setfield(L, -2, "remote_addr");
+		lua_pushcfunction(L, lua_tcp_socket_handle_t::get_local_port);
+		lua_setfield(L, -2, "local_port");
+		lua_pushcfunction(L, lua_tcp_socket_handle_t::get_remote_port);
+		lua_setfield(L, -2, "remote_port");
 		lua_pushcfunction(L, lua_tcp_is_closed);
 		lua_setfield(L, -2, "is_closed");
 		lua_pushcfunction(L, lua_tcp_get_fd);
@@ -929,6 +937,74 @@ int32_t lua_tcp_socket_handle_t::set_wshared(lua_State* L)
 	return 0;
 }
 
+static lua_tcp_socket_handle_t* check_socket_addr(lua_State* L, int32_t idx)
+{
+	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, idx, TCP_SOCKET_METATABLE);
+	if (socket->is_closed()) {
+		luaL_error(L, "attempt to perform on a invalid or closed socket");
+	}
+	if (socket->get_uv_handle_type() == UV_NAMED_PIPE) {
+#if defined CC_MSVC
+		luaL_error(L, "attempt to perform on a named pipe");
+#else
+		luaL_error(L, "attempt to perform on a unix domain socket");
+#endif
+	}
+	return socket;
+}
+
+int32_t lua_tcp_socket_handle_t::get_local_addr(lua_State* L)
+{
+	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
+	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
+	char host[512];
+	if (socket_host(sock, true, host, sizeof(host), NULL)) {
+		lua_pushstring(L, host);
+	} else {
+		lua_pushstring(L, "unknown address");
+	}
+	return 1;
+}
+
+int32_t lua_tcp_socket_handle_t::get_remote_addr(lua_State* L)
+{
+	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
+	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
+	char host[512];
+	if (socket_host(sock, false, host, sizeof(host), NULL)) {
+		lua_pushstring(L, host);
+	} else {
+		lua_pushstring(L, "unknown address");
+	}
+	return 1;
+}
+
+int32_t lua_tcp_socket_handle_t::get_local_port(lua_State* L)
+{
+	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
+	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
+	uint16_t port;
+	if (socket_host(sock, true, NULL, 0, &port)) {
+		lua_pushinteger(L, port);
+	} else {
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
+int32_t lua_tcp_socket_handle_t::get_remote_port(lua_State* L)
+{
+	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
+	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
+	uint16_t port;
+	if (socket_host(sock, false, NULL, 0, &port)) {
+		lua_pushinteger(L, port);
+	} else {
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
 int32_t lua_tcp_socket_handle_t::wakeup_connect(lua_State* L, message_t& message)
 {
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
@@ -1008,6 +1084,10 @@ int luaopen_tcp(lua_State *L)
 		{ "get_rwopt", lua_tcp_socket_handle_t::get_rwopt },
 		{ "set_nodelay", lua_tcp_socket_handle_t::set_nodelay },
 		{ "set_wshared", lua_tcp_socket_handle_t::set_wshared },
+		{ "local_addr", lua_tcp_socket_handle_t::get_local_addr },
+		{ "remote_addr", lua_tcp_socket_handle_t::get_remote_addr },
+		{ "local_port", lua_tcp_socket_handle_t::get_local_port },
+		{ "remote_port", lua_tcp_socket_handle_t::get_remote_port },
 		{ "close", lua_tcp_close },
 		{ "is_closed", lua_tcp_is_closed },
 		{ "fd", lua_tcp_get_fd },

@@ -72,9 +72,9 @@ print("value", value1, value2)]]
 
 
 
-local handle = context.create("test.lua")
+-- local handle = context.create("test.lua")
 
-print(context.self, context.parent, handle)
+-- print(context.self, context.parent, handle)
 
 if context.winos then
 	package.cpath = package.cpath ..";".."..\\clib\\?.dll"
@@ -89,42 +89,58 @@ end
 -- end
 -- do return end
 
+acceptSockets = {}
+connecSockets = {}
+
 local ret, sock = tcp.listen("0.0.0.0", 8801)
 if not ret then
 	print("tcp.listens failed: ", context.strerror(sock))
 else
 	print("tcp.listens success: ", sock)
-	sock:accept(function(result, accept_sock) 
-		print("sock:accept", result, accept_sock)
-		sock:close()
+	sock:accept(function(result, accept_sock)
+		if result then
+			acceptSockets[#acceptSockets+1] = accept_sock
+			print("sock:accept success", #acceptSockets, accept_sock:fd(), accept_sock:local_port())
+		else
+			print("sock:accept fail", ret, context.strerror(accept_sock))
+		end
+		--sock:close()
 		--accept_sock:set_nodelay(false)
-		accept_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
-		accept_sock:set_wshared(true)
-		print("accept_sock:fd", accept_sock:fd())
-		tcp.write(accept_sock:fd(), "hello world!", true)
-		accept_sock:write("hello world!", function(result, error) print("tcp.write1", result, error) end)
-		tcp.write(accept_sock:fd(), "hello world!", function(result, error) print("tcp.write2", result, error) end)
-		accept_sock:close()
-		--timer.sleep(1)
-		tcp.write(accept_sock:fd(), "hello world!", function(result, error) print("tcp.write3", result, error) end)
-		--accept_sock:write("hello world!", function(result, error) print("tcp.write4", result, error) end)
+		-- print("accept_sock local addr:", accept_sock:local_addr(), accept_sock:local_port())
+		-- print("accept_sock remote addr:", accept_sock:remote_addr(), accept_sock:remote_port())
+		-- accept_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
+		-- accept_sock:set_wshared(true)
+		-- print("accept_sock:fd", accept_sock:fd())
+		-- tcp.write(accept_sock:fd(), "hello world!", true)
+		-- accept_sock:write("hello world!", function(result, error) print("tcp.write1", result, error) end)
+		-- tcp.write(accept_sock:fd(), "hello world!", function(result, error) print("tcp.write2", result, error) end)
+		-- accept_sock:close()
+		-- tcp.write(accept_sock:fd(), "hello world!", function(result, error) print("tcp.write3", result, error) end)
 	end)
-	local ret, con_sock = tcp.connect("127.0.0.1", 8801)
-	if ret then
-		print("tcp.connect", ret, con_sock)
-		con_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
-		con_sock:set_wshared(true)
-		local ret, buffer = con_sock:read()
-		print("tcp read", ret, ret and buffer:tostring())
-		local ret, buffer = con_sock:read()
-		print("tcp read", ret, ret and buffer:tostring())
-		local ret, buffer = con_sock:read()
-		print("tcp read", ret, ret and buffer:tostring())
-		local ret, buffer = con_sock:read()
-		print("tcp read", ret, ret and buffer:tostring())
-	else
-		print("tcp.connect", ret, context.strerror(sock))
+	for i = 1, 70000 do
+		local ret, con_sock = tcp.connect("127.0.0.1", 8801)
+		if ret then
+			connecSockets[#connecSockets+1] = con_sock
+			print("tcp.connect success", #connecSockets, con_sock:fd(), con_sock:remote_port(), con_sock:local_port())
+			-- print("tcp.connect", ret, con_sock)
+			-- print("con_sock local addr:", con_sock:local_addr(), con_sock:local_port())
+			-- print("con_sock remote addr:", con_sock:remote_addr(), con_sock:remote_port())
+			-- con_sock:set_rwopt({ read_head_endian =  "L", read_head_bytes = 2, read_head_max = 65535, write_head_endian =  "L", write_head_bytes = 2, write_head_max = 65535,})
+			-- con_sock:set_wshared(true)
+			-- local ret, buffer = con_sock:read()
+			-- print("tcp read", ret, ret and buffer:tostring())
+			-- local ret, buffer = con_sock:read()
+			-- print("tcp read", ret, ret and buffer:tostring())
+			-- local ret, buffer = con_sock:read()
+			-- print("tcp read", ret, ret and buffer:tostring())
+			-- local ret, buffer = con_sock:read()
+			-- print("tcp read", ret, ret and buffer:tostring())
+		else
+			print("tcp.connect fail", ret, context.strerror(con_sock), #connecSockets)
+			break
+		end
 	end
+	sock:close()
 end
 
 

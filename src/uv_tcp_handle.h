@@ -63,6 +63,7 @@ class uv_tcp_socket_handle_t : public uv_handle_base_t
 public:
 	uv_tcp_socket_handle_t(uv_loop_t* loop, uint32_t source, bool sock)
 		: uv_handle_base_t(loop, (sock ? UV_NAMED_PIPE : UV_TCP), source),
+		  m_tcp_sock(-1),
 		  m_has_noblocking_read(false),
 		  m_blocking_read_count(0),
 		  m_read_error(UV_OK),
@@ -106,6 +107,7 @@ public:
 	static void free_shared_read_buffer();
 	static void make_shared_read_buffer();
 private:
+	uv_os_sock_t m_tcp_sock;
 	/* read parameters */
 	bool m_has_noblocking_read;		/* can't change to false if set to be true */
 	uint32_t m_blocking_read_count;	/* maybe not so precise only if m_has_noblocking_accept has been set true,

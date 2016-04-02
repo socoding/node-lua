@@ -62,6 +62,10 @@ public:
 	static int32_t get_rwopt(lua_State* L);
 	static int32_t set_nodelay(lua_State* L);
 	static int32_t set_wshared(lua_State* L);
+	static int32_t get_local_addr(lua_State* L);
+	static int32_t get_remote_addr(lua_State* L);
+	static int32_t get_local_port(lua_State* L);
+	static int32_t get_remote_port(lua_State* L);
 	static int32_t close(lua_State* L);
 private:
 	static int32_t _connect(lua_State* L, bool ipv6);

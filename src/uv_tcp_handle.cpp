@@ -70,6 +70,9 @@ void uv_tcp_listen_handle_t::try_accept()
 		uv_tcp_socket_handle_t *client_handle = new uv_tcp_socket_handle_t(m_handle->loop, m_source, (m_handle->type == UV_NAMED_PIPE));
 		uv_handle_t *client = (uv_handle_t*)client_handle->m_handle;
 		if (uv_accept((uv_stream_t*)(m_handle), (uv_stream_t*)client) == 0) {
+			if (m_handle->type == UV_TCP) {
+				client_handle->m_tcp_sock = uv_tcp_fd((uv_tcp_t*)client);
+			}
 			if (!singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_ACCEPT, (void*)client_handle)) {
 				uv_close((uv_handle_t*)client, on_closed);
 			} else if (m_blocking_accept_count > 0) {
@@ -128,6 +131,9 @@ void uv_tcp_socket_handle_t::on_connect(uv_connect_t* req, int status)
 	uv_tcp_socket_handle_t *client_handle = (uv_tcp_socket_handle_t*)client->data;
 	uint32_t session = (uint64_t)req->data;
 	if (status == 0) { //connect success
+		if (client->type == UV_TCP) {
+			client_handle->m_tcp_sock = uv_tcp_fd((uv_tcp_t*)client);
+		}
 		if (!singleton_ref(node_lua_t).context_send(client_handle->m_source, 0, session, RESPONSE_TCP_CONNECT, (void*)client_handle)) {
 			uv_close((uv_handle_t*)client, on_closed);
 		}

@@ -43,3 +43,35 @@ extern void* nl_memdup(const void* src, uint32_t len)
 	}
 	return NULL;
 }
+
+extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, uint16_t* port)
+{
+	union sock_name_u {
+		sockaddr_in sock4;
+		sockaddr_in6 sock6;
+	} sock_name;
+	int sock_len = sizeof(sock_name);
+	int result = local ? getsockname(sock, (sockaddr*)&sock_name, &sock_len) : getpeername(sock, (sockaddr*)&sock_name, &sock_len);
+	if (result != 0)
+		return false;
+	uint16_t family = ((sockaddr*)&sock_name)->sa_family;
+	if (family == AF_INET) {
+		if (host != NULL) {
+			uv_ip4_name(&sock_name.sock4, host, host_len);
+		}
+		if (port != NULL) {
+			*port = sock_name.sock4.sin_port;
+		}
+		return true;
+	}
+	if (family == AF_INET6) {
+		if (host != NULL) {
+			uv_ip6_name(&sock_name.sock6, host, host_len);
+		}
+		if (port != NULL) {
+			*port = sock_name.sock6.sin6_port;
+		}
+		return true;
+	}
+	return false;
+}

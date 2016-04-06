@@ -1,6 +1,7 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
 #include "buffer.h"
+#include "lbson.h"
 
 #define  MESSAGE_TYPE_BIT	24
 #define	 MAKE_MESSAGE_TYPE(mtype, dtype) (((uint32_t)(dtype) << MESSAGE_TYPE_BIT) | ((mtype) & (((uint32_t)1 << MESSAGE_TYPE_BIT) - 1)))
@@ -8,6 +9,7 @@
 #define	 MESSAGE_TYPE(type)	(type & ((((uint32_t)1 << MESSAGE_TYPE_BIT) - 1)))
 
 typedef struct { uint8_t m_nil; } nil_t;
+typedef struct message_array_t message_array_t;
 
 enum data_type {
 	NIL				= 0,
@@ -17,17 +19,21 @@ enum data_type {
 	INTEGER			= 4, //support after lua53
 	BUFFER			= 5, //need to be freed
 	STRING			= 6, //need to be freed
-	TERROR			= 7  //
+	BSON			= 7, //need to be freed
+	ARRAY			= 8, //need to be freed[warning]
+	TERROR			= 9  //
 };
 
 typedef union data_t {
-	bool		m_bool;
-	void	   *m_userdata;
-	double		m_number;
-	int64_t     m_integer;
-	buffer_t	m_buffer;
-	char	   *m_string;
-	int32_t		m_error;
+	bool			  m_bool;
+	void			 *m_userdata;
+	double			  m_number;
+	int64_t			  m_integer;
+	buffer_t		  m_buffer;
+	char			 *m_string;
+	bson_t			 *m_bson;
+	message_array_t  *m_array;
+	int32_t			  m_error;
 } data_t;
 
 enum message_type {
@@ -59,6 +65,8 @@ enum message_type {
 #define message_integer(msg)		((msg).m_data.m_integer)
 #define message_buffer(msg)			((msg).m_data.m_buffer)
 #define message_string(msg)			((msg).m_data.m_string)
+#define message_bson(msg)			((msg).m_data.m_bson)
+#define message_array(msg)			((msg).m_data.m_array)
 #define message_error(msg)			((msg).m_data.m_error)
 
 #define message_data_type(msg)		(DATA_TYPE((msg).m_type))
@@ -69,6 +77,8 @@ enum message_type {
 #define message_is_integer(msg)		(INTEGER == message_data_type(msg))
 #define message_is_buffer(msg)		(BUFFER == message_data_type(msg))
 #define message_is_string(msg)		(STRING == message_data_type(msg))
+#define message_is_bson(msg)		(BSON == message_data_type(msg))
+#define message_is_array(msg)		(ARRAY == message_data_type(msg))
 #define message_is_error(msg)		(TERROR == message_data_type(msg))
 #define message_is_pure_error(msg)	(TERROR == message_data_type(msg) && message_error(msg) != 0)
 
@@ -77,12 +87,23 @@ enum message_type {
 #define message_clean(msg)			do {															\
 										if (message_is_buffer(msg)) {								\
 											buffer_release(msg.m_data.m_buffer);					\
-										} else if (message_is_string(msg)&&(msg).m_data.m_string) {	\
-											nl_free((msg).m_data.m_string);							\
-											msg.m_data.m_string = NULL;								\
+										} else if (message_is_string(msg)) {                    	\
+											if ((msg).m_data.m_string) {							\
+												nl_free((msg).m_data.m_string);						\
+												(msg).m_data.m_string = NULL;						\
+											}														\
+										} else if (message_is_bson(msg)) {					     	\
+											if ((msg).m_data.m_bson) {								\
+												bson_free((msg).m_data.m_bson);						\
+												(msg).m_data.m_bson = NULL;							\
+											}														\
+										} else if (message_is_array(msg)) {					     	\
+											if ((msg).m_data.m_array) {								\
+												message_array_release((msg).m_data.m_array);		\
+												(msg).m_data.m_array = NULL;						\
+											}														\
 										}															\
 									} while (0)
-
 
 class message_t {
 public:
@@ -125,11 +146,25 @@ public:
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, nl_err_code err)
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, TERROR)) { m_data.m_error = err; }
+
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, bson_t* bson)
+			: m_source(source), m_session(session),
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, BSON)) { m_data.m_bson = bson; }
 public:
 	uint32_t m_source;
 	int32_t  m_session;
 	uint32_t m_type;
 	data_t	 m_data;
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+//message array api
+struct message_array_t {
+	uint32_t m_count;
+	message_t m_array[0];
+};
+
+extern message_array_t* message_array_create(message_t* messages, uint32_t count);
+extern  void message_array_release(message_array_t* array);
 
 #endif

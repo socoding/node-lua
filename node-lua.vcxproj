@@ -102,6 +102,7 @@
     <ClInclude Include="src\errors.h" />
     <ClInclude Include="src\context_queue.h" />
     <ClInclude Include="src\handle_base_def.h" />
+    <ClInclude Include="src\lbson.h" />
     <ClInclude Include="src\lbuffer.h" />
     <ClInclude Include="src\lua_handle_base.h" />
     <ClInclude Include="src\lua_timer_handle.h" />
@@ -130,11 +131,13 @@
     <ClCompile Include="src\endian_conv.cpp" />
     <ClCompile Include="src\errors.cpp" />
     <ClCompile Include="src\context_queue.cpp" />
+    <ClCompile Include="src\lbson.cpp" />
     <ClCompile Include="src\lbuffer.cpp" />
     <ClCompile Include="src\lcororep.cpp" />
     <ClCompile Include="src\lua_handle_base.cpp" />
     <ClCompile Include="src\lua_timer_handle.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\message.cpp" />
     <ClCompile Include="src\message_queue.cpp" />
     <ClCompile Include="src\network.cpp" />
     <ClCompile Include="src\node_lua.cpp" />

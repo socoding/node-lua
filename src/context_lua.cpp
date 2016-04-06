@@ -114,6 +114,8 @@ LUAMOD_API int (luaopen_buffer)(lua_State *L);
 LUAMOD_API int (luaopen_context)(lua_State *L);
 #define LUA_TIMERLIBNAME	"timer"
 LUAMOD_API int (luaopen_timer)(lua_State *L);
+#define LUA_BSONLIBNAME	    "bson"
+LUAMOD_API int (luaopen_bson)(lua_State *L);
 
 void context_lua_t::lua_open_libs(lua_State *L)
 {
@@ -135,6 +137,7 @@ void context_lua_t::lua_open_libs(lua_State *L)
 		{LUA_BUFFERLIBNAME, luaopen_buffer},
 		{LUA_CONTEXTLIBNAME, luaopen_context},
 		{LUA_TIMERLIBNAME, luaopen_timer},
+		{LUA_BSONLIBNAME, luaopen_bson},
 		{NULL, NULL}
 	};
 	static const luaL_Reg preloadedlibs[] = {

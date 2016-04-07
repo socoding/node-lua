@@ -13,7 +13,7 @@ typedef struct bson {
 	uint8_t buffer[DEFAULT_CAP];
 } bson_t;
 
-extern bson_t* create_bson(bson_t* bson_ptr, lua_State* L);
+extern void* create_bson(bson_t* bson_ptr, lua_State* L);
 extern bson_t* bson_new(bool extract);
 extern void bson_release(bson_t* bson_ptr);
 extern bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx);

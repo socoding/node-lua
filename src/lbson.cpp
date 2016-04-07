@@ -760,7 +760,7 @@ lreplace(lua_State *L) {
 	int type = id & ((1<<(BSON_TYPE_SHIFT)) - 1);
 	int offset = id >> BSON_TYPE_SHIFT;
 	uint8_t * start = (uint8_t *)lua_touserdata(L, 1);
-	struct bson b = { 0,16, start + offset };
+	struct bson b = { false, 0, 16, start + offset };
 	switch (type) {
 	case BSON_REAL:
 		write_double(&b, luaL_checknumber(L, 3));
@@ -1201,10 +1201,11 @@ LUAMOD_API int luaopen_bson(lua_State *L) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bson_t* create_bson(bson_t* bson_ptr, lua_State* L) {
+void* create_bson(bson_t* bson_ptr, lua_State* L) {
 	void * ud = lua_newuserdata(L, bson_ptr->size);
 	memcpy(ud, bson_ptr->ptr, bson_ptr->size);
 	bson_meta(L);
+	return ud;
 }
 
 bson_t* bson_new(bool extract) {

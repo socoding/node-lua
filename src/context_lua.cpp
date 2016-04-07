@@ -527,6 +527,7 @@ void context_lua_t::lua_free_ref_session(lua_State *L, int32_t ref)
 
 void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 {
+	message_array_t *array = NULL;
 	switch (message_data_type(message)) {
 	case NIL:
 		lua_pushnil(L);
@@ -560,8 +561,8 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 		lua_pushinteger(L, message_error(message));
 		return;
 	case ARRAY:
-		message_array_t *array = message_array(message);
-		if (array->m_count > 0) {
+		array = message_array(message);
+		if (array != NULL && array->m_count > 0) {
 			for (int32_t i = 0; i < array->m_count; ++i) { //extract them
 				lua_pushmessage(L, array->m_array[i]);
 			}

@@ -51,7 +51,8 @@ bson_destroy(struct bson *b) {
 }
 
 static inline void
-bson_create(struct bson *b) {
+bson_create(struct bson *b, bool extract) {
+	b->extract = extract;
 	b->size = 0;
 	b->cap = DEFAULT_CAP;
 	b->ptr = b->buffer;
@@ -626,7 +627,7 @@ unpack_dict(lua_State *L, struct bson_reader *br, bool array) {
 
 static int
 lmakeindex(lua_State *L) {
-	int32_t *bson = (int32_t *)luaL_checkudata(L, 1, "bson");
+	int32_t *bson = (int32_t *)luaL_checkudata(L, 1, BSON_METATABLE);
 	const uint8_t * start = (const uint8_t *)bson;
 	struct bson_reader br = { start+4, get_length(start) - 5 };
 	lua_newtable(L);
@@ -812,7 +813,7 @@ ldecode(lua_State *L) {
 
 static void
 bson_meta(lua_State *L) {
-	if (luaL_newmetatable(L, "bson")) {
+	if (luaL_newmetatable(L, BSON_METATABLE)) {
 		luaL_Reg l[] = {
 			{ "decode", ldecode },
 			{ "makeindex", lmakeindex },
@@ -833,7 +834,7 @@ bson_meta(lua_State *L) {
 static int
 lencode(lua_State *L) {
 	struct bson b;
-	bson_create(&b);
+	bson_create(&b, false);
 	lua_settop(L,1);
 	luaL_checktype(L, 1, LUA_TTABLE);
 	pack_dict(L, &b, false, 0);
@@ -847,7 +848,7 @@ lencode(lua_State *L) {
 static int
 lencode_order(lua_State *L) {
 	struct bson b;
-	bson_create(&b);
+	bson_create(&b, false);
 	int n = lua_gettop(L);
 	if (n%2 != 0) {
 		return luaL_error(L, "Invalid ordered dict");
@@ -1200,35 +1201,62 @@ LUAMOD_API int luaopen_bson(lua_State *L) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bson_t* bson_new() {
-	bson_t* ptr = (bson_t*)nl_malloc(sizeof(*ptr));
-	bson_create(ptr);
-	return ptr;
+bson_t* create_bson(bson_t* bson_ptr, lua_State* L) {
+	void * ud = lua_newuserdata(L, bson_ptr->size);
+	memcpy(ud, bson_ptr->ptr, bson_ptr->size);
+	bson_meta(L);
 }
 
-void bson_free(bson_t* ptr) {
-	bson_destroy(ptr);
-	nl_free(ptr);
+bson_t* bson_new(bool extract) {
+	bson_t* bson_ptr = (bson_t*)nl_malloc(sizeof(*bson_ptr));
+	bson_create(bson_ptr, extract);
+	return bson_ptr;
+}
+
+void bson_release(bson_t* bson_ptr) {
+	bson_destroy(bson_ptr);
+	nl_free(bson_ptr);
 }
 
 static int bson_encode_safe(lua_State *L) {
-	bson_t* b = (bson_t*)lua_touserdata(L, 2); //arg1: table, arg2: bson_t ptr.
+	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 2); //arg1: table, arg2: bson_t ptr.
 	lua_settop(L, 1);
-	pack_dict(L, b, false, 0);
-	return 0;
+	pack_dict(L, bson_ptr, false, 0);
+	lua_pushlightuserdata(L, bson_ptr);
+	return 1;
 }
 
-bool bson_encode(bson_t* b, lua_State *L, int idx) {
+bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx) {
 	if (lua_istable(L, idx)) {
 		int status;
 		lua_checkstack(L, 3);
 		lua_pushcfunction(L, bson_encode_safe);
 		lua_pushvalue(L, idx);
-		lua_pushlightuserdata(L, b);
-		return lua_pcall(L, 2, 0, NULL) == LUA_OK;
+		lua_pushlightuserdata(L, bson_ptr);
+		if (lua_pcall(L, 2, 1, NULL) == LUA_OK) {
+			return true;
+		}
+		return false;
 	}
 	lua_checkstack(L, 1);
 	lua_pushstring(L, "table expected");
 	return false;
+}
+
+static int bson_decode_safe(lua_State *L) {
+	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 1); //arg1: bson_t ptr.
+	lua_settop(L, 1);
+	const uint8_t * b = (const uint8_t *)bson_ptr->ptr;
+	int32_t len = get_length(b);
+	struct bson_reader br = { b, len };
+	unpack_dict(L, &br, false);
+	return 1;
+}
+
+bool bson_decode(bson_t* bson_ptr, lua_State *L) {
+	lua_checkstack(L, 3);
+	lua_pushcfunction(L, bson_decode_safe);
+	lua_pushlightuserdata(L, bson_ptr);
+	return lua_pcall(L, 1, 1, NULL) == LUA_OK;
 }
 

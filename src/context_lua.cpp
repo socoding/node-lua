@@ -549,8 +549,25 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 	case STRING:
 		lua_pushstring(L, message_string(message));
 		return;
+	case BSON:
+		if (message_bson(message)->extract) {
+			bson_decode(message_bson(message), L);
+		} else {
+			create_bson(message_bson(message), L);
+		}
+		return;
 	case TERROR:
 		lua_pushinteger(L, message_error(message));
+		return;
+	case ARRAY:
+		message_array_t *array = message_array(message);
+		if (array->m_count > 0) {
+			for (int32_t i = 0; i < array->m_count; ++i) { //extract them
+				lua_pushmessage(L, array->m_array[i]);
+			}
+		} else {
+			lua_pushnil(L);
+		}
 		return;
 	default:
 		lua_pushnil(L);
@@ -600,11 +617,13 @@ int32_t context_lua_t::wakeup_ref_session(int32_t ref, message_t& message, bool 
 		if (blocking || free_callback) {
 			lua_free_ref_session(m_lstate, ref);
 		}
+		int32_t oldTop = lua_gettop(m_lstate);
 		lua_pushboolean(co, !message_is_pure_error(message));
 		lua_pushmessage(co, message);
 		lua_pushnumber(co, message.m_source);
 		lua_pushinteger(co, message.m_session);
-		resume_coroutine(co, 4);
+		int32_t newTop = lua_gettop(m_lstate);
+		resume_coroutine(co, newTop - oldTop);
 		return 1;
 	}
 	return 0;
@@ -832,6 +851,7 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message)
 {
 	buffer_t* buffer;
+	int32_t* bson;
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
 		if (lua_isinteger(L, idx)) {
@@ -859,11 +879,21 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 		return UV_OK;
 	case LUA_TUSERDATA:
 		buffer = (buffer_t*)luaL_testudata(L, idx, BUFFER_METATABLE);
-		if (!buffer) return NL_ETRANSTYPE;
-		message.m_type = MAKE_MESSAGE_TYPE(msg_type, USERDATA);
-		message.m_data.m_buffer = *buffer;
-		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		if (buffer) {
+			message.m_type = MAKE_MESSAGE_TYPE(msg_type, BUFFER);
+			message.m_data.m_buffer = *buffer;
+			message.m_source = lua_get_context_handle(L);
+			return UV_OK;
+		}
+		//to be fix : bson, array
+		//bson = (int32_t*)luaL_testudata(L, idx, BSON_METATABLE);
+		//if (bson) {
+		//	message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
+		//	message.m_data.m_bson = (bson_t*)bson; //temporary store the pointer here, which is not illegal.
+		//	message.m_source = lua_get_context_handle(L);
+		//	return UV_OK;
+		//}
+		return NL_ETRANSTYPE;
 	case LUA_TLIGHTUSERDATA:
 		message.m_type = MAKE_MESSAGE_TYPE(msg_type, USERDATA);
 		message.m_data.m_userdata = (void*)lua_touserdata(L, idx);
@@ -905,6 +935,7 @@ int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t handle, 
 		} else {
 			return NL_ETRANSTYPE;
 		}
+		//to be fix : bson, array
 	case LUA_TLIGHTUSERDATA:
 		ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (void*)lua_touserdata(L, idx));
 		break;
@@ -940,6 +971,8 @@ int32_t context_lua_t::context_query_yield_finalize(lua_State *root_coro, lua_St
 		bool ret;
 		if (message_is_string(message)) {
 			ret = singleton_ref(node_lua_t).context_send_string_safe(destination, lctx->get_handle(), message.m_session, CONTEXT_QUERY, message_string(message));
+		} else if (message_is_bson(message)) {
+
 		} else {
 			ret = singleton_ref(node_lua_t).context_send(destination, message);
 		}

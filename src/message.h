@@ -94,7 +94,7 @@ enum message_type {
 											}														\
 										} else if (message_is_bson(msg)) {					     	\
 											if ((msg).m_data.m_bson) {								\
-												bson_free((msg).m_data.m_bson);						\
+												bson_release((msg).m_data.m_bson);					\
 												(msg).m_data.m_bson = NULL;							\
 											}														\
 										} else if (message_is_array(msg)) {					     	\

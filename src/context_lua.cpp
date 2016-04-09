@@ -626,7 +626,7 @@ int32_t context_lua_t::wakeup_ref_session(int32_t ref, message_t& message, bool 
 		lua_pushboolean(co, !message_is_pure_error(message));
 		lua_pushmessage(co, message);
 		lua_checkstack(co, 2);
-		lua_pushnumber(co, message.m_source);
+		lua_pushinteger(co, message.m_source);
 		lua_pushinteger(co, message.m_session);
 		int32_t newTop = lua_gettop(co);
 		resume_coroutine(co, newTop - oldTop);

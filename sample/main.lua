@@ -117,7 +117,7 @@ else
 		-- accept_sock:close()
 		-- tcp.write(accept_sock:fd(), "hello world!", function(result, error) print("tcp.write3", result, error) end)
 	end)
-	for i = 1, 70000 do
+	for i = 1, 100 do
 		local ret, con_sock = tcp.connect("127.0.0.1", 8801)
 		if ret then
 			connecSockets[#connecSockets+1] = con_sock
@@ -142,6 +142,8 @@ else
 	end
 	sock:close()
 end
+
+timer.sleep(100)
 
 
 do return end

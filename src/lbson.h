@@ -6,7 +6,7 @@
 #define BSON_METATABLE	"bson"
 
 typedef struct bson {
-	bool extract;
+	bool extract; //whether extract to lua table
 	int size;
 	int cap;
 	uint8_t *ptr;
@@ -14,7 +14,7 @@ typedef struct bson {
 } bson_t;
 
 extern void* create_bson(bson_t* bson_ptr, lua_State* L);
-extern bson_t* bson_new(bool extract);
+extern bson_t* bson_new(void* ud, bool extract);
 extern void bson_release(bson_t* bson_ptr);
 extern bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx);
 extern bool bson_decode(bson_t* bson_ptr, lua_State *L);

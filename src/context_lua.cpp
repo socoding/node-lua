@@ -336,11 +336,12 @@ int32_t context_lua_t::yielding_finalize(lua_State *root_coro, int32_t status)
 
 int32_t context_lua_t::common_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
-	if (!lua_toboolean(L, -4) && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
-		context_lua_t::lua_throw(L, -3);
+	int32_t old_top = (int32_t)ctx;
+	if (!lua_toboolean(L, old_top + 1) && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
+		context_lua_t::lua_throw(L, old_top + 2);
 	}
 	lua_pop(L, 2); //pop out two useless arguments
-	return 2;
+	return lua_gettop(L) - old_top;
 }
 
 int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_finalize_t fnz, void* fnz_ud, lua_KFunction yieldk, int64_t timeout)
@@ -354,15 +355,16 @@ int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_
 	lctx->m_shared->m_yielding_status = UV_OK;
 	lctx->m_shared->m_yielding_timeout = timeout;
 	if ((stacks = lua_checkstack(L, LUA_MINSTACK)) && lua_yieldable(L)) { /* reserve LUA_MINSTACK stack for resume result */
-		return lua_yieldk(L, 0, 0, yieldk); /* n(0) result to yield and ctx(0) is not allowed */
+		return lua_yieldk(L, 0, (lua_KContext)lua_gettop(L), yieldk);
 	} else {
 		if (stacks) { /* stack enough, but not yield-able */
 			lctx->yielding_finalize(NULL, NL_EYIELD);
+			int32_t top = lua_gettop(L);
 			lua_pushboolean(L, 0);
 			lua_pushinteger(L, NL_EYIELD);
 			lua_pushnil(L);
 			lua_pushnil(L);
-			return (yieldk == NULL) ? 4 : yieldk(L, LUA_YIELD, 0);
+			return (yieldk == NULL) ? 4 : yieldk(L, LUA_YIELD, (lua_KContext)top);
 		} else { /* error jump directly */
 			lctx->yielding_finalize(NULL, NL_ESTACKLESS);
 			return luaL_error(L, "attempt to yield across a stack-less coroutine");
@@ -563,6 +565,7 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 	case ARRAY:
 		array = message_array(message);
 		if (array != NULL && array->m_count > 0) {
+			lua_checkstack(L, array->m_count);
 			for (int32_t i = 0; i < array->m_count; ++i) { //extract them
 				lua_pushmessage(L, array->m_array[i]);
 			}
@@ -619,8 +622,10 @@ int32_t context_lua_t::wakeup_ref_session(int32_t ref, message_t& message, bool 
 			lua_free_ref_session(m_lstate, ref);
 		}
 		int32_t oldTop = lua_gettop(m_lstate);
+		lua_checkstack(co, 2);
 		lua_pushboolean(co, !message_is_pure_error(message));
 		lua_pushmessage(co, message);
+		lua_checkstack(co, 2);
 		lua_pushnumber(co, message.m_source);
 		lua_pushinteger(co, message.m_session);
 		int32_t newTop = lua_gettop(m_lstate);
@@ -852,7 +857,8 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message)
 {
 	buffer_t* buffer;
-	int32_t* bson;
+	bson_t* bson_ptr;
+	int32_t* bson_data;
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
 		if (lua_isinteger(L, idx)) {
@@ -863,99 +869,98 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 			message.m_data.m_number = (double)lua_tonumber(L, idx);
 		}
 		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		return 1;
 	case LUA_TSTRING:
 		message.m_type = MAKE_MESSAGE_TYPE(msg_type, STRING);
-		message.m_data.m_string = (char*)lua_tostring(L, idx);
+		message.m_data.m_string = nl_strdup(lua_tostring(L, idx));
 		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		return 1;
 	case LUA_TBOOLEAN:
 		message.m_type = MAKE_MESSAGE_TYPE(msg_type, TBOOLEAN);
 		message.m_data.m_bool = (bool)lua_toboolean(L, idx);
 		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		return 1;
 	case LUA_TNIL:
 		message.m_type = MAKE_MESSAGE_TYPE(msg_type, NIL);
 		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		return 1;
 	case LUA_TUSERDATA:
 		buffer = (buffer_t*)luaL_testudata(L, idx, BUFFER_METATABLE);
 		if (buffer) {
 			message.m_type = MAKE_MESSAGE_TYPE(msg_type, BUFFER);
-			message.m_data.m_buffer = *buffer;
+			message.m_data.m_buffer = buffer_grab(*buffer);
 			message.m_source = lua_get_context_handle(L);
-			return UV_OK;
+			return 1;
 		}
-		//to be fix : bson, array
-		//bson = (int32_t*)luaL_testudata(L, idx, BSON_METATABLE);
-		//if (bson) {
-		//	message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
-		//	message.m_data.m_bson = (bson_t*)bson; //temporary store the pointer here, which is not illegal.
-		//	message.m_source = lua_get_context_handle(L);
-		//	return UV_OK;
-		//}
-		return NL_ETRANSTYPE;
+		bson_data = (int32_t*)luaL_testudata(L, idx, BSON_METATABLE);
+		if (bson_data) {
+			message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
+			message.m_data.m_bson = bson_new(bson_data, false);
+			message.m_source = lua_get_context_handle(L);
+			return 1;
+		}
+		lua_pushstring(L, "transfer data type not supported");
+		return 0;
 	case LUA_TLIGHTUSERDATA:
 		message.m_type = MAKE_MESSAGE_TYPE(msg_type, USERDATA);
 		message.m_data.m_userdata = (void*)lua_touserdata(L, idx);
 		message.m_source = lua_get_context_handle(L);
-		return UV_OK;
+		return 1;
+	case LUA_TTABLE:
+		message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
+		message.m_data.m_bson = bson_new(NULL, true);
+		message.m_source = lua_get_context_handle(L);
+		return bson_encode(message.m_data.m_bson, L, idx) ? 1 : 0;
 	default:
-		return NL_ETRANSTYPE;
+		lua_pushstring(L, "transfer data type not supported");
+		return 0;
 	}
 }
 
-int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t handle, int32_t session, uint32_t msg_type)
+int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t count, uint32_t msg_type, message_t& message)
 {
-	bool ret = false;
-	nil_t nil;
-	buffer_t* buffer;
-	context_t* ctx = lua_get_context(L);
-	switch (lua_type(L, idx)) {
-	case LUA_TNUMBER:
-		if (lua_isinteger(L, idx)) {
-			ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (int64_t)lua_tointeger(L, idx));
-		} else {
-			ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (double)lua_tonumber(L, idx));
+	if (count <= 1) {
+		return context_check_message(L, idx, msg_type, message);
+	}
+	message_array_t* array = message_array_create(count);
+	message.m_type = MAKE_MESSAGE_TYPE(msg_type, ARRAY);
+	message.m_data.m_array = array;
+	message.m_source = lua_get_context_handle(L);
+	for (int32_t i = 0; i < count; ++i) {
+		if (context_check_message(L, idx + i, msg_type, array->m_array[i]) == 0) {
+			return 0;
 		}
-		break;
-	case LUA_TSTRING:
-		ret = singleton_ref(node_lua_t).context_send_string_safe(handle, ctx->get_handle(), session, msg_type, lua_tostring(L, idx));
-		break;
-	case LUA_TBOOLEAN:
-		ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (bool)lua_toboolean(L, idx));
-		break;
-	case LUA_TNIL:
-		ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, nil);
-		break;
-	case LUA_TUSERDATA:
-		buffer = (buffer_t*)luaL_testudata(L, idx, BUFFER_METATABLE);
-		if (buffer) {
-			ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, *buffer);
-			break;
-		} else {
-			return NL_ETRANSTYPE;
-		}
-		//to be fix : bson, array
-	case LUA_TLIGHTUSERDATA:
-		ret = singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, msg_type, (void*)lua_touserdata(L, idx));
-		break;
-	default:
+	}
+	return 1;
+}
+
+int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t count, uint32_t handle, int32_t session, uint32_t msg_type)
+{
+	message_t message;
+	int32_t status = context_check_message(L, idx, count, msg_type, message);
+	if (status == 0) {
+		message_clean(message);
 		return NL_ETRANSTYPE;
 	}
-	return ret ? UV_OK : NL_ENOCONTEXT;
+	if (singleton_ref(node_lua_t).context_send(handle, message)) {
+		return UV_OK;
+	}
+	message_clean(message);
+	return NL_ENOCONTEXT;
 }
 
 int32_t context_lua_t::context_send(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	int32_t ret = context_send(L, 2, handle, LUA_REFNIL, CONTEXT_QUERY);
+	int32_t top = lua_gettop(L);
+	luaL_checkany(L, 2);
+	int32_t ret = context_send(L, 2, top - 1, handle, LUA_REFNIL, CONTEXT_QUERY);
 	if (ret == UV_OK) {
 		lua_pushboolean(L, 1);
 		return 1;
 	}
 	if (ret == NL_ETRANSTYPE) {
-		luaL_argerror(L, 2, common_strerror(NL_ETRANSTYPE));
+		lua_error(L);
 		return 0;
 	}
 	lua_pushboolean(L, 0);
@@ -969,14 +974,7 @@ int32_t context_lua_t::context_query_yield_finalize(lua_State *root_coro, lua_St
 		context_lua_t* lctx = context_lua_t::lua_get_context(root_coro);
 		message_t& message = lctx->get_yielding_message();
 		message.m_session = context_lua_t::lua_ref_yield_coroutine(root_coro);
-		bool ret;
-		if (message_is_string(message)) {
-			ret = singleton_ref(node_lua_t).context_send_string_safe(destination, lctx->get_handle(), message.m_session, CONTEXT_QUERY, message_string(message));
-		} else if (message_is_bson(message)) {
-
-		} else {
-			ret = singleton_ref(node_lua_t).context_send(destination, message);
-		}
+		bool ret = singleton_ref(node_lua_t).context_send(destination, message);
 		if (ret) {
 			int64_t timeout = lctx->get_yielding_timeout();
 			if (timeout > 0) {
@@ -985,47 +983,50 @@ int32_t context_lua_t::context_query_yield_finalize(lua_State *root_coro, lua_St
 			return UV_OK;
 		} else {
 			lua_free_ref_session(main_coro, message.m_session);
+			message_clean(message);
 			return NL_ENOCONTEXT;
 		}
+	} else {
+		context_lua_t* lctx = context_lua_t::lua_get_context(root_coro);
+		message_t& message = lctx->get_yielding_message();
+		message_clean(message);
 	}
 	return UV_OK;
 }
 
 int32_t context_lua_t::context_query_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
-	if (!lua_toboolean(L, -4)) {
+	int32_t old_top = (int32_t)ctx;
+	if (!lua_toboolean(L, old_top + 1)) {
 		int32_t ret = context_lua_t::lua_get_context(L)->get_yielding_status();
 		if (ret != UV_OK && ret != NL_ENOCONTEXT) {
-			context_lua_t::lua_throw(L, -3);
+			context_lua_t::lua_throw(L, old_top + 2);
 		}
 	}
 	lua_pop(L, 2); //pop two useless arguments
-	return 2;
+	return lua_gettop(L) - old_top;
 }
 
-int32_t context_lua_t::context_query(lua_State *L)
+int32_t context_lua_t::context_query(lua_State *L, bool timed_query)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
 	int32_t top = lua_gettop(L);
 	uint64_t timeout = 0;
-	int32_t callback = 0;
-	if (top >= 3) { //nonblocking
-		if (lua_isfunction(L, 3)) {
-			callback = 3;
-		} else {
-			timeout = 1000 * luaL_checknumber(L, 3);
-			if (top >= 4) {
-				luaL_checktype(L, 4, LUA_TFUNCTION);
-				callback = 4;
-			}
-		}
+	if (timed_query) {
+		timeout = 1000 * luaL_checknumber(L, 2);
+		luaL_checkany(L, 3);
+	} else {
+		luaL_checkany(L, 2);
 	}
-	if (callback > 0) {
-		lua_settop(L, callback);
-		lua_pushvalue(L, 2);
-		lua_insert(L, 1);
-		int32_t session = context_lua_t::lua_ref_callback(L, callback - 1, LUA_REFNIL, common_callback_adjust);
-		int32_t ret = context_send(L, 1, handle, session, CONTEXT_QUERY);
+	bool callback = lua_isfunction(L, -1);
+	int32_t idx = timed_query ? 3 : 2;
+	int32_t count = top - 1 - (timed_query ? 1 : 0) - (callback ? 1 : 0);
+	if (count <= 0) {
+		luaL_error(L, "no data to be sent");
+	}
+	if (callback) {
+		int32_t session = context_lua_t::lua_ref_callback(L, 0, LUA_REFNIL, common_callback_adjust);
+		int32_t ret = context_send(L, idx, count, handle, session, CONTEXT_QUERY);
 		if (ret == UV_OK) {
 			if (timeout > 0) {
 				context_lua_t::lua_ref_timer(L, session, timeout, 0, false);
@@ -1036,7 +1037,7 @@ int32_t context_lua_t::context_query(lua_State *L)
 		}
 		context_lua_t::lua_free_ref_session(L, session);
 		if (ret == NL_ETRANSTYPE) {
-			luaL_argerror(L, 2, common_strerror(NL_ETRANSTYPE));
+			lua_error(L);
 			return 0;
 		}
 		lua_pushboolean(L, 0);
@@ -1045,27 +1046,38 @@ int32_t context_lua_t::context_query(lua_State *L)
 	}
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
 	message_t& message = lctx->get_yielding_message();
-	int ret = context_check_message(L, 2, CONTEXT_QUERY, message);
-	if (ret != UV_OK) {
-		luaL_argerror(L, 2, common_strerror(ret));
+	int ret = context_check_message(L, idx, count, CONTEXT_QUERY, message);
+	if (ret == 0) {
+		message_clean(message);
+		lua_error(L);
 		return 0;
 	}
 	return lctx->lua_yield_send(L, handle, context_query_yield_finalize, NULL, context_lua_t::context_query_yield_continue, timeout);
+}
+
+int32_t context_lua_t::context_query(lua_State *L)
+{
+	return context_query(L, false);
+}
+
+int32_t context_lua_t::context_timed_query(lua_State *L)
+{
+	return context_query(L, true);
 }
 
 int32_t context_lua_t::context_reply(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
 	int32_t session = luaL_checkinteger(L, 2);
-	int32_t ret = context_send(L, 3, handle, session, CONTEXT_REPLY);
+	luaL_checkany(L, 3);
+	int32_t ret = context_send(L, 3, lua_gettop(L) - 2, handle, session, CONTEXT_REPLY);
 	if (ret == UV_OK) {
 		lua_pushboolean(L, 1);
 		return 1;
 	}
 	if (ret == NL_ETRANSTYPE) {
-		context_t* ctx = lua_get_context(L);
-		singleton_ref(node_lua_t).context_send(handle, ctx->get_handle(), session, CONTEXT_REPLY, NL_ETRANSTYPE);
-		luaL_argerror(L, 3, common_strerror(NL_ETRANSTYPE));
+		singleton_ref(node_lua_t).context_send(handle, lua_get_context_handle(L), session, CONTEXT_REPLY, NL_ETRANSTYPE);
+		lua_error(L);
 		return 0;
 	}
 	lua_pushboolean(L, 0);
@@ -1088,10 +1100,24 @@ int32_t context_lua_t::context_recv_yield_finalize(lua_State *root_coro, lua_Sta
 
 int32_t context_lua_t::context_recv_yield_continue(lua_State* L, int status, lua_KContext ctx)
 {
-	if (!lua_toboolean(L, -4) && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
-		context_lua_t::lua_throw(L, -3);
+	int32_t old_top = (int32_t)ctx;
+	bool result = lua_toboolean(L, old_top + 1);
+	if (!result && context_lua_t::lua_get_context(L)->get_yielding_status() != UV_OK) {
+		context_lua_t::lua_throw(L, old_top + 2);
 	}
-	return 4;
+	if (result) {
+		lua_rotate(L, old_top + 2, 2);
+	}
+	return lua_gettop(L) - old_top;
+}
+
+int32_t context_lua_t::context_recv_callback_adjust(lua_State* L)
+{
+	bool result = lua_toboolean(L, 1); //old_top is 0
+	if (result) {
+		lua_rotate(L, 2, 2); //push source handle and session before recved data.
+	}
+	return lua_gettop(L);
 }
 
 int32_t context_lua_t::context_recv_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat)
@@ -1110,7 +1136,7 @@ int32_t context_lua_t::context_recv(lua_State *L)
 	if (top >= 2) { //nonblocking
 		if (lua_isfunction(L, 2)) {
 			lua_settop(L, 2);
-			lctx->m_context_recv_sessions.make_nonblocking_callback(handle, L, 1);
+			lctx->m_context_recv_sessions.make_nonblocking_callback(handle, L, 0, context_recv_callback_adjust);
 			return 0;
 		}
 		if (lua_isnil(L, 2)) {
@@ -1226,6 +1252,7 @@ int luaopen_context(lua_State *L)
 			{ "thread", context_lua_t::context_thread },
 			{ "send", context_lua_t::context_send },
 			{ "query", context_lua_t::context_query },
+			{ "timed_query", context_lua_t::context_timed_query },
 			{ "reply", context_lua_t::context_reply },
 			{ "recv", context_lua_t::context_recv },
 			{ "wait", context_lua_t::context_wait },

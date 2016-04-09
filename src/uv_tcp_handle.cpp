@@ -345,7 +345,8 @@ void uv_tcp_socket_handle_t::write_read_buffer(ssize_t nread, uv_buf_t buf)
 void uv_tcp_socket_handle_t::clear_read_cached_buffers()
 {
 	buffer_release(m_read_buffer);
-	for (int i = 0; i < m_read_cached_buffers.size(); ++i) {
+	int size = m_read_cached_buffers.size();
+	for (int i = 0; i < size; ++i) {
 		buffer_release(m_read_cached_buffers.front());
 		m_read_cached_buffers.pop();
 	}
@@ -399,7 +400,8 @@ void uv_tcp_socket_handle_t::read(request_tcp_read_t& request)
 	} else {				  //non-blocking has started
 		m_has_noblocking_read = true;
 	}
-	for (int i = 0; i < m_read_cached_buffers.size(); ++i) {
+	int size = m_read_cached_buffers.size();
+	for (int i = 0; i < size; ++i) {
 		singleton_ref(node_lua_t).context_send_buffer_release(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_cached_buffers.front());
 		m_read_cached_buffers.pop();
 		if (m_blocking_read_count > 0) {

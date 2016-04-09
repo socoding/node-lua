@@ -53,11 +53,35 @@ public:
 		return false;
 	}
 	
+	FORCE_INLINE bool context_send_buffer_safe(uint32_t handle, uint32_t source, int session, int msg_type, buffer_t& buffer)
+	{
+		buffer_grab(buffer);
+		message_t msg(source, session, msg_type, buffer);
+		bool ret = context_send(handle, msg);
+		if (!ret) {
+			buffer_release(buffer);
+		}
+		return ret;
+	}
+
+	FORCE_INLINE bool context_send_buffer_safe(context_t* ctx, uint32_t source, int session, int msg_type, buffer_t& buffer)
+	{
+		buffer_grab(buffer);
+		message_t msg(source, session, msg_type, buffer);
+		bool ret = context_send(ctx, msg);
+		if (!ret) {
+			buffer_release(buffer);
+		}
+		return ret;
+	}
+
 	FORCE_INLINE bool context_send_buffer_release(uint32_t handle, uint32_t source, int session, int msg_type, buffer_t& buffer)
 	{
 		message_t msg(source, session, msg_type, buffer);
 		bool ret = context_send(handle, msg);
-		buffer_release(buffer);
+		if (!ret) {
+			buffer_release(buffer);
+		}
 		return ret;
 	}
 
@@ -65,7 +89,9 @@ public:
 	{
 		message_t msg(source, session, msg_type, buffer);
 		bool ret = context_send(ctx, msg);
-		buffer_release(buffer);
+		if (!ret) {
+			buffer_release(buffer);
+		}
 		return ret;
 	}
 

@@ -53,14 +53,12 @@ bool node_lua_t::context_send(context_t* ctx, message_t& msg)
 {
 	if (ctx->get_handle() != 0 && (ctx->is_inited() || ctx->get_handle() == msg.m_source)) {
 		bool processing;
-		message_buffer_grab(msg);
 		if (ctx->push_message(msg, processing)) {
 			if (!processing) {
 				m_worker_mgr->push_context(ctx);
 			}
 			return true;
 		}
-		message_buffer_release(msg);
 	}
 	return false;
 }

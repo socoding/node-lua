@@ -20,7 +20,7 @@ enum data_type {
 	BUFFER			= 5, //need to be freed
 	STRING			= 6, //need to be freed
 	BSON			= 7, //need to be freed
-	ARRAY			= 8, //need to be freed[warning]
+	ARRAY			= 8, //need to be freed
 	TERROR			= 9  //
 };
 
@@ -161,10 +161,10 @@ public:
 //message array api
 struct message_array_t {
 	uint32_t m_count;
-	message_t m_array[0];
+	message_t m_array[1];
 };
 
-extern message_array_t* message_array_create(message_t* messages, uint32_t count);
+extern message_array_t* message_array_create(uint32_t count);
 extern  void message_array_release(message_array_t* array);
 
 #endif

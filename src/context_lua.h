@@ -133,11 +133,14 @@ public:
 
 	/********** the following are context lua api **********/
 	static int32_t context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message);
-	static int32_t context_send(lua_State *L, int32_t idx, uint32_t handle, int32_t session, uint32_t msg_type);
+	static int32_t context_check_message(lua_State *L, int32_t idx, uint32_t count, uint32_t msg_type, message_t& message);
+	static int32_t context_send(lua_State *L, int32_t idx, uint32_t count, uint32_t handle, int32_t session, uint32_t msg_type);
+	static int32_t context_query(lua_State *L, bool timed_query);
 	static int32_t context_query_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t context_query_yield_continue(lua_State* L, int status, lua_KContext ctx);
 	static int32_t context_recv_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t context_recv_yield_continue(lua_State* L, int status, lua_KContext ctx);
+	static int32_t context_recv_callback_adjust(lua_State* L);
 	static int32_t context_recv_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat);
 	static int32_t context_wait_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t context_wait_yield_continue(lua_State* L, int status, lua_KContext ctx);
@@ -149,6 +152,7 @@ public:
 	static int32_t context_destroy(lua_State *L);
 	static int32_t context_send(lua_State *L);
 	static int32_t context_query(lua_State *L);
+	static int32_t context_timed_query(lua_State *L);
 	static int32_t context_reply(lua_State *L);
 	static int32_t context_recv(lua_State *L);
 	static int32_t context_wait(lua_State *L);

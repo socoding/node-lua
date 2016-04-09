@@ -1062,7 +1062,8 @@ int32_t lua_tcp_socket_handle_t::close(lua_State* L)
 
 void lua_tcp_socket_handle_t::release_read_overflow_buffers()
 {
-	for (int32_t i = 0; i < m_read_overflow_buffers.size(); ++i) {
+	int32_t size = m_read_overflow_buffers.size();
+	for (int32_t i = 0; i < size; ++i) {
 		buffer_release(m_read_overflow_buffers.front());
 		m_read_overflow_buffers.pop();
 	}

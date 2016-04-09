@@ -27,23 +27,30 @@
 	
 14. tcp.set_nodelay(socket, enable)
 
-15. result, error = context.send(handle, data) --QUERY
+15. result, error = context.send(handle, data1, data2, ...) --QUERY
 
-16. result, query_data = context.query(handle, data[, timeout [, query_callback(result, query_data, handle, data[, timeout])]]) --QUERY(real query)
+16. result, query_data1, query_data2, ... = context.query(handle, data1, data2, ... [, query_callback(result, query_data1, query_data2, ...)]]) --QUERY(real query)
 	--query_callback is a once callback, blocking if callback is nil.
-17. result, error = context.reply(handle, session, data) --REPLY
 
-18. result, data, recv_handle, session = context.recv(handle[, timeout])
+17. result, query_data1, query_data2, ... = context.timed_query(handle, timeout, data1, data2, ... [, query_callback(result, query_data1, query_data2, ...)]]) --QUERY(real query)
+	--query_callback is a once callback, blocking if callback is nil.
+	
+18. result, error = context.reply(handle, session, data1, data2, ...) --REPLY
+
+19. result, recv_handle, session, data1, data2, ... = context.recv(handle[, timeout])
 	--recv_callback is a continues callback, blocking if callback is nil.
-19. result, data, recv_handle, session = context.recv(handle[, recv_callback(result, data, recv_handle, session, handle)])
+
+20. result, recv_handle, session, data1, data2, ... = context.recv(handle[, recv_callback(result, recv_handle, session, data1, data2, ... )])
 	--recv_callback is a continues callback, blocking if callback is nil.
-20. result, error = context.wait(handle[, timeout[, callback(result, error, handle[, timeout])]])
+
+21. result, error = context.wait(handle[, timeout[, callback(result, error, handle[, timeout])]])
 	--connect_callback is a once callback, blocking if callback is nil.
-21. timer.sleep(seconds)
 
-22.	timer.timeout(seconds, ..., void (*callback)(...))
+22. timer.sleep(seconds)
 
-23.	timer.loop(interval, repeat_time, ..., void (*callback)(...))
+23.	timer.timeout(seconds, ..., void (*callback)(...))
+
+24.	timer.loop(interval, repeat_time, ..., void (*callback)(...))
 
 ----------------------------------------------------------------------------------------------------------------------------
 

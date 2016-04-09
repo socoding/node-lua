@@ -1198,7 +1198,6 @@ LUAMOD_API int luaopen_bson(lua_State *L) {
 	return 1;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void* create_bson(bson_t* bson_ptr, lua_State* L) {
@@ -1208,9 +1207,22 @@ void* create_bson(bson_t* bson_ptr, lua_State* L) {
 	return ud;
 }
 
-bson_t* bson_new(bool extract) {
+bson_t* bson_new(void* ud, bool extract) {
 	bson_t* bson_ptr = (bson_t*)nl_malloc(sizeof(*bson_ptr));
 	bson_create(bson_ptr, extract);
+	if (ud != NULL) {
+		const uint8_t * b = (const uint8_t *)ud;
+		int len = get_length(b);
+		bson_ptr->size = len;
+		if (len <= DEFAULT_CAP) {
+			bson_ptr->ptr = bson_ptr->buffer;
+			bson_ptr->cap = DEFAULT_CAP;
+		} else {
+			bson_ptr->ptr = (uint8_t*)nl_malloc(len);
+			bson_ptr->cap = len;
+		}
+		memcpy(bson_ptr->ptr, b, len);
+	}
 	return bson_ptr;
 }
 
@@ -1223,8 +1235,7 @@ static int bson_encode_safe(lua_State *L) {
 	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 2); //arg1: table, arg2: bson_t ptr.
 	lua_settop(L, 1);
 	pack_dict(L, bson_ptr, false, 0);
-	lua_pushlightuserdata(L, bson_ptr);
-	return 1;
+	return 0;
 }
 
 bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx) {
@@ -1234,7 +1245,7 @@ bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx) {
 		lua_pushcfunction(L, bson_encode_safe);
 		lua_pushvalue(L, idx);
 		lua_pushlightuserdata(L, bson_ptr);
-		if (lua_pcall(L, 2, 1, NULL) == LUA_OK) {
+		if (lua_pcall(L, 2, LUA_MULTRET, NULL) == LUA_OK) {
 			return true;
 		}
 		return false;
@@ -1247,7 +1258,7 @@ bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx) {
 static int bson_decode_safe(lua_State *L) {
 	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 1); //arg1: bson_t ptr.
 	lua_settop(L, 1);
-	const uint8_t * b = (const uint8_t *)bson_ptr->ptr;
+	const uint8_t * b = (const uint8_t*)bson_ptr->ptr;
 	int32_t len = get_length(b);
 	struct bson_reader br = { b, len };
 	unpack_dict(L, &br, false);
@@ -1258,6 +1269,6 @@ bool bson_decode(bson_t* bson_ptr, lua_State *L) {
 	lua_checkstack(L, 3);
 	lua_pushcfunction(L, bson_decode_safe);
 	lua_pushlightuserdata(L, bson_ptr);
-	return lua_pcall(L, 1, 1, NULL) == LUA_OK;
+	return lua_pcall(L, 1, LUA_MULTRET, NULL) == LUA_OK;
 }
 

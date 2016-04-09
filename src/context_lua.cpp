@@ -942,6 +942,7 @@ int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t count, u
 		message_clean(message);
 		return NL_ETRANSTYPE;
 	}
+	message.m_session = session;
 	if (singleton_ref(node_lua_t).context_send(handle, message)) {
 		return UV_OK;
 	}

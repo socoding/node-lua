@@ -72,7 +72,15 @@ print("value", value1, value2)]]
 
 
 
--- local handle = context.create("test.lua")
+local handle = context.create("sample/test.lua")
+
+print("main service create sub service:", handle)
+
+context.send(handle, 1, 2, 3, 4, nil, true, false, "hello", { 1, 2, 3, 4, nil, true, false, ["main"] = 1, })
+context.send(handle, 1, 2, 3, 4, nil, true, false, "hello", { 1, 2, 3, 4, nil, true, false, ["main"] = 1, })
+print("context.query", context.timed_query(handle, 0.5, "hello world"))
+
+do return end
 
 -- print(context.self, context.parent, handle)
 
@@ -143,7 +151,7 @@ else
 	sock:close()
 end
 
-timer.sleep(100)
+--timer.sleep(1)
 
 
 do return end

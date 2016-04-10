@@ -7,7 +7,7 @@
 #if defined (CC_MSVC)
 #define uv_tcp_fd(handle) ((handle)->socket)
 #elif defined(__APPLE__)
-int uv___stream_fd(uv_stream_t* handle);
+extern "C" int uv___stream_fd(uv_stream_t* handle);
 #define uv_tcp_fd(handle) (uv___stream_fd((uv_stream_t*) (handle)))
 #else
 #define uv_tcp_fd(handle) ((handle)->io_watcher.fd)

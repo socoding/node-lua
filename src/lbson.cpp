@@ -1,5 +1,10 @@
 #include <time.h>
+#define __STDC_LIMIT_MACROS
 #include "lbson.h"
+#ifndef _WIN32
+# include <unistd.h>
+#endif
+
 
 #define MAX_NUMBER 1024
 // avoid circular reference while encodeing

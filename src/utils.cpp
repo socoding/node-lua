@@ -51,7 +51,11 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 		sockaddr_in6 sock6;
 	} sock_name;
 	int sock_len = sizeof(sock_name);
+#ifdef _WIN32
 	int result = local ? getsockname(sock, (sockaddr*)&sock_name, &sock_len) : getpeername(sock, (sockaddr*)&sock_name, &sock_len);
+#else
+	int result = local ? getsockname(sock, (sockaddr*)&sock_name, (socklen_t*)&sock_len) : getpeername(sock, (sockaddr*)&sock_name, (socklen_t*)&sock_len);
+#endif
 	if (result != 0)
 		return false;
 	uint16_t family = ((sockaddr*)&sock_name)->sa_family;

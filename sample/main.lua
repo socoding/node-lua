@@ -79,6 +79,7 @@ print("main service create sub service:", handle)
 context.send(handle, 1, 2, 3, 4, nil, true, false, "hello", { 1, 2, 3, 4, nil, true, false, ["main"] = 1, })
 context.send(handle, 1, 2, 3, 4, nil, true, false, "hello", { 1, 2, 3, 4, nil, true, false, ["main"] = 1, })
 print("context.query", context.timed_query(handle, 0.5, "hello world"))
+context.destroy(handle)
 
 do return end
 

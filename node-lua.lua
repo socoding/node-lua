@@ -68,6 +68,8 @@ io 阻塞非阻塞？ setvbuf
 {"__tostring", f_tostring},
 
 热更新
+优化lua shared proto 锁,不使用原子锁?
+udp tty 在线调试
 
 ｗａｒｎｉｎｇ　编译lua的共享dll库,需要在编译时开启 LUA_BUILD_AS_DLL 这个宏(以便在vc下边下编译时导出符号) (外部模块库需要同时开启 LUA_CORE 这个宏,以便使用 LUAMOD_API 这个宏来导出luaopen接口)
 ｗａｒｎｉｎｇ　使用lua的dll扩展库,需要把lua整个打成dll动态库,主进程和其它扩展库都需要使用动态链接lua库的方式来编译或生成,不然lua的版本校验将不会通过(动态库实际使用lua.dll,编译和链接时使用lua.lib)

@@ -1190,7 +1190,7 @@ static int luaL_loadfilex_clone (lua_State *L, const char *filename, const char 
    return LUA_OK;
 }
 
-/* need to wait for all threads to be terminated */
+/* warning: need to wait for all threads to be terminated in muti-thread situation */
 LUALIB_API int luaL_closesharedclosure() {
 	int i;
 	shared_lstate_t* sl;
@@ -1202,8 +1202,7 @@ LUALIB_API int luaL_closesharedclosure() {
 			lua_close(sl->L);
 		}
 	}
-	//TO BE FIXED!!! MUTI-THREAD PROBLEM!
-	printf("shared_lstate_count %ld\n", shared_lstate_count);
+	//printf("shared_lstate_count %ld\n", shared_lstate_count);
 	return 0;
 }
 

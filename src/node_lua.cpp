@@ -40,6 +40,7 @@ node_lua_t::node_lua_t(int argc, char* argv[], char* env[])
 	m_worker_mgr->wait();
 	m_network->stop();
 	m_network->wait();
+	context_lua_t::unload();
 }
 
 node_lua_t::~node_lua_t()

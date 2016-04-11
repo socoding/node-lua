@@ -158,6 +158,13 @@ void context_lua_t::lua_open_libs(lua_State *L)
 	lua_pop(L, 1);  /* remove _PRELOAD table */
 }
 
+void context_lua_t::unload()
+{
+#if defined(LUA_CACHELIB)
+	luaL_closesharedclosure();
+#endif
+}
+
 void context_lua_t::lua_load_env(lua_State *L, char* env[])
 {
 	lua_checkstack(L, 3);

@@ -107,7 +107,8 @@ OBJS += src/unix/linux-core.o \
 endif
 
 ifeq (freebsd,$(PLATFORM))
-ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
+# ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
+ifeq ($(shell dtrace -l >/dev/null; echo $$?),0) #modified by xdczju@sina.com
 HAVE_DTRACE ?= 1
 endif
 LDFLAGS+=-lkvm

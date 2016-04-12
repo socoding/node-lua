@@ -51,7 +51,7 @@ LIBS += dl rt
 endif
 
 ifeq (freebsd,$(PLATFORM))
-ifeq ($(shell dtrace -l 1>&2 2>/dev/null; echo $$?),0)
+ifeq ($(shell dtrace -l >/dev/null; echo $$?),0)
 HAVE_DTRACE ?= 1
 endif
 LIBS += kvm pthread

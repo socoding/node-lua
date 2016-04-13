@@ -69,8 +69,7 @@ ifeq (openbsd,$(PLATFORM))
 LIBS += kvm
 endif
 
-## here we must include ../deps/uv/src/unix (include dtrace header file) and declare HAVE_DTRACE macro.
-## otherwise dtrace method will be undefined reference linkage. 
+## !!! HAVE_DTRACE not supported(undefined reference to `__dtrace_uv___tick__start' & undefined reference to `__dtrace_uv___tick__stop')
 ifeq ($(HAVE_DTRACE), 1)
 INCLUDE_PATH += ../deps/uv/src/unix
 CFLAGS += -DHAVE_DTRACE

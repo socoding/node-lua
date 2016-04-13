@@ -11,8 +11,8 @@ ROOT_PATH = $(shell pwd)
 define MAKE_PLATFORM
 	##main essential builds
 	cd deps/lua  && make $(2); cd $(ROOT_PATH)
-	cd deps/uv   && make PLATFORM=$(1); rm -f libuv.so libuv.dylib; cd $(ROOT_PATH)
-	cd src       && make PLATFORM=$(1) RELEASE=$(3); cd $(ROOT_PATH)
+	cd deps/uv   && make PLATFORM=$(1) HAVE_DTRACE=0; rm -f libuv.so libuv.dylib; cd $(ROOT_PATH)
+	cd src       && make PLATFORM=$(1) HAVE_DTRACE=0 RELEASE=$(3); cd $(ROOT_PATH)
 	##not essential builds
 	cd clib/mime && make PLATFORM=$(1) RELEASE=$(3); cd $(ROOT_PATH)
 endef

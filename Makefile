@@ -10,6 +10,7 @@ ROOT_PATH = $(shell pwd)
 
 define MAKE_PLATFORM
 	##main essential builds
+	##disable dtrace
 	cd deps/lua  && make $(2); cd $(ROOT_PATH)
 	cd deps/uv   && make PLATFORM=$(1) HAVE_DTRACE=0; rm -f libuv.so libuv.dylib; cd $(ROOT_PATH)
 	cd src       && make PLATFORM=$(1) HAVE_DTRACE=0 RELEASE=$(3); cd $(ROOT_PATH)

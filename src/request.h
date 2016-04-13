@@ -1,8 +1,7 @@
 #ifndef REQUEST_H_
 #define REQUEST_H_
 
-#include "uv.h"
-#include "lua.hpp"
+#include "common.h"
 #include "buffer.h"
 
 class uv_handle_base_t;

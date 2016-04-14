@@ -55,7 +55,7 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--read_callback is a continues callback, blocking if read_callback is nil.`*
 	
 11. `result, error = tcp.write(socket/fd, buffer_or_lstring[, send_callback(result, error, socket, buffer_or_lstring)/bool safety])`  
-	*`--write a tcp socket or directly on a tcp fd(tcp.fd()) where the socket must enable shared write in advance.`*
+	*`--write a tcp socket or directly on a tcp fd(tcp.fd()) where the socket must enable shared write in advance.`*  
     *`--send_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*
 	
 12. `tcp.set_rwopt(socket, option_table)`  
@@ -96,7 +96,7 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--send data1, data2, ... directy to context specified by handle noblocking.`*
 
 2.	`result, query_data1, ... = context.query(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])`  
-    *`--query context specified by handle with data1, data2, ... and query_data1, query_data2, ... is the queried datas.`*
+    *`--query context specified by handle with data1, data2, ... and query_data1, query_data2, ... is the queried datas.`*  
 	*`--query_callback is a once callback, blocking if query_callback is nil.`*
 
 3.	`result, query_data1, ... = context.timed_query(handle, timeout, data1[, ... [, query_callback(result, query_data1[, ...])]])`  

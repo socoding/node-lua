@@ -107,16 +107,16 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--reply session(received by context.recv) context specified by handle with data1, data2, ...`*
 
 5.	`result, recv_handle, session, recv_data1, ... = context.recv(handle[, timeout])`  
-    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*
+    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
     *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*
 	
 5.	`result, recv_handle, session, recv_data1, ... = context.recv(handle[, recv_callback(result, recv_handle, session, recv_data1, ...)])`  
-    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*
-    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*
-    *`--recv_callback is a continues callback, blocking if recv_callback is nil.`*
+    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
+    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
+    *`--recv_callback is a continues callback, blocking if recv_callback is nil.`*  
 	
 6.	`result, error = context.wait(handle[, timeout[, callback(result, error, handle[, timeout])]])`  
-    *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*
+    *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*  
     *`--callback is a once callback, blocking if callback is nil.`*
 
 7.	`error = context.strerror(errno)`  

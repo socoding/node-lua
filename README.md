@@ -120,7 +120,7 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--callback is a once callback, blocking if callback is nil.`*
 
 7.	`error = context.strerror(errno)`  
-    *`--convert error number to error string. Error number is always the next argument after **result** in most apis.`*
+    *`--convert error number to error string. Error number is always the next argument after result in most apis.`*
 
 8.	`handle = context.create(file_name[, arg1[, ...]])`  
     *`--create a new context with file_name as the context entry. arg1, arg2, ... will be the argument for the context.`*

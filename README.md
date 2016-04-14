@@ -72,25 +72,25 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--change tcp socket write shared option. Enable write shared if 'enable' is true or disable it if 'enable' is false. tcp.set_rwopt will be choked or invalid if write shared is enabled. So if you want to call both tcp.set_wshared and tcp.set_rwopt, call tcp.set_rwopt first!`*
 
 16. `tcp.local_addr(socket)`  
-	*`socket can't be a listen socket`*
+	*`--socket can't be a listen socket`*
 
 17. `tcp.remote_addr(socket)`  
-	*`socket can't be a listen socket`*
+	*`--socket can't be a listen socket`*
 
 18. `tcp.local_port(socket)`  
-	*`socket can't be a listen socket`*
+	*`--socket can't be a listen socket`*
 
 19. `tcp.remote_port(socket)`  
-	*`socket can't be a listen socket`*
+	*`--socket can't be a listen socket`*
 
 20. `tcp.close(socket)` 
-	*`close the tcp socket directly`*
+	*`--close the tcp socket directly`*
 
 21. `tcp.is_closed(socket)`  
-	*`check whether the tcp socket is closed`*
+	*`--check whether the tcp socket is closed`*
 
 22. `tcp.fd(socket)`  
-	*`get tcp socket lua fd`*
+	*`--get tcp socket lua fd`*
 
 ### context api
 1.	`result, error = context.send(handle, data1[,data2[, ...]])`  

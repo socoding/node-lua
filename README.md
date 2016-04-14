@@ -92,7 +92,7 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 	*`--get tcp socket lua fd`*  
 
 ### context api
-1.	`result, error = context.send(handle, data1[, ...])`  
+1.	`result, error = **context.send**(handle, data1[, ...])`  
     *`--send data1, data2, ... directy to context specified by handle noblocking.`*  
 
 2.	`result, query_data1, ... = context.query(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])`  

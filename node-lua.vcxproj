@@ -120,6 +120,7 @@
     <ClInclude Include="src\timer_mgr.h" />
     <ClInclude Include="src\utils.h" />
     <ClInclude Include="src\uv_handle_base.h" />
+    <ClInclude Include="src\uv_udp_handle.h" />
     <ClInclude Include="src\worker.h" />
     <ClInclude Include="src\worker_mgr.h" />
   </ItemGroup>
@@ -148,6 +149,7 @@
     <ClCompile Include="src\uv_timer_handle.cpp" />
     <ClCompile Include="src\utils.cpp" />
     <ClCompile Include="src\uv_handle_base.cpp" />
+    <ClCompile Include="src\uv_udp_handle.cpp" />
     <ClCompile Include="src\worker_mgr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

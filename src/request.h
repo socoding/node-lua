@@ -7,6 +7,7 @@
 class uv_handle_base_t;
 class uv_tcp_socket_handle_t;
 class uv_tcp_listen_handle_t;
+class uv_udp_handle_t;
 class uv_timer_handle_t;
 
 #define REQUEST_SIZE_MAX				255
@@ -92,6 +93,24 @@ struct request_tcp_write_t {
 	uint32_t m_source;   /* redundant if m_shared_write is true */
 	uint32_t m_session;
 	bool m_shared_write; /* whether m_socket_fd is valid */ 
+	REQUEST_SPARE_REGION
+};
+
+struct request_udp_open_t {
+	uint32_t m_source;
+	uint32_t m_session;
+	uint16_t m_port;
+	bool m_ipv6;
+	REQUEST_SPARE_REGION
+};
+
+struct request_udp_read_t {
+	uv_udp_handle_t *m_socket_handle;
+	bool m_switch; //true : start, false : stop.
+	REQUEST_SPARE_REGION
+};
+
+struct request_udp_write_t {
 	REQUEST_SPARE_REGION
 };
 

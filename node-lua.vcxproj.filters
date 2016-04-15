@@ -99,6 +99,9 @@
     <ClInclude Include="src\lbson.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\uv_udp_handle.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\buffer.cpp">
@@ -174,6 +177,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\message.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uv_udp_handle.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -152,3 +152,38 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     *`--make a repeated callback. The first time callback will be triggered in interval seconds and then repeated in repeat_time`*  
 
 ### buffer api
+1.	buffer = **buffer.new**([string])  
+    *`--make a buffer. buffer will be initialized as string if string is not nil.`*  
+
+2.	buffer = **buffer.new**(capacity[, string])  
+    *`--make a buffer with capacity. buffer will be initialized as string if string is not nil.`*  
+
+3.	buffer = **buffer.new**(buffer)  
+    *`--make a buffer initialized with another buffer.`*  
+
+4.	result = **buffer.append**(buffer, string/buffer1)  
+    *`--append string/buffer1 to buffer.`*  
+
+5.	split_buffer = **buffer.split**(buffer[, split_length])  
+    *`--split buffer. The front split_length bytes in buffer will be splitted out as split_buffer and the front split_length bytes will be removed from buffer. The default value for split_length is the origin buffer length.`*  
+
+6.	result = **buffer.clear**(buffer)  
+    *`--clear data in buffer.`*  
+
+7.	length = **buffer.length**(buffer)  
+    *`--return the buffer length.`*  
+
+8.	unfill = **buffer.unfill**(buffer)  
+    *`--return the unfilled(or usefull) space in buffer.`*  
+
+9.	position = **buffer.find**(buffer, string)  
+    *`--find string in buffer and return the start position found.`*  
+
+10.	string = **buffer.tostring**(buffer)  
+    *`--convert buffer to lua string. `*  
+
+11.	is_valid = **buffer.valid**(buffer)  
+    *`--check whether the buffer is valid, in other words whether the buffer is already released. `*  
+
+12.	**buffer.release**(buffer)  
+    *`--release the buffer. There may be some unexpected error if you operate on a released buffer, but it won't crash the program. `*  

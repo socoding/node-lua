@@ -68,7 +68,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 14.	thread = **context.thread**()  
     *`--return the running thread index.`*  
+
 ### tcp api  
+
 1.	result, listen_socket = **tcp.listen**(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])  
 	*`--listen on a ipv4 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
@@ -138,7 +140,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 22. fd = **tcp.fd**(socket)  
 	*`--get tcp socket lua fd`*
+
 ### udp api  
+
 1.	result, socket = **udp.open**(addr, port, [callback(result, socket, addr, port)])  
 	*`--open a udp socket on a ipv4 address.`*  
     *`--callback is a once callback, blocking if callback is nil.`*  
@@ -173,7 +177,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 10. fd = **udp.fd**(socket)  
 	*`--get udp socket lua fd`*  
+
 ### timer api	
+
 1.	**timer.sleep**(seconds)  
     *`--blocking for seconds.`*  
 
@@ -182,7 +188,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 3.	**timer.loop**(interval, repeat_time, ..., callback(...))  
     *`--make a repeated callback. The first time callback will be triggered in interval seconds and then repeated in repeat_time`*  
+
 ### buffer api  
+
 1.	buffer = **buffer.new**([string])  
     *`--make a buffer. buffer will be initialized as string if string is not nil.`*  
 

@@ -158,24 +158,21 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 4. result, error = **udp.write6**(socket/fd, buffer/string, remote_addr, remote_port[, write_callback(result, error, socket/fd, buffer/string, remote_addr, remote_port)/bool safety])  
 	*`--write a udp socket or directly on a udp fd(udp.fd()) where the socket must enable shared write in advance(call udp.set_wshared(socket, true)).`*  
     *`--write_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*  
-
-5. result, buffer, remote_addr, remote_port, remote_ipv6  = **udp.read**(socket[, timeout])  
-	*`--udp max datagram read pack size: SHARED_READ_BUFFER_SIZE(64 * 1024).`*  
 	
-6. result, buffer, remote_addr, remote_port, remote_ipv6 = **udp.read**(socket[, read_callback(result, buffer, remote_addr, remote_port, remote_ipv6, socket)])  
+5. result, buffer, remote_addr, remote_port, remote_ipv6 = **udp.read**(socket, read_callback(result, buffer, remote_addr, remote_port, remote_ipv6, socket))  
 	*`--udp max datagram read pack size: SHARED_READ_BUFFER_SIZE(64 * 1024).`*  
     *`--read_callback is a continues callback, blocking if read_callback is nil.`*  
 
-7. **udp.set_wshared**(socket, enable)  
+6. **udp.set_wshared**(socket, enable)  
     *`--change udp socket write shared option. Enable write shared if 'enable' is true or disable it if 'enable' is false.`*  
 
-8. **udp.close**(socket) 
+7. **udp.close**(socket) 
 	*`--close the udp socket directly.`*  
 
-9. is_closed = **udp.is_closed**(socket)  
+8. is_closed = **udp.is_closed**(socket)  
 	*`--check whether the udp socket is closed.`*  
 
-10. fd = **udp.fd**(socket)  
+9. fd = **udp.fd**(socket)  
 	*`--get udp socket lua fd`*  
 
 ### timer api	

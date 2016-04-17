@@ -19,9 +19,56 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     make [release]  #add release to build for release versions
 	make install
 
-## usefull api
-### tcp api
+## usefull api  
+### context api  
+1.	**context.self**  
+    *`--the running context id.`*  
 
+2.	**context.parent**  
+    *`--the running context parent id.`*  
+
+3.	**context.winos**  
+    *`--whether the running system is windows.`*  
+
+4.	handle = **context.create**(file_name[, arg1[, ...]])  
+    *`--create a new context with file_name as the context entry. arg1, arg2, ... will be the argument for the context.`*  
+
+5.	handle = **context.destroy**([handle[, message]])  
+    *`--destroy a context specified by handle with a string message. You'll kill the context itself if handle is nil and message is a optional argument.`*  
+
+6.	result, error = **context.send**(handle, data1[, ...])  
+    *`--send data1, data2, ... directy to context specified by handle noblocking.`*  
+
+7.	result, query_data1, ... = **context.query**(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])  
+    *`--query context specified by handle with data1, data2, ... and query_data1, query_data2, ... is the queried datas.`*  
+	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
+
+8.	result, query_data1, ... = **context.timed_query**(handle, timeout, data1[, ... [, query_callback(result, query_data1[, ...])]])  
+    *`--query context specified by handle with data1, data2, ... in timeout seconds`*  
+	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
+	
+9.	result, error = **context.reply**(handle, session, data1[, ...])  
+    *`--reply session(received by context.recv) context specified by handle with data1, data2, ...`*  
+
+10.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, timeout])  
+    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
+    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
+	
+11.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, recv_callback(result, recv_handle, session, recv_data1, ...)])  
+    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
+    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
+    *`--recv_callback is a continues callback, blocking if recv_callback is nil.`*  
+	
+12.	result, error = **context.wait**(handle[, timeout[, callback(result, error, handle[, timeout])]])  
+    *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*  
+    *`--callback is a once callback, blocking if callback is nil.`*  
+
+13.	error = **context.strerror**(errno)  
+    *`--convert error number to error string. Error number is always the next argument after result in most apis.`*  
+
+14.	thread = **context.thread**()  
+    *`--return the running thread index.`*  
+### tcp api  
 1.	result, listen_socket = **tcp.listen**(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])  
 	*`--listen on a ipv4 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
@@ -90,9 +137,8 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 	*`--check whether the tcp socket is closed.`*  
 
 22. fd = **tcp.fd**(socket)  
-	*`--get tcp socket lua fd`*  
-### udp api
-
+	*`--get tcp socket lua fd`*
+### udp api  
 1.	result, socket = **udp.open**(addr, port, [callback(result, socket, addr, port)])  
 	*`--open a udp socket on a ipv4 address.`*  
     *`--callback is a once callback, blocking if callback is nil.`*  
@@ -127,56 +173,6 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 10. fd = **udp.fd**(socket)  
 	*`--get udp socket lua fd`*  
-
-### context api
-1.	result, error = **context.send**(handle, data1[, ...])  
-    *`--send data1, data2, ... directy to context specified by handle noblocking.`*  
-
-2.	result, query_data1, ... = **context.query**(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])  
-    *`--query context specified by handle with data1, data2, ... and query_data1, query_data2, ... is the queried datas.`*  
-	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
-
-3.	result, query_data1, ... = **context.timed_query**(handle, timeout, data1[, ... [, query_callback(result, query_data1[, ...])]])  
-    *`--query context specified by handle with data1, data2, ... in timeout seconds`*  
-	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
-	
-4.	result, error = **context.reply**(handle, session, data1[, ...])  
-    *`--reply session(received by context.recv) context specified by handle with data1, data2, ...`*  
-
-5.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, timeout])  
-    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
-    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
-	
-6.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, recv_callback(result, recv_handle, session, recv_data1, ...)])  
-    *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
-    *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
-    *`--recv_callback is a continues callback, blocking if recv_callback is nil.`*  
-	
-7.	result, error = **context.wait**(handle[, timeout[, callback(result, error, handle[, timeout])]])  
-    *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*  
-    *`--callback is a once callback, blocking if callback is nil.`*  
-
-8.	error = **context.strerror**(errno)  
-    *`--convert error number to error string. Error number is always the next argument after result in most apis.`*  
-
-9.	handle = **context.create**(file_name[, arg1[, ...]])  
-    *`--create a new context with file_name as the context entry. arg1, arg2, ... will be the argument for the context.`*  
-
-10.	handle = **context.destroy**([handle[, message]])  
-    *`--destroy a context specified by handle with a string message. You'll kill the context itself if handle is nil and message is a optional argument.`*  
-
-11.	thread = **context.thread**()  
-    *`--return the running thread index.`*  
-
-12.	**context.winos**  
-    *`--whether the running system is windows.`*  
-
-13.	**context.self**  
-    *`--the running context id.`*  
-
-14.	**context.parent**  
-    *`--the running context parent id.`*  
-
 ### timer api	
 1.	**timer.sleep**(seconds)  
     *`--blocking for seconds.`*  
@@ -186,8 +182,7 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 3.	**timer.loop**(interval, repeat_time, ..., callback(...))  
     *`--make a repeated callback. The first time callback will be triggered in interval seconds and then repeated in repeat_time`*  
-
-### buffer api
+### buffer api  
 1.	buffer = **buffer.new**([string])  
     *`--make a buffer. buffer will be initialized as string if string is not nil.`*  
 

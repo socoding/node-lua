@@ -55,9 +55,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 10. result, buffer = **tcp.read**(socket[, read_callback(result, buffer, socket)])  
     *`--read_callback is a continues callback, blocking if read_callback is nil.`*  
 	
-11. result, error = **tcp.write**(socket/fd, buffer_or_lstring[, send_callback(result, error, socket, buffer_or_lstring)/bool safety])  
-	*`--write a tcp socket or directly on a tcp fd(tcp.fd()) where the socket must enable shared write in advance.`*  
-    *`--send_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*  
+11. result, error = **tcp.write**(socket/fd, buffer/string[, write_callback(result, error, socket/fd, buffer/string)/bool safety])  
+	*`--write a tcp socket or directly on a tcp fd(tcp.fd()) where the socket must enable shared write in advance(call tcp.set_wshared(socket, true)).`*  
+    *`--write_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*  
 	
 12. **tcp.set_rwopt**(socket, option_table)  
     *`--set tcp_socket read and write options --e.g. { "read_head_endian" = "L", "read_head_bytes" = 2, "read_head_max" = 65535, "write_head_endian" = "L", "write_head_bytes" = 2, "write_head_max" = 65535,}`*  
@@ -91,6 +91,42 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 
 22. fd = **tcp.fd**(socket)  
 	*`--get tcp socket lua fd`*  
+### udp api
+
+1.	result, socket = **udp.open**(addr, port, [callback(result, socket, addr, port)])  
+	*`--open a udp socket on a ipv4 address.`*  
+    *`--callback is a once callback, blocking if callback is nil.`*  
+
+2.	result, socket = **udp.open6**(addr, port, [callback(result, socket, addr, port)])  
+	*`--open a udp socket on a ipv6 address.`*  
+    *`--callback is a once callback, blocking if callback is nil.`*  
+
+3. result, error = **udp.write**(socket/fd, buffer/string, remote_addr, remote_port[, write_callback(result, error, socket/fd, buffer/string, remote_addr, remote_port)/bool safety])  
+	*`--write a udp socket or directly on a udp fd(udp.fd()) where the socket must enable shared write in advance(call udp.set_wshared(socket, true)).`*  
+    *`--write_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*  
+
+4. result, error = **udp.write6**(socket/fd, buffer/string, remote_addr, remote_port[, write_callback(result, error, socket/fd, buffer/string, remote_addr, remote_port)/bool safety])  
+	*`--write a udp socket or directly on a udp fd(udp.fd()) where the socket must enable shared write in advance(call udp.set_wshared(socket, true)).`*  
+    *`--write_callback is a once callback and is safety assurance, blocking until buffer_or_lstring is sent only if safety is true.`*  
+
+5. result, buffer, remote_addr, remote_port, remote_ipv6  = **udp.read**(socket[, timeout])  
+	*`--udp max datagram read pack size: SHARED_READ_BUFFER_SIZE(64 * 1024).`*  
+	
+6. result, buffer, remote_addr, remote_port, remote_ipv6 = **udp.read**(socket[, read_callback(result, buffer, remote_addr, remote_port, remote_ipv6, socket)])  
+	*`--udp max datagram read pack size: SHARED_READ_BUFFER_SIZE(64 * 1024).`*  
+    *`--read_callback is a continues callback, blocking if read_callback is nil.`*  
+
+7. **udp.set_wshared**(socket, enable)  
+    *`--change udp socket write shared option. Enable write shared if 'enable' is true or disable it if 'enable' is false.`*  
+
+8. **udp.close**(socket) 
+	*`--close the udp socket directly.`*  
+
+9. is_closed = **udp.is_closed**(socket)  
+	*`--check whether the udp socket is closed.`*  
+
+10. fd = **udp.fd**(socket)  
+	*`--get udp socket lua fd`*  
 
 ### context api
 1.	result, error = **context.send**(handle, data1[, ...])  

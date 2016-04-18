@@ -89,7 +89,8 @@ int32_t lua_udp_handle_t::_open(lua_State* L, bool ipv6)
 	size_t host_len;
 	uint16_t port;
 	int32_t callback = false;
-	if (!lua_isfunction(L, 1)) {
+	int32_t top = lua_gettop(L);
+	if (!lua_isfunction(L, 1) && top > 0) {
 		host = luaL_checklstring(L, 1, &host_len);
 		port = luaL_checkunsigned(L, 2);
 		if (host_len + 1 > REQUEST_SPARE_SIZE(request_udp_open_t)) {
@@ -103,7 +104,7 @@ int32_t lua_udp_handle_t::_open(lua_State* L, bool ipv6)
 		host = !ipv6 ? "0.0.0.0" : "::";
 		host_len = !ipv6 ? 7 : 2;
 		port = 0;
-		callback = 1;
+		callback = top > 0 ? 1 : 0;
 	}
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
 	request_t& request = lctx->get_yielding_request();
@@ -274,6 +275,9 @@ int32_t lua_udp_handle_t::close(lua_State* L)
 {
 	lua_udp_handle_t* socket = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
 	if (!socket->is_closed()) {
+		context_lua_t* lctx = context_lua_t::lua_get_context(L);
+		/* The message will close the nonblocking lua ref */
+		singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_UDP_CLOSING, NL_EUDPSCLOSED);
 		socket->_close();
 		lua_pushboolean(L, 1);
 	} else {
@@ -312,4 +316,50 @@ int32_t lua_udp_handle_t::get_fd(lua_State* L)
 		return 1;
 	}
 	return 0;
+}
+
+int32_t lua_udp_handle_t::wakeup_open(lua_State* L, message_t& message)
+{
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+	if (!lctx->wakeup_ref_session(message.m_session, message, true)) {
+		if (message_is_userdata(message)) {
+			close_uv_handle((uv_handle_base_t*)message_userdata(message));
+		}
+		return 0;
+	}
+	return 1;
+}
+
+int32_t lua_udp_handle_t::wakeup_read(lua_State* L, message_t& message)
+{
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+	lua_udp_handle_t* socket = (lua_udp_handle_t*)get_lua_handle(L, message.m_session, SOCKET_SET);
+	if (socket) {
+		if (!socket->is_closed()) {
+			return lctx->wakeup_ref_session(socket->m_nonblocking_ref, message, false);
+		} else if (socket->m_nonblocking_ref != LUA_REFNIL) { /* udp socket is already closed */
+			context_lua_t::lua_free_ref_session(L, socket->m_nonblocking_ref);
+			socket->m_nonblocking_ref = LUA_REFNIL;
+			return 0;
+		}
+	}
+	return 0;
+}
+
+int luaopen_udp(lua_State *L)
+{
+	luaL_Reg l[] = {
+			{ "open", lua_udp_handle_t::open },
+			{ "open6", lua_udp_handle_t::open6 },
+			{ "write", lua_udp_handle_t::write },
+			{ "write6", lua_udp_handle_t::write6 },
+			{ "read", lua_udp_handle_t::read },
+			{ "set_wshared", lua_udp_handle_t::set_wshared },
+			{ "close", lua_udp_handle_t::close },
+			{ "is_closed", lua_udp_handle_t::udp_is_closed },
+			{ "fd", lua_udp_handle_t::get_fd },
+			{ NULL, NULL },
+	};
+	luaL_newlib(L, l);
+	return 1;
 }

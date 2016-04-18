@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "message.h"
 #include "uv_tcp_handle.h"
+#include "uv_udp_handle.h"
 #include "uv_timer_handle.h"
 #include "network.h"
 #include "node_lua.h"
@@ -135,6 +136,21 @@ void network_t::request_tcp_write(request_tcp_write_t& request)
 	uv_tcp_socket_handle_t::write(request);
 }
 
+void network_t::request_udp_open(request_udp_open_t& request)
+{
+	(new uv_udp_handle_t(m_uv_loop, request.m_source))->open(request);
+}
+
+void network_t::request_udp_write(request_udp_write_t& request)
+{
+	uv_udp_handle_t::write(request);
+}
+
+void network_t::request_udp_read(request_udp_read_t& request)
+{
+	request.m_socket_handle->read(request);
+}
+
 void network_t::request_handle_option(request_handle_option_t& request)
 {
 	request.m_handle->set_option(request.m_option_type, REQUEST_SPARE_PTR(request));
@@ -214,6 +230,15 @@ void network_t::process_request(request_t& request)
 		break;
 	case REQUEST_TCP_READ:
 		request_tcp_read(request.m_tcp_read);
+		break;
+	case REQUEST_UDP_OPEN:
+		request_udp_open(request.m_udp_open);
+		break;
+	case REQUEST_UDP_WRITE:
+		request_udp_write(request.m_udp_write);
+		break;
+	case REQUEST_UDP_READ:
+		request_udp_read(request.m_udp_read);
 		break;
 	case REQUEST_HANDLE_OPTION:
 		request_handle_option(request.m_handle_option);

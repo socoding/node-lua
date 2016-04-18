@@ -99,8 +99,12 @@ private:
 	void response_tcp_connect(message_t& response);
 	void response_tcp_write(message_t& response);
 	void response_tcp_read(message_t& response);
-	void response_handle_close(message_t& response);
 	void response_tcp_closing(message_t& response);
+	void response_udp_open(message_t& response);
+	void response_udp_write(message_t& response);
+	void response_udp_read(message_t& response);
+	void response_udp_closing(message_t& response);
+	void response_handle_close(message_t& response);
 	void response_timeout(message_t& response);
 
 public:

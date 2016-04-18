@@ -34,6 +34,8 @@ private:
 	static int32_t read_callback_adjust(lua_State* L);
 public:
 	static lua_udp_handle_t* create_udp_socket(uv_udp_handle_t* handle, lua_State* L);
+	static int32_t wakeup_open(lua_State* L, message_t& message);
+	static int32_t wakeup_read(lua_State* L, message_t& message);
 };
 
 #endif

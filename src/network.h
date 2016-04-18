@@ -83,6 +83,9 @@ private:
 	void request_tcp_connects(request_tcp_connects_t& request);
 	void request_tcp_write(request_tcp_write_t& request);
 	void request_tcp_read(request_tcp_read_t& request);
+	void request_udp_open(request_udp_open_t& request);
+	void request_udp_write(request_udp_write_t& request);
+	void request_udp_read(request_udp_read_t& request);
 	void request_handle_option(request_handle_option_t& request);
 	void request_handle_close(request_handle_close_t& request);
 	void request_timer_start(request_timer_start_t& request);

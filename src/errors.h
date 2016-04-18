@@ -5,7 +5,7 @@
 
 /* Expand this list if necessary. */
 #define NL_ERRNO_MAP(XX)															\
-  XX( 200, EYIELD,			"attempt to yield across a C-call boundary")				\
+  XX( 200, EYIELD,			"attempt to yield across a C-call boundary")			\
   XX( 201, EYIELDFNZ,		"yielding up finalize error")							\
   XX( 202, ESTACKLESS,		"attempt to yield across a stack-less coroutine")		\
   XX( 203, ETCPSCLOSED,		"tcp socket has been closed")							\

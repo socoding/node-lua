@@ -7,6 +7,7 @@
 #include "worker.h"
 #include "uv_handle_base.h"
 #include "lua_tcp_handle.h"
+#include "lua_udp_handle.h"
 #include "lua_timer_handle.h"
 #include "errors.h"
 
@@ -108,6 +109,8 @@ void context_lua_t::on_worker_detached()
 LUAMOD_API int (luaopen_my_coroutine)(lua_State *L);
 #define LUA_TCPLIBNAME		"tcp"
 LUAMOD_API int (luaopen_tcp)(lua_State *L);
+#define LUA_UDPLIBNAME		"udp"
+LUAMOD_API int (luaopen_udp)(lua_State *L);
 #define LUA_BUFFERLIBNAME	"buffer"
 LUAMOD_API int (luaopen_buffer)(lua_State *L);
 #define LUA_CONTEXTLIBNAME	"context"
@@ -134,6 +137,7 @@ void context_lua_t::lua_open_libs(lua_State *L)
 		{LUA_CACHELIB, luaopen_cache},
 #endif
 		{LUA_TCPLIBNAME, luaopen_tcp},
+		{LUA_UDPLIBNAME, luaopen_udp},
 		{LUA_BUFFERLIBNAME, luaopen_buffer},
 		{LUA_CONTEXTLIBNAME, luaopen_context},
 		{LUA_TIMERLIBNAME, luaopen_timer},
@@ -676,11 +680,23 @@ void context_lua_t::on_received(message_t& message)
 	case RESPONSE_TCP_WRITE:
 		response_tcp_write(message);
 		break;
-	case RESPONSE_HANDLE_CLOSE:
-		response_handle_close(message);
-		break;
 	case RESPONSE_TCP_CLOSING:
 		response_tcp_closing(message);
+		break;
+	case RESPONSE_UDP_OPEN:
+		response_udp_open(message);
+		break;
+	case RESPONSE_UDP_WRITE:
+		response_udp_write(message);
+		break;
+	case RESPONSE_UDP_READ:
+		response_udp_read(message);
+		break;
+	case RESPONSE_UDP_CLOSING:
+		response_udp_closing(message);
+		break;
+	case RESPONSE_HANDLE_CLOSE:
+		response_handle_close(message);
 		break;
 	case RESPONSE_TIMEOUT:
 		response_timeout(message);
@@ -796,11 +812,6 @@ void context_lua_t::response_tcp_read(message_t& response)
 	lua_tcp_socket_handle_t::wakeup_read(m_lstate, response);
 }
 
-void context_lua_t::response_handle_close(message_t& response)
-{
-	lua_handle_base_t::release_ref(m_lstate, response.m_session, (handle_set)(int32_t)message_integer(response));
-}
-
 void context_lua_t::response_tcp_closing(message_t& response)
 {
 	if (message_error(response) == NL_ETCPLCLOSED) { /* listen socket */
@@ -808,6 +819,31 @@ void context_lua_t::response_tcp_closing(message_t& response)
 	} else {
 		lua_tcp_socket_handle_t::wakeup_read(m_lstate, response);
 	}
+}
+
+void context_lua_t::response_udp_open(message_t& response)
+{
+	lua_udp_handle_t::wakeup_open(m_lstate, response);
+}
+
+void context_lua_t::response_udp_write(message_t& response)
+{
+	wakeup_ref_session(response.m_session, response, true);
+}
+
+void context_lua_t::response_udp_read(message_t& response)
+{
+	lua_udp_handle_t::wakeup_read(m_lstate, response);
+}
+
+void context_lua_t::response_udp_closing(message_t& response)
+{
+	lua_udp_handle_t::wakeup_read(m_lstate, response);
+}
+
+void context_lua_t::response_handle_close(message_t& response)
+{
+	lua_handle_base_t::release_ref(m_lstate, response.m_session, (handle_set)(int32_t)message_integer(response));
 }
 
 void context_lua_t::response_timeout(message_t& response)

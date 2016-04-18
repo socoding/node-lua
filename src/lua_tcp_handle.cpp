@@ -1053,7 +1053,7 @@ int32_t lua_tcp_socket_handle_t::close(lua_State* L)
 	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)luaL_checkudata(L, 1, TCP_SOCKET_METATABLE);
 	if (!socket->is_closed()) {
 		context_lua_t* lctx = context_lua_t::lua_get_context(L);
-		/* The message will wake up all blocking coroutine only*/
+		/* The message will wake up all blocking coroutine only and close the nonblocking lua ref */
 		singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_CLOSING, NL_ETCPSCLOSED);
 		socket->_close();
 		socket->release_read_overflow_buffers();

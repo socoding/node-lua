@@ -70,7 +70,31 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
+local result, server = udp.open("127.0.0.1", 8081)
+server:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, server)
+	print("server read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, server)
+	server:write("hello, world server send!", remote_addr, 8082, true)
+end)
 
+local result, client1 = udp.open("127.0.0.1", 8082)
+local result, client2 = udp.open("127.0.0.1", 8083)
+
+client1:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, client)
+	print("client1 read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, client)
+end)
+client2:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, client)
+	print("client2 read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, client)
+end)
+
+print("client1:write ", client1:write("hello, world1!", "127.0.0.1", 8081, true))
+print("client2:write ", client2:write("hello, world2!", "127.0.0.1", 8081, true))
+
+
+timer.sleep(3600)
+
+do return end
+
+--context send and recv test, memery leak test
 
 local handle = context.create("sample/test.lua")
 

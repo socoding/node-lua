@@ -67,7 +67,7 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 			*ipv6 = false;
 		}
 		if (port != NULL) {
-			*port = sock_name.sock4.sin_port;
+			*port = ntohs(sock_name.sock4.sin_port);
 		}
 		return true;
 	}
@@ -79,7 +79,7 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 			*ipv6 = true;
 		}
 		if (port != NULL) {
-			*port = sock_name.sock6.sin6_port;
+			*port = ntohs(sock_name.sock6.sin6_port);
 		}
 		return true;
 	}
@@ -97,7 +97,7 @@ extern bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, 
 			*ipv6 = false;
 		}
 		if (port != NULL) {
-			*port = ((sockaddr_in*)addr)->sin_port;
+			*port = ntohs(((sockaddr_in*)addr)->sin_port);
 		}
 		return true;
 	}
@@ -109,7 +109,7 @@ extern bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, 
 			*ipv6 = true;
 		}
 		if (port != NULL) {
-			*port = ((sockaddr_in6*)addr)->sin6_port;
+			*port = ntohs(((sockaddr_in6*)addr)->sin6_port);
 		}
 		return true;
 	}

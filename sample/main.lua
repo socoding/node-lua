@@ -73,7 +73,7 @@ print("value", value1, value2)]]
 local result, server = udp.open("127.0.0.1", 8081)
 server:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, server)
 	print("server read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, server)
-	server:write("hello, world server send!", remote_addr, 8082, true)
+	server:write("hello, world server send!", remote_addr, remote_port, true)
 end)
 
 local result, client1 = udp.open("127.0.0.1", 8082)

@@ -6,7 +6,6 @@
 #include "uv_handle_base.h"
 #include <vector>
 #include <queue>
-#include <map>
 
 #define TCP_TRANSPORT_DEFAULT_ENDIAN	LITTLE_ENDIAN_VAL
 #define TCP_WRITE_UV_REQUEST_CACHE_MAX	32
@@ -56,8 +55,6 @@ private:
 										   since nonblocking may be treated as blocking in context thread. */
 };
 
-typedef std::map<int64_t, uv_tcp_socket_handle_t*> write_shared_map_t;
-
 class uv_tcp_socket_handle_t : public uv_handle_base_t
 {
 public:
@@ -83,7 +80,7 @@ private:
 	static void on_connect(uv_connect_t* req, int status);
 	static void on_write(uv_write_t* req, int status);
 	static void on_read(uv_stream_t* stream, ssize_t nread, uv_buf_t buf);
-	static uv_buf_t on_read_alloc(uv_handle_t* handle, size_t suggested_size); /* return tcp shared read buffer */
+	static uv_buf_t on_read_alloc(uv_handle_t* handle, size_t suggested_size); /* return shared read buffer */
 	
 	int32_t write_handle(request_tcp_write_t& request);
 	void write_read_buffer(ssize_t nread, uv_buf_t buf);
@@ -104,8 +101,6 @@ public:
 	void set_tcp_wshared(bool enable);
 	uv_err_code get_read_error()  const { return m_read_error; }
 	uv_err_code get_write_error() const { return m_write_error; }
-	static void free_shared_read_buffer();
-	static void make_shared_read_buffer();
 private:
 	uv_os_sock_t m_tcp_sock;
 	/* read parameters */
@@ -119,7 +114,6 @@ private:
 	uint32_t m_read_bytes;
 	buffer_t m_read_buffer;
 	std::queue<buffer_t> m_read_cached_buffers;
-	static uv_buf_t m_shared_read_buffer; /* tcp shared read buffer in network thread */
 
 	/* the following members are read-acceleration options and set in context thread before recv starts. */
 	head_option_t m_read_head_option;
@@ -164,16 +158,12 @@ private:
 		}
 		m_write_cached_reqs.push_back(request);
 	}
-	void clear_write_cached_requests()
-	{
+	void clear_write_cached_requests() {
 		for (int i = 0; i < m_write_cached_reqs.size(); ++i) {
 			nl_free(m_write_cached_reqs[i]);
 		}
 		m_write_cached_reqs.clear();
 	}
-
-private:
-	static write_shared_map_t m_write_shared_sockets;
 };
 
 #endif

@@ -95,6 +95,26 @@ public:
 		return ret;
 	}
 
+	FORCE_INLINE bool context_send_array_release(uint32_t handle, uint32_t source, int session, int msg_type, message_array_t* array)
+	{
+		message_t msg(source, session, msg_type, array);
+		bool ret = context_send(handle, msg);
+		if (!ret) {
+			message_clean(msg);
+		}
+		return ret;
+	}
+
+	FORCE_INLINE bool context_send_array_release(context_t* ctx, uint32_t source, int session, int msg_type, message_array_t* array)
+	{
+		message_t msg(source, session, msg_type, array);
+		bool ret = context_send(ctx, msg);
+		if (!ret) {
+			message_clean(msg);
+		}
+		return ret;
+	}
+
 	template < class type >
 	uint32_t context_create(uint32_t parent, int32_t argc, char* argv[], char* env[]) {
 		uint32_t handle = 0;

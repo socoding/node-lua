@@ -96,33 +96,12 @@ void uv_tcp_listen_handle_t::accept(request_tcp_accept_t& request)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define LARGE_UNCOMPLETE_LIMIT	(1 * 1024)
-#define SHARED_READ_BUFFER_SIZE	(64 * 1024)
-uv_buf_t uv_tcp_socket_handle_t::m_shared_read_buffer = { 0, NULL, };
-write_shared_map_t uv_tcp_socket_handle_t::m_write_shared_sockets;
-
-void uv_tcp_socket_handle_t::make_shared_read_buffer()
-{
-	if (!m_shared_read_buffer.base) {
-		m_shared_read_buffer.base = (char*)nl_malloc(SHARED_READ_BUFFER_SIZE);
-		assert(m_shared_read_buffer.base != NULL);
-		m_shared_read_buffer.len = SHARED_READ_BUFFER_SIZE;
-	}
-}
-
-void uv_tcp_socket_handle_t::free_shared_read_buffer()
-{
-	if (m_shared_read_buffer.base) {
-		nl_free(m_shared_read_buffer.base);
-		m_shared_read_buffer.base = NULL;
-		m_shared_read_buffer.len = 0;
-	}
-}
 
 uv_tcp_socket_handle_t::~uv_tcp_socket_handle_t()
 {
 	clear_read_cached_buffers();
 	clear_write_cached_requests();
-	m_write_shared_sockets.erase(TCP_SOCKET_MAKE_FD(m_lua_ref, m_source));
+	singleton_ref(network_t).pop_shared_write_socket(SOCKET_MAKE_FD(m_lua_ref, m_source));
 }
 
 void uv_tcp_socket_handle_t::on_connect(uv_connect_t* req, int status)
@@ -196,9 +175,8 @@ void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
 {
 	int32_t err = UV_UNKNOWN;
 	if (request.m_shared_write) {
-		write_shared_map_t::iterator it = m_write_shared_sockets.find(request.m_socket_fd);
-		if (it != m_write_shared_sockets.end()) {
-			uv_tcp_socket_handle_t* handle = it->second;
+		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)singleton_ref(network_t).get_shared_write_socket(request.m_socket_fd);
+		if (handle != NULL) {
 			uint32_t length = request.m_length > 0 ? request.m_length : (uint32_t)buffer_data_length(request.m_buffer);
 			if (uv_is_closing((uv_handle_t*)handle)) {
 				err = NL_ETCPSCLOSED;
@@ -263,10 +241,7 @@ uv_buf_t uv_tcp_socket_handle_t::on_read_alloc(uv_handle_t* handle, size_t sugge
 {
 	uv_tcp_socket_handle_t *socket_handle = (uv_tcp_socket_handle_t*)(handle->data);
 	if (buffer_write_size(socket_handle->m_read_buffer) < LARGE_UNCOMPLETE_LIMIT) {
-		if (!m_shared_read_buffer.base) {
-			make_shared_read_buffer();
-		}
-		return m_shared_read_buffer;
+		return singleton_ref(network_t).make_shared_read_buffer();
 	}
 	/* read in m_shared_read_buffer but not complete large pack(optimization for memcpy) */
 	uv_buf_t buf;
@@ -285,7 +260,7 @@ void uv_tcp_socket_handle_t::write_read_buffer(ssize_t nread, uv_buf_t buf)
 		return;
 	}
 	char* buffer = buf.base;
-	if (buffer != m_shared_read_buffer.base) {
+	if (buffer != singleton_ref(network_t).get_shared_read_buffer().base) {
 		buffer_adjust_len(m_read_buffer, nread);
 		if (buffer_write_size(m_read_buffer) == 0) {
 			write_read_buffer_finish(UV_OK);
@@ -446,11 +421,11 @@ void uv_tcp_socket_handle_t::set_tcp_nodelay(bool enable)
 void uv_tcp_socket_handle_t::set_tcp_wshared(bool enable)
 {
 	if (!uv_is_closing((uv_handle_t*)(m_handle))) {
-		int64_t fd = TCP_SOCKET_MAKE_FD(m_lua_ref, m_source);
+		int64_t fd = SOCKET_MAKE_FD(m_lua_ref, m_source);
 		if (enable) {
-			m_write_shared_sockets[fd] = this;
+			singleton_ref(network_t).put_shared_write_socket(fd, this);
 		} else {
-			m_write_shared_sockets.erase(fd);
+			singleton_ref(network_t).pop_shared_write_socket(fd);
 		}
 	}
 }

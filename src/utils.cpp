@@ -44,7 +44,7 @@ extern void* nl_memdup(const void* src, uint32_t len)
 	return NULL;
 }
 
-extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, uint16_t* port)
+extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
 {
 	union sock_name_u {
 		sockaddr_in sock4;
@@ -63,6 +63,9 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 		if (host != NULL) {
 			uv_ip4_name(&sock_name.sock4, host, host_len);
 		}
+		if (ipv6 != NULL) {
+			*ipv6 = false;
+		}
 		if (port != NULL) {
 			*port = sock_name.sock4.sin_port;
 		}
@@ -72,8 +75,41 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 		if (host != NULL) {
 			uv_ip6_name(&sock_name.sock6, host, host_len);
 		}
+		if (ipv6 != NULL) {
+			*ipv6 = true;
+		}
 		if (port != NULL) {
 			*port = sock_name.sock6.sin6_port;
+		}
+		return true;
+	}
+	return false;
+}
+
+extern bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
+{
+	uint16_t family = addr->sa_family;
+	if (family == AF_INET) {
+		if (host != NULL) {
+			uv_ip4_name((sockaddr_in*)addr, host, host_len);
+		}
+		if (ipv6 != NULL) {
+			*ipv6 = false;
+		}
+		if (port != NULL) {
+			*port = ((sockaddr_in*)addr)->sin_port;
+		}
+		return true;
+	}
+	if (family == AF_INET6) {
+		if (host != NULL) {
+			uv_ip6_name((sockaddr_in6*)addr, host, host_len);
+		}
+		if (ipv6 != NULL) {
+			*ipv6 = true;
+		}
+		if (port != NULL) {
+			*port = ((sockaddr_in6*)addr)->sin6_port;
 		}
 		return true;
 	}

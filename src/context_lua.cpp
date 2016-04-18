@@ -702,6 +702,7 @@ void context_lua_t::on_dropped(message_t& message)
 	case RESPONSE_TCP_LISTEN:
 	case RESPONSE_TCP_ACCEPT:
 	case RESPONSE_TCP_CONNECT:
+	case RESPONSE_UDP_OPEN:
 		if (message_is_userdata(message)) {
 			uv_handle_base_t* handle = (uv_handle_base_t*)message_userdata(message);
 			lua_handle_base_t::close_uv_handle(handle);

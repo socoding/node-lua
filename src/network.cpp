@@ -14,7 +14,7 @@
 
 initialise_singleton(network_t);
 
-network_t::network_t() : m_exiting(0)
+network_t::network_t() : m_exiting(0), m_shared_read_buffer({ 0, NULL, })
 {
 	int rc;
 	rc = make_socketpair(&m_request_r_fd, &m_request_w_fd);
@@ -31,7 +31,7 @@ network_t::network_t() : m_exiting(0)
 network_t::~network_t()
 {
 	uv_loop_delete(m_uv_loop);
-	uv_tcp_socket_handle_t::free_shared_read_buffer();
+	free_shared_read_buffer();
 }
 
 void network_t::start()
@@ -364,4 +364,3 @@ int network_t::close_socketpair( uv_os_sock_t *r, uv_os_sock_t *w )
 #endif
 	return 0;
 }
-

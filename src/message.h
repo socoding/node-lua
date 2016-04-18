@@ -54,6 +54,8 @@ enum message_type {
 	RESPONSE_TCP_WRITE,
 	RESPONSE_TCP_CLOSING,
 	RESPONSE_UDP_OPEN,
+	RESPONSE_UDP_READ,
+	RESPONSE_UDP_WRITE,
 	RESPONSE_HANDLE_CLOSE,
 	RESPONSE_TIMEOUT
 };
@@ -151,6 +153,10 @@ public:
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, bson_t* bson)
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, BSON)) { m_data.m_bson = bson; }
+
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, message_array_t* array)
+			: m_source(source), m_session(session),
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, ARRAY)) { m_data.m_array = array; }
 public:
 	uint32_t m_source;
 	int32_t  m_session;

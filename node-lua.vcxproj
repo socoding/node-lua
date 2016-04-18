@@ -106,6 +106,7 @@
     <ClInclude Include="src\lbuffer.h" />
     <ClInclude Include="src\lua_handle_base.h" />
     <ClInclude Include="src\lua_timer_handle.h" />
+    <ClInclude Include="src\lua_udp_handle.h" />
     <ClInclude Include="src\message.h" />
     <ClInclude Include="src\message_queue.h" />
     <ClInclude Include="src\network.h" />
@@ -137,6 +138,7 @@
     <ClCompile Include="src\lcororep.cpp" />
     <ClCompile Include="src\lua_handle_base.cpp" />
     <ClCompile Include="src\lua_timer_handle.cpp" />
+    <ClCompile Include="src\lua_udp_handle.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\message.cpp" />
     <ClCompile Include="src\message_queue.cpp" />

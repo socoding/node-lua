@@ -25,6 +25,9 @@ enum request_type {
 	REQUEST_TCP_CONNECTS,
 	REQUEST_TCP_READ,
 	REQUEST_TCP_WRITE,
+	REQUEST_UDP_OPEN,
+	REQUEST_UDP_READ,
+	REQUEST_UDP_WRITE,
 	REQUEST_HANDLE_OPTION,
 	REQUEST_HANDLE_CLOSE,
 	REQUEST_TIMER_START
@@ -106,11 +109,24 @@ struct request_udp_open_t {
 
 struct request_udp_read_t {
 	uv_udp_handle_t *m_socket_handle;
-	bool m_switch; //true : start, false : stop.
 	REQUEST_SPARE_REGION
 };
 
 struct request_udp_write_t {
+	union {
+		uv_udp_handle_t *m_socket_handle;
+		uint64_t m_socket_fd;
+	};
+	union {
+		const char* m_string;
+		buffer_t m_buffer;
+	};
+	uint32_t m_length;   /* judge it's string or buffer */
+	uint32_t m_source;   /* redundant if m_shared_write is true */
+	uint32_t m_session;
+	uint16_t m_port;
+	bool m_ipv6;
+	bool m_shared_write; /* whether m_socket_fd is valid */
 	REQUEST_SPARE_REGION
 };
 
@@ -146,6 +162,9 @@ struct request_t {
 		request_tcp_connects_t m_tcp_connects;
 		request_tcp_read_t m_tcp_read;
 		request_tcp_write_t m_tcp_write;
+		request_udp_open_t m_udp_open;
+		request_udp_read_t m_udp_read;
+		request_udp_write_t m_udp_write;
 		request_handle_option_t m_handle_option;
 		request_handle_close_t m_handle_close;
 		request_timer_start_t m_timer_start;

@@ -49,7 +49,7 @@ static int32_t lua_tcp_get_fd(lua_State* L)
 {
 	lua_handle_base_t* handle = lua_check_tcp_handle(L, 1);
 	if (handle != NULL) {
-		int64_t fd = TCP_SOCKET_MAKE_FD(handle->get_handle_ref(), context_lua_t::lua_get_context_handle(L));
+		int64_t fd = SOCKET_MAKE_FD(handle->get_handle_ref(), context_lua_t::lua_get_context_handle(L));
 		lua_pushinteger(L, fd);
 		return 1;
 	}
@@ -654,7 +654,7 @@ int32_t lua_tcp_socket_handle_t::write_handle(lua_State* L)
 	request_t& request = lctx->get_yielding_request();
 	request.m_type = REQUEST_TCP_WRITE;
 	request.m_length = REQUEST_SIZE(request_tcp_write_t, 0);
-	request.m_tcp_write.m_socket_handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
+	request.m_tcp_write.m_socket_handle = handle;
 	request.m_tcp_write.m_source = lctx->get_handle();
 	request.m_tcp_write.m_shared_write = false;
 	if (s) {
@@ -957,21 +957,25 @@ int32_t lua_tcp_socket_handle_t::get_local_addr(lua_State* L)
 {
 	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
 	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
-	char host[512];
-	if (socket_host(sock, true, host, sizeof(host), NULL)) {
+	char host[512] = { '\0' };
+	bool ipv6 = false;
+	if (socket_host(sock, true, host, sizeof(host), &ipv6, NULL)) {
 		lua_pushstring(L, host);
+		lua_pushboolean(L, ipv6);
 	} else {
 		lua_pushstring(L, "unknown address");
+		lua_pushboolean(L, ipv6);
 	}
-	return 1;
+	return 2;
 }
 
 int32_t lua_tcp_socket_handle_t::get_remote_addr(lua_State* L)
 {
 	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
 	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
-	char host[512];
-	if (socket_host(sock, false, host, sizeof(host), NULL)) {
+	char host[512] = { '\0' };
+	bool ipv6 = false;
+	if (socket_host(sock, false, host, sizeof(host), &ipv6, NULL)) {
 		lua_pushstring(L, host);
 	} else {
 		lua_pushstring(L, "unknown address");
@@ -984,7 +988,7 @@ int32_t lua_tcp_socket_handle_t::get_local_port(lua_State* L)
 	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
 	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
 	uint16_t port;
-	if (socket_host(sock, true, NULL, 0, &port)) {
+	if (socket_host(sock, true, NULL, 0, NULL, &port)) {
 		lua_pushinteger(L, port);
 	} else {
 		lua_pushinteger(L, -1);
@@ -997,7 +1001,7 @@ int32_t lua_tcp_socket_handle_t::get_remote_port(lua_State* L)
 	lua_tcp_socket_handle_t* socket = check_socket_addr(L, 1);
 	uv_os_sock_t sock = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->m_tcp_sock;
 	uint16_t port;
-	if (socket_host(sock, false, NULL, 0, &port)) {
+	if (socket_host(sock, false, NULL, 0, NULL, &port)) {
 		lua_pushinteger(L, port);
 	} else {
 		lua_pushinteger(L, -1);

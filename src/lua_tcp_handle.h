@@ -6,8 +6,6 @@
 #include "context_lua.h"
 #include <queue>
 
-#define TCP_SOCKET_MAKE_FD(lua_ref, context_id) ((int64_t)(lua_ref)%1000000 + 1000000*(int64_t)(context_id))
-
 class context_lua_t;
 class uv_handle_base_t;
 class uv_tcp_listen_handle_t;

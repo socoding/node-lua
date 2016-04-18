@@ -10,6 +10,6 @@ int main(int argc, char* argv[], char* env[])
 	node_lua_t node(argc - 1, argv + 1, env);
 	double duration = (uv_hrtime() - start_time) / 1e9;
 	printf("Process used %.3f sec total!\n", duration);
-	getchar();
+	//getchar();
 	return 0;
 }

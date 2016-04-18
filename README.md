@@ -177,10 +177,18 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
 9. **udp.close**(socket) 
 	*`--close the udp socket directly.`*  
 
-10. is_closed = **udp.is_closed**(socket)  
+10. local_addr = **udp.local_addr**(socket)  
+
+11. remote_addr = **udp.remote_addr**(socket)  
+
+12. local_port = **udp.local_port**(socket)  
+
+13. remote_port = **udp.remote_port**(socket)  
+
+14. is_closed = **udp.is_closed**(socket)  
 	*`--check whether the udp socket is closed.`*  
 
-11. fd = **udp.fd**(socket)  
+15. fd = **udp.fd**(socket)  
 	*`--get udp socket lua fd`*  
 
 ### timer api	

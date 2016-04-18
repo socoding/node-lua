@@ -16,9 +16,11 @@ class uv_udp_handle_t : public uv_handle_base_t
 public:
 	uv_udp_handle_t(uv_loop_t* loop, uint32_t source)
 		: uv_handle_base_t(loop, UV_UDP, source),
-		  m_read_started(false) {}
+		  m_read_started(false),
+		  m_udp_sock(-1) {}
 	~uv_udp_handle_t();
 
+	friend class lua_udp_handle_t;
 private:
 	static void on_read(uv_udp_t* handle, ssize_t nread, uv_buf_t buf, struct sockaddr* addr, unsigned flags);
 	static uv_buf_t on_read_alloc(uv_handle_t* handle, size_t suggested_size);
@@ -35,6 +37,7 @@ public:
 	static void write(request_udp_write_t& request);
 private:
 	bool m_read_started;
+	uv_os_sock_t m_udp_sock;
 
 	typedef struct {
 		uv_udp_send_t m_write_req;

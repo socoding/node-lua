@@ -3,6 +3,12 @@
 #include "node_lua.h"
 #include "uv_udp_handle.h"
 
+#if defined (CC_MSVC)
+#define uv_udp_fd(handle) ((handle)->socket)
+#else
+#define uv_udp_fd(handle) ((handle)->io_watcher.fd)
+#endif
+
 uv_udp_handle_t::~uv_udp_handle_t()
 {
 	clear_write_cached_requests();
@@ -13,6 +19,7 @@ void uv_udp_handle_t::open(request_udp_open_t& request)
 {
 	uv_udp_t* server = (uv_udp_t*)m_handle;
 	if ((!request.m_ipv6 ? uv_udp_bind(server, uv_ip4_addr(REQUEST_SPARE_PTR(request), request.m_port), 0) == 0 : uv_udp_bind6(server, uv_ip6_addr(REQUEST_SPARE_PTR(request), request.m_port), 0) == 0)) {
+		m_udp_sock = uv_udp_fd((uv_udp_t*)server);
 		if (!singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_UDP_OPEN, (void*)this)) {
 			uv_close((uv_handle_t*)server, on_closed);
 		}

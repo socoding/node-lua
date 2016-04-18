@@ -23,6 +23,10 @@ public:
 	static int32_t close(lua_State* L);
 	static int32_t udp_is_closed(lua_State* L);
 	static int32_t set_wshared(lua_State* L);
+	static int32_t get_local_addr(lua_State* L);
+	static int32_t get_remote_addr(lua_State* L);
+	static int32_t get_local_port(lua_State* L);
+	static int32_t get_remote_port(lua_State* L);
 	static int32_t get_fd(lua_State* L);
 private:
 	static int32_t _open(lua_State* L, bool ipv6);

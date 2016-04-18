@@ -24,6 +24,14 @@ lua_udp_handle_t* lua_udp_handle_t::create_udp_socket(uv_udp_handle_t* handle, l
 		lua_setfield(L, -2, "read");
 		lua_pushcfunction(L, lua_udp_handle_t::set_wshared);
 		lua_setfield(L, -2, "set_wshared");
+		lua_pushcfunction(L, lua_udp_handle_t::get_local_addr);
+		lua_setfield(L, -2, "local_addr");
+		lua_pushcfunction(L, lua_udp_handle_t::get_remote_addr);
+		lua_setfield(L, -2, "remote_addr");
+		lua_pushcfunction(L, lua_udp_handle_t::get_local_port);
+		lua_setfield(L, -2, "local_port");
+		lua_pushcfunction(L, lua_udp_handle_t::get_remote_port);
+		lua_setfield(L, -2, "remote_port");
 		lua_pushcfunction(L, lua_udp_handle_t::close);
 		lua_setfield(L, -2, "close");
 		lua_pushcfunction(L, lua_udp_handle_t::udp_is_closed);
@@ -307,6 +315,74 @@ int32_t lua_udp_handle_t::udp_is_closed(lua_State* L)
 	return 1;
 }
 
+int32_t lua_udp_handle_t::get_local_addr(lua_State* L)
+{
+	lua_udp_handle_t* socket = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
+	if (socket->is_closed()) {
+		luaL_error(L, "attempt to perform on a invalid or closed socket");
+	}
+	uv_os_sock_t sock = ((uv_udp_handle_t*)socket->m_uv_handle)->m_udp_sock;
+	char host[512] = { '\0' };
+	bool ipv6 = false;
+	if (socket_host(sock, true, host, sizeof(host), &ipv6, NULL)) {
+		lua_pushstring(L, host);
+		lua_pushboolean(L, ipv6);
+	} else {
+		lua_pushstring(L, "unknown address");
+		lua_pushboolean(L, ipv6);
+	}
+	return 2;
+}
+
+int32_t lua_udp_handle_t::get_remote_addr(lua_State* L)
+{
+	lua_udp_handle_t* socket = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
+	if (socket->is_closed()) {
+		luaL_error(L, "attempt to perform on a invalid or closed socket");
+	}
+	uv_os_sock_t sock = ((uv_udp_handle_t*)socket->m_uv_handle)->m_udp_sock;
+	char host[512] = { '\0' };
+	bool ipv6 = false;
+	if (socket_host(sock, false, host, sizeof(host), &ipv6, NULL)) {
+		lua_pushstring(L, host);
+	} else {
+		lua_pushstring(L, "unknown address");
+	}
+	return 1;
+}
+
+int32_t lua_udp_handle_t::get_local_port(lua_State* L)
+{
+	lua_udp_handle_t* socket = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
+	if (socket->is_closed()) {
+		luaL_error(L, "attempt to perform on a invalid or closed socket");
+	}
+	uv_os_sock_t sock = ((uv_udp_handle_t*)socket->m_uv_handle)->m_udp_sock;
+	uint16_t port;
+	if (socket_host(sock, true, NULL, 0, NULL, &port)) {
+		lua_pushinteger(L, port);
+	} else {
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
+int32_t lua_udp_handle_t::get_remote_port(lua_State* L)
+{
+	lua_udp_handle_t* socket = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
+	if (socket->is_closed()) {
+		luaL_error(L, "attempt to perform on a invalid or closed socket");
+	}
+	uv_os_sock_t sock = ((uv_udp_handle_t*)socket->m_uv_handle)->m_udp_sock;
+	uint16_t port;
+	if (socket_host(sock, false, NULL, 0, NULL, &port)) {
+		lua_pushinteger(L, port);
+	} else {
+		lua_pushinteger(L, -1);
+	}
+	return 1;
+}
+
 int32_t lua_udp_handle_t::get_fd(lua_State* L)
 {
 	lua_udp_handle_t* handle = (lua_udp_handle_t*)luaL_checkudata(L, 1, UDP_SOCKET_METATABLE);
@@ -355,6 +431,10 @@ int luaopen_udp(lua_State *L)
 			{ "write6", lua_udp_handle_t::write6 },
 			{ "read", lua_udp_handle_t::read },
 			{ "set_wshared", lua_udp_handle_t::set_wshared },
+			{ "local_addr", lua_udp_handle_t::get_local_addr },
+			{ "remote_addr", lua_udp_handle_t::get_remote_addr },
+			{ "local_port", lua_udp_handle_t::get_local_port },
+			{ "remote_port", lua_udp_handle_t::get_remote_port },
 			{ "close", lua_udp_handle_t::close },
 			{ "is_closed", lua_udp_handle_t::udp_is_closed },
 			{ "fd", lua_udp_handle_t::get_fd },

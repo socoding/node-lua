@@ -76,8 +76,8 @@ server:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, serv
 	server:write("hello, world server send!", remote_addr, remote_port, true)
 end)
 
-local result, client1 = udp.open("127.0.0.1", 8082)
-local result, client2 = udp.open("127.0.0.1", 8083)
+local result, client1 = udp.open()
+local result, client2 = udp.open()
 
 client1:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, client)
 	print("client1 read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, client)
@@ -89,6 +89,8 @@ end)
 print("client1:write ", client1:write("hello, world1!", "127.0.0.1", 8081, true))
 print("client2:write ", client2:write("hello, world2!", "127.0.0.1", 8081, true))
 
+print("client1:addr ", client1:local_addr(), client1:local_port())
+print("client2:addr ", client2:local_addr(), client2:local_port())
 
 timer.sleep(3600)
 

@@ -38,14 +38,15 @@ end
 -- chains a bunch of filters together
 -- (thanks to Wim Couwenberg)
 function filter.chain(...)
-    local n = table.getn(arg)
+	local arg = { ... }
+	local n = #arg
     local top, index = 1, 1
     local retry = ""
     return function(chunk)
         retry = chunk and retry
         while true do
             if index == top then
-                chunk = arg[index](chunk)
+				chunk = arg[index](chunk)
                 if chunk == "" or top == n then return chunk
                 elseif chunk then index = index + 1
                 else
@@ -53,7 +54,7 @@ function filter.chain(...)
                     index = top
                 end
             else
-                chunk = arg[index](chunk or "")
+				chunk = arg[index](chunk or "")
                 if chunk == "" then
                     index = index - 1
                     chunk = retry
@@ -186,6 +187,7 @@ end
 -- other, as if they were concatenated
 -- (thanks to Wim Couwenberg)
 function source.cat(...)
+	local arg = {...}
     local src = table.remove(arg, 1)
     return function()
         while src do

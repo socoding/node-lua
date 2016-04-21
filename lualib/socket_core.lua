@@ -103,6 +103,7 @@ end
 
 function lua_tcp_mode:settimeout(timeout)
 	self._timeout = timeout
+	return true
 end
 
 function lua_tcp_mode:setoption(field, value)

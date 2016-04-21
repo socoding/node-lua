@@ -18,6 +18,9 @@ For windows, just open node-lua.sln and build the whole solution. For linux or o
     cd node-lua
     make [release]  #add release to build for release versions
 	make install
+## contact
+See https://github.com/socoding/node-lua/wiki for detailed node-lua description.  
+Contact with **Email: xdczju@sina.com** or **QQ: 443231647**  
 
 ## usefull api  
 ### context api  

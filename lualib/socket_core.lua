@@ -137,6 +137,7 @@ local function try_read(tcp_socket)
 			tcp_socket._received_buffer:append(buffer)
 		end
 	else
+		--to be fix : half close http???
 		tcp_socket._sock:close()
 		tcp_socket._sock = nil
 		tcp_socket._received_buffer = nil
@@ -145,45 +146,47 @@ local function try_read(tcp_socket)
 end
 
 	
-function lua_tcp_mode:receive(len)
+function lua_tcp_mode:receive(len, header)
 	local sock = self._sock
 	if not sock or sock:is_closed() then
-		return false, "socket not invalid or closed"
+		return "", "socket not invalid or closed"
 	end
 	
 	if not len or len == '*l' then
 		if not self._received_buffer or self._received_buffer:length() == 0 then
 			local error = try_read(self)
 			if error then
-				return false, error
+				return "", error
 			end
 		end
 		while true do
 			local len = self._received_buffer:find("\n")
 			if len then
-				return self._received_buffer:split(len):tostring()
+				local received = self._received_buffer:split(len):tostring()
+				return header and header..received or received
 			end
 			local error = try_read(self)
 			if error then
-				return false, error
+				return "", error
 			end
 		end
 	end
 	
 	if type(len) == "number" then
 		if len <= 0 then
-			return false, "receive length can't be less than 0"
+			return "", "receive length can't be less than 0"
 		end
 		while not self._received_buffer or self._received_buffer:length() < len do
 			local error = try_read(self)
 			if error then
-				return false, error
+				return "", error
 			end
 		end
-		return self._received_buffer:split(len):tostring()
+		local received = self._received_buffer:split(len):tostring()
+		return header and header..received or received
 	end
 	
-	return false, "unsupported receive format"
+	return "", "unsupported receive format"
 end
 
 socket.tcp = lua_tcp_mode

@@ -72,7 +72,7 @@ end
 
 socket.sinkt["default"] = socket.sinkt["keep-open"]
 
-socket.sink = socket.choose(sinkt)
+socket.sink = socket.choose(socket.sinkt)
 
 socket.sourcet["by-length"] = function(sock, length)
     return base.setmetatable({
@@ -111,7 +111,6 @@ end
 
 
 socket.sourcet["default"] = socket.sourcet["until-closed"]
-
-socket.source = socket.choose(sourcet)
+socket.source = socket.choose(socket.sourcet)
 
 return socket

@@ -46,7 +46,7 @@ function filter.chain(...)
         retry = chunk and retry
         while true do
             if index == top then
-				chunk = arg[index](chunk)
+                chunk = arg[index](chunk)
                 if chunk == "" or top == n then return chunk
                 elseif chunk then index = index + 1
                 else
@@ -54,7 +54,7 @@ function filter.chain(...)
                     index = top
                 end
             else
-				chunk = arg[index](chunk or "")
+                chunk = arg[index](chunk or "")
                 if chunk == "" then
                     index = index - 1
                     chunk = retry

@@ -349,12 +349,28 @@ void uv_tcp_socket_handle_t::write_read_buffer_finish(uv_err_code read_error)
 		}
 	} else {
 		if (m_read_error == UV_OK) {
-			m_read_error = read_error;
-			singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_error);
+			trigger_read_error(read_error);
 			uv_read_stop((uv_stream_t*)m_handle);
+		} else {
+			clear_read_cached_buffers();
 		}
-		clear_read_cached_buffers();
 	}
+}
+
+//when read error occurred, we need to send the cached buffer to lua_context in case of half closed peer socket.
+//peer socket may only shut down write(half close) before totally close the socket. 
+void uv_tcp_socket_handle_t::trigger_read_error(uv_err_code read_error)
+{ 
+	int size = m_read_cached_buffers.size();
+	for (int i = 0; i < size; ++i) {
+		singleton_ref(node_lua_t).context_send_buffer_release(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_cached_buffers.front());
+		m_read_cached_buffers.pop();
+	}
+	buffer_release(m_read_buffer);
+	buffer_make_invalid(m_read_buffer);
+	singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_error);
+	atomic_barrier();
+	m_read_error = read_error;
 }
 
 /* When RESPONSE_TCP_READ error occurs, read request must also stop in context_lua thread. */
@@ -388,9 +404,7 @@ void uv_tcp_socket_handle_t::read(request_tcp_read_t& request)
 	}
 	if (!read_started && uv_read_start((uv_stream_t*)(m_handle), on_read_alloc, on_read) != 0) {
 		if (!uv_is_closing((uv_handle_t*)(m_handle))) {
-			m_read_error = singleton_ref(network_t).last_error();
-			singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_error);
-			clear_read_cached_buffers();
+			trigger_read_error(singleton_ref(network_t).last_error());
 		}
 	}
 }

@@ -85,7 +85,9 @@ private:
 	int32_t write_handle(request_tcp_write_t& request);
 	void write_read_buffer(ssize_t nread, uv_buf_t buf);
 	void write_read_buffer_finish(uv_err_code err_code);
+	void trigger_read_error(uv_err_code read_error);
 	void clear_read_cached_buffers();
+
 public:
 	void connect_tcp(request_tcp_connect_t& request);
 	void connect_sock(request_tcp_connects_t& request);

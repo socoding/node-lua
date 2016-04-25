@@ -760,8 +760,9 @@ int32_t lua_tcp_socket_handle_t::read_yield_finalize(lua_State *root_coro, lua_S
 		if (handle->get_read_error() == UV_OK) {
 			if (socket->m_read_timeout_session_count == 0) {
 				singleton_ref(network_t).send_request(lctx->get_yielding_request());
+			} else {
+				--socket->m_read_timeout_session_count;
 			}
-			--socket->m_read_timeout_session_count;
 			int64_t timeout = lctx->get_yielding_timeout();
 			if (timeout > 0) {
 				context_lua_t::lua_ref_timer(main_coro, session, timeout, 0, false, socket, read_timeout);

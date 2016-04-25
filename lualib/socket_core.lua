@@ -137,10 +137,7 @@ local function try_read(tcp_socket)
 			tcp_socket._received_buffer:append(buffer)
 		end
 	else
-		--to be fix : half close http???
-		tcp_socket._sock:close()
-		tcp_socket._sock = nil
-		tcp_socket._received_buffer = nil
+		tcp_socket:close()
 		return context.strerror(buffer)
 	end
 end
@@ -187,6 +184,15 @@ function lua_tcp_mode:receive(len, header)
 	end
 	
 	return "", "unsupported receive format"
+end
+
+function lua_tcp_mode:close()
+	if self._sock then
+		self._sock:close()
+		self._sock = nil
+		self._received_buffer = nil
+	end
+	return true
 end
 
 socket.tcp = lua_tcp_mode

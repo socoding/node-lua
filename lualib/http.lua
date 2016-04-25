@@ -39,6 +39,10 @@ local function receiveheaders(sock, headers)
     if err then return nil, err end
     -- headers go until a blank line is found
     while line ~= "" do
+		--header ends if line == "\r\n"
+		if line == "\r\n" then
+			return headers 
+		end
         -- get field-name and value
         name, value = socket.skip(2, string.find(line, "^(.-):%s*(.*)"))
         if not (name and value) then return nil, "malformed reponse headers" end
@@ -46,8 +50,8 @@ local function receiveheaders(sock, headers)
         -- get next line (value might be folded)
         line, err  = sock:receive()
         if err then return nil, err end
-        -- unfold any folded values
-        while string.find(line, "^%s") do
+        -- unfold any folded values(header parts begin with [ \t]!)
+        while string.find(line, "^[ \t]") do
             value = value .. line
             line, err = sock:receive()
             if err then return nil, err end

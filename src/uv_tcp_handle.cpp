@@ -368,7 +368,7 @@ void uv_tcp_socket_handle_t::trigger_read_error(uv_err_code read_error)
 	}
 	buffer_release(m_read_buffer);
 	buffer_make_invalid(m_read_buffer);
-	singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, m_read_error);
+	singleton_ref(node_lua_t).context_send(m_source, 0, m_lua_ref, RESPONSE_TCP_READ, read_error);
 	atomic_barrier();
 	m_read_error = read_error;
 }

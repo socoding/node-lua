@@ -10,14 +10,15 @@
   XX( 202, ESTACKLESS,		"attempt to yield across a stack-less coroutine")		\
   XX( 203, ETCPSCLOSED,		"tcp socket has been closed")							\
   XX( 204, ETCPLCLOSED,		"tcp listen socket has been closed")					\
-  XX( 205, ENOCONTEXT,		"context not exist or has been killed")					\
-  XX( 206, ETRANSTYPE,		"transfer data type not supported")						\
-  XX( 207, ENOREPLY,		"no reply")												\
-  XX( 208, ETIMEOUT,		"timeout")												\
-  XX( 209, ETCPNOWSHARED,	"tcp socket not set write shared")						\
-  XX( 210, ETCPWRITELONG,	"attempt to send data too long")						\
-  XX( 211, EUDPSCLOSED,		"udp socket has been closed")							\
-  XX( 212, EUDPNOWSHARED,	"udp socket not set write shared")						\
+  XX( 205, ETCPNOWSHARED,	"tcp socket not set write shared")						\
+  XX( 206, ETCPWRITELONG,	"attempt to send data too long")						\
+  XX( 207, ETCPREADOVERFLOW,"read overflowed wake up")								\
+  XX( 208, EUDPSCLOSED,		"udp socket has been closed")							\
+  XX( 209, EUDPNOWSHARED,	"udp socket not set write shared")						\
+  XX( 210, ENOCONTEXT,		"context not exist or has been killed")					\
+  XX( 211, ETRANSTYPE,		"transfer data type not supported")						\
+  XX( 212, ENOREPLY,		"no reply")												\
+  XX( 213, ETIMEOUT,		"timeout")												\
 
 #define NL_ERRNO_GEN(val, name, s) NL_##name = val,
 typedef enum {

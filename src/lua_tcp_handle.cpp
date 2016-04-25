@@ -728,18 +728,6 @@ int32_t lua_tcp_socket_handle_t::read(lua_State* L)
 	}
 	/* error already occurred in network thread, stop read immediately. */
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
-	uv_err_code err = handle->get_read_error();
-	if (err != UV_OK) {
-		if (nonblocking) {
-			socket->m_read_ref_sessions.make_nonblocking_callback(L, 1, context_lua_t::common_callback_adjust);
-			singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, err); /* The message will wake up all blocking coroutine and nonblocking callback. */
-			return 0;
-		} else {
-			lua_pushboolean(L, 0);
-			lua_pushinteger(L, err);
-			return 2;
-		}
-	}
 	request_t& request = lctx->get_yielding_request();
 	request.m_type = REQUEST_TCP_READ;
 	request.m_length = REQUEST_SIZE(request_tcp_read_t, 0);
@@ -748,11 +736,11 @@ int32_t lua_tcp_socket_handle_t::read(lua_State* L)
 	if (nonblocking) { /* nonblocking callback */
 		if (socket->m_read_ref_sessions.make_nonblocking_callback(L, 1, context_lua_t::common_callback_adjust)) {
 			froze_head_option(handle->m_read_head_option);
-			if (socket->m_read_overflow_buffers.empty()) {
+			if (handle->get_read_error() == UV_OK) {
 				singleton_ref(network_t).send_request(request);
-			} else {
-				singleton_ref(node_lua_t).context_send_buffer_release(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, socket->m_read_overflow_buffers.front());
-				socket->m_read_overflow_buffers.pop();
+			}
+			if (!socket->m_read_overflow_buffers.empty()) { //do read over flow wake up(whether read error occurred or not)!!!
+				singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, NL_ETCPREADOVERFLOW);
 			}
 		}
 		return 0;
@@ -769,15 +757,20 @@ int32_t lua_tcp_socket_handle_t::read_yield_finalize(lua_State *root_coro, lua_S
 		int32_t session = socket->m_read_ref_sessions.push_blocking(root_coro);
 		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
 		froze_head_option(handle->m_read_head_option);
-		if (socket->m_read_overflow_buffers.empty()) {
-			singleton_ref(network_t).send_request(lctx->get_yielding_request());
+		if (handle->get_read_error() == UV_OK) {
+			if (socket->m_read_timeout_session_count == 0) {
+				singleton_ref(network_t).send_request(lctx->get_yielding_request());
+			}
+			--socket->m_read_timeout_session_count;
 			int64_t timeout = lctx->get_yielding_timeout();
 			if (timeout > 0) {
 				context_lua_t::lua_ref_timer(main_coro, session, timeout, 0, false, socket, read_timeout);
 			}
-		} else {
-			singleton_ref(node_lua_t).context_send_buffer_release(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, socket->m_read_overflow_buffers.front());
-			socket->m_read_overflow_buffers.pop();
+			if (!socket->m_read_overflow_buffers.empty()) { //do read over flow wake up(whether read error occurred or not)!!!
+				singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, NL_ETCPREADOVERFLOW);
+			}
+		} else { //wake up the blocking read directly
+			singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), socket->m_lua_ref, RESPONSE_TCP_READ, NL_ETCPREADOVERFLOW);
 		}
 	}
 	return UV_OK;
@@ -788,7 +781,11 @@ int32_t lua_tcp_socket_handle_t::read_timeout(lua_State *L, int32_t session, voi
 	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)userdata;
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
 	message_t message(0, session, RESPONSE_TCP_READ, NL_ETIMEOUT);
-	return socket->m_read_ref_sessions.wakeup_one_fixed(lctx, message, false);
+	if (socket->m_read_ref_sessions.wakeup_one_fixed(lctx, message, false)) {
+		++socket->m_read_timeout_session_count;
+		return 1;
+	}
+	return 0;
 }
 
 static void opt_check_endian(lua_State* L, int32_t idx, const char* field, char *value, bool frozen)
@@ -1027,21 +1024,50 @@ int32_t lua_tcp_socket_handle_t::wakeup_read(lua_State* L, message_t& message)
 	lua_tcp_socket_handle_t* socket = (lua_tcp_socket_handle_t*)get_lua_handle(L, message.m_session, SOCKET_SET);
 	if (socket) {
 		if (!socket->is_closed()) {
-			if (message_is_buffer(message)) {
-				if (socket->m_read_ref_sessions.wakeup_once(lctx, message)) {
+			if (socket->m_read_overflow_buffers.empty()) {
+				if (message_is_buffer(message)) {
+					if (socket->m_read_ref_sessions.wakeup_once(lctx, message)) {
+						return 1;
+					}
+					socket->m_read_overflow_buffers.push(buffer_grab(message_buffer(message)));
+					return 0;
+				} //else empty overflow buffers
+				goto handle_error;
+			} else {
+				if (message_is_buffer(message)) {
+					socket->m_read_overflow_buffers.push(buffer_grab(message_buffer(message)));
+				}
+				while (!socket->m_read_ref_sessions.is_empty() && !socket->m_read_overflow_buffers.empty()) {
+					message_t overflow_message(0, socket->m_lua_ref, RESPONSE_TCP_READ, socket->m_read_overflow_buffers.front());
+					socket->m_read_overflow_buffers.pop();
+					socket->m_read_ref_sessions.wakeup_once(lctx, overflow_message);
+					buffer_release(message_buffer(overflow_message));
+				}
+				if (!socket->m_read_overflow_buffers.empty()) {
 					return 1;
 				}
-				socket->m_read_overflow_buffers.push(buffer_grab(message_buffer(message)));
-			}
-			if (message_is_error(message)) {
-				socket->m_read_ref_sessions.wakeup_all(lctx, message);
-				return 1;
+				goto handle_error;
 			}
 			return 0;
 		} else { /* listen socket is already closed */
 			message_t error = message_t(message.m_source, message.m_session, RESPONSE_TCP_CLOSING, NL_ETCPSCLOSED);
 			socket->m_read_ref_sessions.free_nonblocking_callback(L);
 			socket->m_read_ref_sessions.wakeup_all_blocking(lctx, error);
+			return 1;
+		}
+	}
+	return 0;
+
+handle_error:
+	if (message_is_error(message)) {
+		uv_err_code err = ((uv_tcp_socket_handle_t*)socket->m_uv_handle)->get_read_error();
+		if (err != UV_OK || message_error(message) != NL_ETCPREADOVERFLOW) { //if it's over flow wakeup, do nothing!!!
+			if (message_error(message) != NL_ETCPREADOVERFLOW) {
+				socket->m_read_ref_sessions.wakeup_all(lctx, message);
+			} else {
+				message_t error = message_t(0, socket->m_lua_ref, RESPONSE_TCP_READ, err);
+				socket->m_read_ref_sessions.wakeup_all(lctx, error);
+			}
 			return 1;
 		}
 	}

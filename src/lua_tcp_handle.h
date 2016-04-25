@@ -47,7 +47,8 @@ class lua_tcp_socket_handle_t : public lua_handle_base_t
 {
 public:
 	lua_tcp_socket_handle_t(uv_tcp_socket_handle_t* handle, lua_State* L)
-		: lua_handle_base_t((uv_handle_base_t*)handle, L) {}
+		: lua_handle_base_t((uv_handle_base_t*)handle, L),
+		  m_read_timeout_session_count(0) {}
 	~lua_tcp_socket_handle_t();
 
 public:
@@ -84,6 +85,7 @@ public:
 private:
 	void release_read_overflow_buffers();
 private:
+	int32_t m_read_timeout_session_count; //blocking
 	ref_sessions_t m_read_ref_sessions;
 	std::queue<buffer_t> m_read_overflow_buffers;
 };

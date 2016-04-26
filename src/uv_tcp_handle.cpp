@@ -99,7 +99,7 @@ void uv_tcp_listen_handle_t::accept(request_tcp_accept_t& request)
 
 typedef struct {
 	uv_getaddrinfo_t m_request;
-	uv_tcp_t *m_client;
+	uv_tcp_socket_handle_t *m_client;
 	uint32_t m_session;
 } uv_addr_resolver_t;
 
@@ -186,7 +186,7 @@ void uv_tcp_socket_handle_t::connect_tcp(request_tcp_connect_t& request)
 		hints.ai_flags = 0;
 		uv_addr_resolver_t* resolver = (uv_addr_resolver_t*)nl_malloc(sizeof(uv_addr_resolver_t));
 		itoa(request.m_remote_port, port, 10);
-		resolver->m_client = client;
+		resolver->m_client = this;
 		resolver->m_session = request.m_session;
 		resolver->m_request.data = resolver;
 		if (uv_getaddrinfo(client->loop, &resolver->m_request, on_resolve, remote_host, port, &hints) != 0) {

@@ -62,8 +62,8 @@ bool buffer_append(buffer_t& buffer_ref, const char *data, size_t data_len) {
 				if (new_buffer) {
 					if (offset >= 0) data = (char*)new_buffer + offset;
 					new_buffer->m_cap = new_cap;
-					new_buffer->m_len = buffer->m_len + data_len;
-					memcpy(new_buffer->m_data + buffer->m_len, data, data_len);
+					memcpy(new_buffer->m_data + new_buffer->m_len, data, data_len);
+					new_buffer->m_len += data_len;
 					new_buffer->m_data[new_buffer->m_len] = 0;
 					buffer_ref.m_ptr = new_buffer;
 					return true;

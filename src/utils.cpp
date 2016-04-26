@@ -29,7 +29,7 @@ char* filter_arg(char **param, int32_t *len) {
 	}
 }
 
-extern void* nl_memdup(const void* src, uint32_t len)
+void* nl_memdup(const void* src, uint32_t len)
 {
 	if (src) {
 		if (len != 0) {
@@ -44,7 +44,7 @@ extern void* nl_memdup(const void* src, uint32_t len)
 	return NULL;
 }
 
-extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
+bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
 {
 	union sock_name_u {
 		sockaddr_in sock4;
@@ -86,7 +86,7 @@ extern bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host
 	return false;
 }
 
-extern bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
+bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
 {
 	uint16_t family = addr->sa_family;
 	if (family == AF_INET) {
@@ -114,4 +114,21 @@ extern bool sockaddr_host(struct sockaddr* addr, char* host, uint32_t host_len, 
 		return true;
 	}
 	return false;
+}
+
+uv_err_code host_sockaddr(bool ipv6, const char* host, uint16_t port, struct sockaddr* addr)
+{
+	if (!ipv6) {
+		struct sockaddr_in* addr4 = (struct sockaddr_in*)addr;
+		memset(addr4, 0, sizeof(struct sockaddr_in));
+		addr4->sin_family = AF_INET;
+		addr4->sin_port = htons(port);
+		return uv_inet_pton(AF_INET, host, (void*)&addr4->sin_addr).code;
+	} else {
+		struct sockaddr_in6* addr6 = (struct sockaddr_in6*)addr;
+		memset(addr6, 0, sizeof(struct sockaddr_in6));
+		addr6->sin6_family = AF_INET6;
+		addr6->sin6_port = htons(port);
+		return uv_inet_pton(AF_INET6, host, (void*)&addr6->sin6_addr).code;
+	}
 }

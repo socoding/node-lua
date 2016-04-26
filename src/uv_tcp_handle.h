@@ -78,6 +78,7 @@ public:
 	friend class lua_tcp_socket_handle_t;
 private:
 	static void on_connect(uv_connect_t* req, int status);
+	static void on_resolve(uv_getaddrinfo_t* req, int status, struct addrinfo* res);
 	static void on_write(uv_write_t* req, int status);
 	static void on_read(uv_stream_t* stream, ssize_t nread, uv_buf_t buf);
 	static uv_buf_t on_read_alloc(uv_handle_t* handle, size_t suggested_size); /* return shared read buffer */

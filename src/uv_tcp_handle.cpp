@@ -97,6 +97,12 @@ void uv_tcp_listen_handle_t::accept(request_tcp_accept_t& request)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define LARGE_UNCOMPLETE_LIMIT	(1 * 1024)
 
+typedef struct {
+	uv_getaddrinfo_t m_request;
+	uv_tcp_t *m_client;
+	uint32_t m_session;
+} uv_addr_resolver_t;
+
 uv_tcp_socket_handle_t::~uv_tcp_socket_handle_t()
 {
 	clear_read_cached_buffers();
@@ -123,6 +129,29 @@ void uv_tcp_socket_handle_t::on_connect(uv_connect_t* req, int status)
 	nl_free(req);
 }
 
+void uv_tcp_socket_handle_t::on_resolve(uv_getaddrinfo_t* req, int status, struct addrinfo* res)
+{
+	uv_addr_resolver_t* resolver = (uv_addr_resolver_t*)(req->data);
+	uv_tcp_socket_handle_t *client_handle = (uv_tcp_socket_handle_t*)resolver->m_client;
+	if (status == 0) {
+		struct sockaddr_in* addr = (struct sockaddr_in*)res->ai_addr;
+		uv_tcp_t* client = (uv_tcp_t*)client_handle->m_handle;
+		uv_connect_t* req = (uv_connect_t*)nl_malloc(sizeof(*req));
+		req->data = (void*)resolver->m_session;
+		if ((addr->sin_family == AF_INET) ? uv_tcp_connect(req, client, *(struct sockaddr_in*)addr, on_connect) != 0 : uv_tcp_connect6(req, client, *(struct sockaddr_in6*)addr, on_connect) != 0) {
+			singleton_ref(node_lua_t).context_send(client_handle->m_source, 0, resolver->m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
+			uv_close((uv_handle_t*)client, on_closed);
+			nl_free(req);
+		}
+		nl_free(resolver);
+		uv_freeaddrinfo(res);
+	} else {
+		singleton_ref(node_lua_t).context_send(client_handle->m_source, 0, resolver->m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
+		uv_close((uv_handle_t*)client_handle, on_closed);
+		nl_free(resolver);
+	}
+}
+
 void uv_tcp_socket_handle_t::connect_tcp(request_tcp_connect_t& request)
 {
 	uv_tcp_t *client = (uv_tcp_t*)m_handle;
@@ -135,12 +164,39 @@ void uv_tcp_socket_handle_t::connect_tcp(request_tcp_connect_t& request)
 			return;
 		}
 	}
-	uv_connect_t* req = (uv_connect_t*)nl_malloc(sizeof(*req));
-	req->data = (void*)request.m_session;
-	if (!request.m_remote_ipv6 ? uv_tcp_connect(req, client, uv_ip4_addr(remote_host, request.m_remote_port), on_connect) != 0 : uv_tcp_connect6(req, client, uv_ip6_addr(remote_host, request.m_remote_port), on_connect) != 0) {
-		singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
+	union {
+		sockaddr_in addr4;
+		sockaddr_in6 addr6;
+	} sock_addr;
+	uv_err_code err = host_sockaddr(request.m_remote_ipv6, remote_host, request.m_remote_port, (struct sockaddr*)&sock_addr);
+	if (err == UV_OK) {
+		uv_connect_t* req = (uv_connect_t*)nl_malloc(sizeof(*req));
+		req->data = (void*)request.m_session;
+		if (!request.m_remote_ipv6 ? uv_tcp_connect(req, client, sock_addr.addr4, on_connect) != 0 : uv_tcp_connect6(req, client, sock_addr.addr6, on_connect) != 0) {
+			singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
+			uv_close((uv_handle_t*)client, on_closed);
+			nl_free(req);
+		}
+	} else if (err == UV_EINVAL) { //try resolve host name
+		char port[8];
+		struct addrinfo hints;
+		hints.ai_family = !request.m_remote_ipv6 ? AF_INET : AF_INET6;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_protocol = IPPROTO_TCP;
+		hints.ai_flags = 0;
+		uv_addr_resolver_t* resolver = (uv_addr_resolver_t*)nl_malloc(sizeof(uv_addr_resolver_t));
+		itoa(request.m_remote_port, port, 10);
+		resolver->m_client = client;
+		resolver->m_session = request.m_session;
+		resolver->m_request.data = resolver;
+		if (uv_getaddrinfo(client->loop, &resolver->m_request, on_resolve, remote_host, port, &hints) != 0) {
+			singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
+			uv_close((uv_handle_t*)client, on_closed);
+			nl_free(resolver);
+		}
+	} else {
+		singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_CONNECT, err);
 		uv_close((uv_handle_t*)client, on_closed);
-		nl_free(req);
 	}
 }
 

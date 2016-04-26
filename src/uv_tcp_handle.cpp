@@ -133,9 +133,9 @@ void uv_tcp_socket_handle_t::on_resolve(uv_getaddrinfo_t* req, int status, struc
 {
 	uv_addr_resolver_t* resolver = (uv_addr_resolver_t*)(req->data);
 	uv_tcp_socket_handle_t *client_handle = (uv_tcp_socket_handle_t*)resolver->m_client;
+	uv_tcp_t* client = (uv_tcp_t*)client_handle->m_handle;
 	if (status == 0) {
 		struct sockaddr_in* addr = (struct sockaddr_in*)res->ai_addr;
-		uv_tcp_t* client = (uv_tcp_t*)client_handle->m_handle;
 		uv_connect_t* req = (uv_connect_t*)nl_malloc(sizeof(*req));
 		req->data = (void*)resolver->m_session;
 		if ((addr->sin_family == AF_INET) ? uv_tcp_connect(req, client, *(struct sockaddr_in*)addr, on_connect) != 0 : uv_tcp_connect6(req, client, *(struct sockaddr_in6*)addr, on_connect) != 0) {
@@ -147,7 +147,7 @@ void uv_tcp_socket_handle_t::on_resolve(uv_getaddrinfo_t* req, int status, struc
 		uv_freeaddrinfo(res);
 	} else {
 		singleton_ref(node_lua_t).context_send(client_handle->m_source, 0, resolver->m_session, RESPONSE_TCP_CONNECT, singleton_ref(network_t).last_error());
-		uv_close((uv_handle_t*)client_handle, on_closed);
+		uv_close((uv_handle_t*)client, on_closed);
 		nl_free(resolver);
 	}
 }

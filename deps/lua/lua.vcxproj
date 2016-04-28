@@ -55,7 +55,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>$(SolutionDir)install.bat $(SolutionDir) $(ProjectName)</Command>
+      <Command>copy  $(OutDir)$(TargetName)$(TargetExt) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -1,7 +1,15 @@
 --print(package.path)
 -- print(context.parent)
--- package.path = package.path .. ";..\\lualib\\?.lua"
--- package.cpath = package.cpath .. ";..\\clib\\?.dll"
+package.path = package.path .. ";..\\lualib\\?.lua"
+package.cpath = package.cpath .. ";..\\luaclib\\?.dll"
+
+print(require "mime")
+print(require "cjson")
+print(require "mime")
+print(require "mime")
+
+
+do return end
 
 -- local redis = require 'redis'
 -- local client = redis.connect("10.4.0.32", 6379, 2)

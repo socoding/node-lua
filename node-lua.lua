@@ -31,3 +31,33 @@ You can link liblua.a statically into your main program but you have to export i
 That's how the Lua interpreter is built in Linux.
 
 A node completation of lua which support sync and async remote procedure call, and task-multiplexing support(in muti-thread mode with no useless wakeup)
+
+
+未初始化的指针错误：
+有一个选择打开和关闭SDL检查的位置就是：项目属性->配置属性->C/C++->SDL检查，选测是或者否。
+
+按照编译错误的提示来看应该是编译器没有识别inline参数。
+查阅了一下inline是c++里面的东西，在c里面使用是会发生错误。
+#define inline __inline
+
+Makefile 添加宏定义: -DDEBUG
+传递参数: make PLATFORM=aaaa
+
+VS中添加预处理宏的方法：
+除了在.c及.h中添加宏定义之外，还可以采用如下方法添加宏定义：
+1、若只需要定义一个宏(如#define DEBUG)，可以右键点击工程-->属性-->c/c++-->预处理器-->预处理器定义，点击下拉框中的编辑，输入想要定义的宏；
+2、如果还需要定义宏的内容(如#define inline __inline)，可以右键点击工程-->属性-->c/c++-->命令行，在其它选项中输入如下内容： /D"inline"=__inline 。
+
+
+snprintf()函数并不是标准c/c++中规定的函数，所以在许多编译器中，厂商提供了其相应的实现的版本。
+在gcc中，该函数名称就 snprintf()，而在VS中称为 _snprintf。 
+所以在需要使用 snprintf()时改成_snprintf就可以了，或则在预编译处加入：
+#if _MSC_VER
+#define snprintf _snprintf
+#define strcasecmp  stricmp
+#define strncasecmp  strnicmp 
+#endif
+
+#define __STDC_LIMIT_MACROS
+
+

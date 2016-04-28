@@ -3,10 +3,11 @@
 package.path = package.path .. ";..\\lualib\\?.lua"
 package.cpath = package.cpath .. ";..\\luaclib\\?.dll"
 
-print(require "mime")
 print(require "cjson")
+print(require "lfs")
+print(require "lpeg")
 print(require "mime")
-print(require "mime")
+print(require "protobuf")
 
 
 do return end

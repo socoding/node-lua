@@ -53,6 +53,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\deps\lua;</AdditionalLibraryDirectories>
       <AdditionalDependencies>nlua.lib</AdditionalDependencies>
+      <ModuleDefinitionFile>lpeg.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>copy  $(OutDir)$(TargetName)$(TargetExt) $(SolutionDir)</Command>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{61e8bb3e-7ce4-4806-95b8-6f7000191bff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fpconv.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="lua_cjson.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="strbuf.c">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fpconv.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="strbuf.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

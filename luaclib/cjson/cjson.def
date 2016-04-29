@@ -1,0 +1,3 @@
+LIBRARY 
+    EXPORTS
+        luaopen_cjson

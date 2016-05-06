@@ -20,6 +20,13 @@ context_mgr_t::~context_mgr_t()
 	}
 }
 
+void context_mgr_t::set_handle_index(uint32_t index)
+{
+	uv_rwlock_wrlock(&m_lock);
+	m_handle_index = index;
+	uv_rwlock_wrunlock(&m_lock);
+}
+
 void context_mgr_t::expand_slot()
 {
 	uint32_t new_cap = m_slot_cap << 2;
@@ -35,7 +42,7 @@ void context_mgr_t::expand_slot()
 	m_slot_cap = new_cap;
 }
 
-bool context_mgr_t::register_context(context_t* ctx, int32_t parent)
+bool context_mgr_t::register_context(context_t* ctx, uint32_t parent)
 {
 	uv_rwlock_wrlock(&m_lock);
 	if (m_ctx_size == MAX_CTX_SIZE || ctx->get_handle() != 0) {

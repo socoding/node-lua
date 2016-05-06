@@ -96,6 +96,7 @@
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\context.h" />
+    <ClInclude Include="src\context_log.h" />
     <ClInclude Include="src\context_lua.h" />
     <ClInclude Include="src\context_mgr.h" />
     <ClInclude Include="src\endian_conv.h" />
@@ -128,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="src\buffer.cpp" />
     <ClCompile Include="src\context.cpp" />
+    <ClCompile Include="src\context_log.cpp" />
     <ClCompile Include="src\context_lua.cpp" />
     <ClCompile Include="src\context_mgr.cpp" />
     <ClCompile Include="src\endian_conv.cpp" />

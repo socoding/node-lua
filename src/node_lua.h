@@ -131,9 +131,7 @@ public:
 			m_ctx_mgr->retire_context(ctx);
 		}
 		ctx->release();
-		if (m_ctx_mgr->get_context_count() == 0) {
-			m_worker_mgr->stop();
-		}
+		context_check_alive(parent);
 		return 0;
 	}
 
@@ -173,8 +171,19 @@ public:
 		ctx->deinit(buffer);	/* ctx->m_handle is valid in this function. */
 		ctx->set_inited(false);
 		m_ctx_mgr->retire_context(ctx);
-		if (m_ctx_mgr->get_context_count() == 0) {
+		context_check_alive(src_handle);
+	}
+
+	void context_check_alive(uint32_t src_handle)
+	{
+		uint32_t ctx_size = m_ctx_mgr->get_context_count();
+		if (ctx_size == 1) {
+			context_destroy(m_logger, src_handle, NULL);
+			return;
+		}
+		if (ctx_size == 0) {
 			m_worker_mgr->stop();
+			return;
 		}
 	}
 
@@ -182,6 +191,7 @@ private:
 	network_t *m_network;
 	context_mgr_t *m_ctx_mgr;
 	worker_mgr_t *m_worker_mgr;
+	uint32_t m_logger;
 
 public:
 	static int32_t m_cpu_count;

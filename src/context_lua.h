@@ -161,6 +161,7 @@ public:
 	static int32_t context_reply(lua_State *L);
 	static int32_t context_recv(lua_State *L);
 	static int32_t context_wait(lua_State *L);
+	static int32_t context_log(lua_State *L);
 	/************ the above are context lua api ************/
 
 public:

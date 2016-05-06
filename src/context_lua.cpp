@@ -891,8 +891,11 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 		singleton_ref(node_lua_t).context_destroy(src_handle, src_handle, lua_tostring(L, 1));
 		return 0;
 	}
-	int32_t handle = luaL_checkunsigned(L, 1);
-	if (handle > 0) {
+	uint32_t handle = luaL_checkunsigned(L, 1);
+	if (handle <= 1) {
+		luaL_error(L, "illegal ");
+	}
+	if (handle > 1) {
 		singleton_ref(node_lua_t).context_destroy(handle, src_handle, lua_tostring(L, 2));
 	}
 	return 0;
@@ -1288,6 +1291,13 @@ int32_t context_lua_t::context_thread(lua_State *L)
 	return 1;
 }
 
+int32_t context_lua_t::context_log(lua_State *L)
+{
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+
+	return 0;
+}
+
 int luaopen_context(lua_State *L)
 {
 	luaL_Reg l[] = {
@@ -1301,6 +1311,7 @@ int luaopen_context(lua_State *L)
 			{ "reply", context_lua_t::context_reply },
 			{ "recv", context_lua_t::context_recv },
 			{ "wait", context_lua_t::context_wait },
+			{ "log", context_lua_t::context_log },
 			{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

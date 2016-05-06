@@ -7,9 +7,10 @@ class context_mgr_t {
 public:
 	context_mgr_t();
 	~context_mgr_t();
-	bool register_context(context_t* ctx, int32_t parent);
+	bool register_context(context_t* ctx, uint32_t parent);
 	void retire_context(context_t* ctx);
 	context_t* grab_context(uint32_t handle);
+	void set_handle_index(uint32_t index);
 	uint32_t get_context_count() const { return m_ctx_size; }
 private:
 	void expand_slot();

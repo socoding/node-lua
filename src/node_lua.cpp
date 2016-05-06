@@ -1,6 +1,7 @@
 #include "common.h"
 #include "context.h"
 #include "network.h"
+#include "context_log.h"
 #include "context_lua.h"
 #include "context_mgr.h"
 #include "worker_mgr.h"
@@ -36,7 +37,12 @@ node_lua_t::node_lua_t(int argc, char* argv[], char* env[])
 	m_worker_mgr = new worker_mgr_t();
 	m_network->start();
 	m_worker_mgr->start();
-	context_create<context_lua_t>(0, argc, argv, env);
+	m_ctx_mgr->set_handle_index(MAX_CTX_SIZE);
+	m_logger = context_create<context_log_t>(0, 0, NULL, NULL);
+	if (m_logger > 0) {
+		m_ctx_mgr->set_handle_index(1);
+		context_create<context_lua_t>(0, argc, argv, env);
+	}
 	m_worker_mgr->wait();
 	m_network->stop();
 	m_network->wait();

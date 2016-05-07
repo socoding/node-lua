@@ -561,7 +561,18 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 		create_buffer(L, message_buffer(message));
 		return;
 	case STRING:
-		lua_pushstring(L, message_string(message));
+		if (message_string(message)) {
+			lua_pushstring(L, message_string(message));
+		} else {
+			lua_pushstring(L, "");
+		}
+		return;
+	case SDS:
+		if (message_sds(message)) {
+			lua_pushlstring(L, message_sds(message), sdslen(message_sds(message)));
+		} else {
+			lua_pushstring(L, "");
+		}
 		return;
 	case BSON:
 		if (message_bson(message)->extract) {
@@ -906,6 +917,8 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 	buffer_t* buffer;
 	bson_t* bson_ptr;
 	int32_t* bson_data;
+	const char* data;
+	uint32_t length;
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
 		if (lua_isinteger(L, idx)) {
@@ -918,8 +931,9 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 		message.m_source = lua_get_context_handle(L);
 		return 1;
 	case LUA_TSTRING:
-		message.m_type = MAKE_MESSAGE_TYPE(msg_type, STRING);
-		message.m_data.m_string = nl_strdup(lua_tostring(L, idx));
+		data = lua_tolstring(L, idx, &length);
+		message.m_type = MAKE_MESSAGE_TYPE(msg_type, SDS);	
+		message.m_data.m_sds = sdsnewlen(data, length);
 		message.m_source = lua_get_context_handle(L);
 		return 1;
 	case LUA_TBOOLEAN:

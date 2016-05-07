@@ -5,6 +5,7 @@
 #include "context_mgr.h"
 #include "worker_mgr.h"
 #include "context.h"
+#include "sds.h"
 
 class message_t;
 class network_t;
@@ -47,6 +48,27 @@ public:
 	{
 		char* str = data ? nl_strdup(data) : NULL;
 		message_t msg(source, session, msg_type, str);
+		if (context_send(ctx, msg))
+			return true;
+		message_clean(msg);
+		return false;
+	}
+
+	/* specific context send interface */
+	FORCE_INLINE bool context_send_sds_safe(uint32_t handle, uint32_t source, int session, int msg_type, const char *data, int32_t length)
+	{
+		char* str = data ? sdsnewlen(data, length) : NULL;
+		message_t msg(source, session, msg_type, str, length);
+		if (context_send(handle, msg))
+			return true;
+		message_clean(msg);
+		return false;
+	}
+
+	FORCE_INLINE bool context_send_sds_safe(context_t* ctx, uint32_t source, int session, int msg_type, const char *data, int32_t length)
+	{
+		char* str = data ? sdsnewlen(data, length) : NULL;
+		message_t msg(source, session, msg_type, str, length);
 		if (context_send(ctx, msg))
 			return true;
 		message_clean(msg);

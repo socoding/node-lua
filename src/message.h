@@ -2,6 +2,7 @@
 #define MESSAGE_H_
 #include "buffer.h"
 #include "lbson.h"
+#include "sds.h"
 
 #define  MESSAGE_TYPE_BIT	24
 #define	 MAKE_MESSAGE_TYPE(mtype, dtype) (((uint32_t)(dtype) << MESSAGE_TYPE_BIT) | ((mtype) & (((uint32_t)1 << MESSAGE_TYPE_BIT) - 1)))
@@ -32,6 +33,7 @@ typedef union data_t {
 	int64_t			  m_integer;
 	buffer_t		  m_buffer;
 	char			 *m_string;
+	char			 *m_sds;
 	bson_t			 *m_bson;
 	message_array_t  *m_array;
 	int32_t			  m_error;
@@ -70,6 +72,7 @@ enum message_type {
 #define message_integer(msg)		((msg).m_data.m_integer)
 #define message_buffer(msg)			((msg).m_data.m_buffer)
 #define message_string(msg)			((msg).m_data.m_string)
+#define message_sds(msg)			((msg).m_data.m_sds)
 #define message_bson(msg)			((msg).m_data.m_bson)
 #define message_array(msg)			((msg).m_data.m_array)
 #define message_error(msg)			((msg).m_data.m_error)
@@ -82,6 +85,7 @@ enum message_type {
 #define message_is_integer(msg)		(INTEGER == message_data_type(msg))
 #define message_is_buffer(msg)		(BUFFER == message_data_type(msg))
 #define message_is_string(msg)		(STRING == message_data_type(msg))
+#define message_is_sds(msg)			(SDS == message_data_type(msg))
 #define message_is_bson(msg)		(BSON == message_data_type(msg))
 #define message_is_array(msg)		(ARRAY == message_data_type(msg))
 #define message_is_error(msg)		(TERROR == message_data_type(msg))
@@ -96,6 +100,11 @@ enum message_type {
 											if ((msg).m_data.m_string) {							\
 												nl_free((msg).m_data.m_string);						\
 												(msg).m_data.m_string = NULL;						\
+											}														\
+										} else if (message_is_sds(msg)) {                    		\
+											if ((msg).m_data.m_sds) {								\
+												sdsfree((msg).m_data.m_sds);						\
+												(msg).m_data.m_sds = NULL;							\
 											}														\
 										} else if (message_is_bson(msg)) {					     	\
 											if ((msg).m_data.m_bson) {								\
@@ -152,9 +161,13 @@ public:
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, TERROR)) { m_data.m_error = err; }
 
-	message_t(uint32_t source, int32_t session, uint32_t msg_type, bson_t* bson)
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, bson_t *bson)
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, BSON)) { m_data.m_bson = bson; }
+
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, char *string, int32_t length)
+			: m_source(source), m_session(session),
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, SDS)) { m_data.m_sds = string; }
 
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, message_array_t* array)
 			: m_source(source), m_session(session),

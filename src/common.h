@@ -37,13 +37,9 @@
 #include "latomic.h"
 #include "utils.h"
 #include "errors.h"
+#include "nlmalloc.h"
 
 #define nl			(singleton_ref(node_lua_t))
-#define nl_malloc	malloc
-#define nl_free		free
-#define nl_calloc	calloc
-#define nl_realloc	realloc
-#define nl_strdup	strdup
 
 #if defined __GNUC__
 #define likely(x) __builtin_expect ((x), 1)

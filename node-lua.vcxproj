@@ -111,10 +111,12 @@
     <ClInclude Include="src\message.h" />
     <ClInclude Include="src\message_queue.h" />
     <ClInclude Include="src\network.h" />
+    <ClInclude Include="src\nlmalloc.h" />
     <ClInclude Include="src\node_lua.h" />
     <ClInclude Include="src\ref_sessions.h" />
     <ClInclude Include="src\ref_sessions_mgr.h" />
     <ClInclude Include="src\request.h" />
+    <ClInclude Include="src\sds.h" />
     <ClInclude Include="src\singleton.h" />
     <ClInclude Include="src\uv_tcp_handle.h" />
     <ClInclude Include="src\lua_tcp_handle.h" />
@@ -148,6 +150,7 @@
     <ClCompile Include="src\node_lua.cpp" />
     <ClCompile Include="src\ref_sessions.cpp" />
     <ClCompile Include="src\ref_sessions_mgr.cpp" />
+    <ClCompile Include="src\sds.cpp" />
     <ClCompile Include="src\uv_tcp_handle.cpp" />
     <ClCompile Include="src\lua_tcp_handle.cpp" />
     <ClCompile Include="src\uv_timer_handle.cpp" />

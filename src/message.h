@@ -19,9 +19,10 @@ enum data_type {
 	INTEGER			= 4, //support after lua53
 	BUFFER			= 5, //need to be freed
 	STRING			= 6, //need to be freed
-	BSON			= 7, //need to be freed
-	ARRAY			= 8, //need to be freed
-	TERROR			= 9  //
+	SDS				= 7, //need to be freed
+	BSON			= 8, //need to be freed
+	ARRAY			= 9, //need to be freed
+	TERROR			= 10 //
 };
 
 typedef union data_t {

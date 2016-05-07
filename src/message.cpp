@@ -1,7 +1,7 @@
 #include "message.h"
 
 message_array_t* message_array_create(uint32_t count) {
-	message_array_t* array = (message_array_t*)nl_calloc(1, sizeof(message_array_t) + (count - 1)*sizeof(message_t));
+	message_array_t* array = (message_array_t*)nl_calloc(sizeof(message_array_t) + (count - 1)*sizeof(message_t));
 	array->m_count = count;
 	return array;
 }

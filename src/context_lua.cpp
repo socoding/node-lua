@@ -63,7 +63,7 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 	}
 	lua_pushstring(m_lstate, lua_path);
 	lua_pushstring(m_lstate, lua_cpath);
-	char* args = (char*)nl_calloc(total_length, 1);
+	char* args = (char*)nl_calloc(total_length);
 	char* argp = args;
 	for (int32_t i = 0; i < argc; ++i) {
 		memcpy(argp, argv[i], lengths[i]);

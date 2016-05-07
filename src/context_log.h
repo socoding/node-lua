@@ -11,6 +11,8 @@ public:
 	bool deinit(const char *arg);
 	void on_received(message_t& message);
 	void on_dropped(message_t& message);
+private:
+	void log_message(message_t& message);
 };
 
 #endif

@@ -61,7 +61,9 @@ enum message_type {
 	RESPONSE_UDP_WRITE,
 	RESPONSE_UDP_CLOSING,
 	RESPONSE_HANDLE_CLOSE,
-	RESPONSE_TIMEOUT
+	RESPONSE_TIMEOUT,
+	////////////////////////////////////////
+	LOG_MESSAGE
 };
 
 #define message_raw_type(msg)		(MESSAGE_TYPE((msg).m_type))

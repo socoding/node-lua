@@ -29,7 +29,7 @@ void node_lua_t::init_once()
 	m_inited = true;
 }
 
-node_lua_t::node_lua_t(int argc, char* argv[], char* env[])
+node_lua_t::node_lua_t(int argc, char* argv[], char* env[]) : m_logger(NULL)
 {
 	node_lua_t::init_once();
 	m_network = new network_t();
@@ -37,15 +37,23 @@ node_lua_t::node_lua_t(int argc, char* argv[], char* env[])
 	m_worker_mgr = new worker_mgr_t();
 	m_network->start();
 	m_worker_mgr->start();
+	
+	/* start basic context */
 	m_ctx_mgr->set_handle_index(MAX_CTX_SIZE);
-	m_logger = context_create<context_log_t>(0, 0, NULL, NULL);
-	if (m_logger > 0) {
+	uint32_t logger_handle = context_create<context_log_t>(0, 0, NULL, NULL);
+	if (logger_handle > 0) {
+		m_logger = m_ctx_mgr->grab_context(logger_handle);
 		m_ctx_mgr->set_handle_index(1);
 		context_create<context_lua_t>(0, argc, argv, env);
 	}
+
 	m_worker_mgr->wait();
 	m_network->stop();
 	m_network->wait();
+	if (m_logger) {
+		m_logger->release();
+		m_logger = NULL;
+	}
 	context_lua_t::unload();
 }
 

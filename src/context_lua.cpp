@@ -903,12 +903,10 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 		return 0;
 	}
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle <= 1) {
-		luaL_error(L, "illegal ");
+	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to destroy an illegal context:0x%08x", handle);
 	}
-	if (handle > 1) {
-		singleton_ref(node_lua_t).context_destroy(handle, src_handle, lua_tostring(L, 2));
-	}
+	singleton_ref(node_lua_t).context_destroy(handle, src_handle, lua_tostring(L, 2));
 	return 0;
 }
 
@@ -1014,6 +1012,9 @@ int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t count, u
 int32_t context_lua_t::context_send(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
+	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to send to an illegal context:0x%08x", handle);
+	}
 	int32_t top = lua_gettop(L);
 	luaL_checkany(L, 2);
 	int32_t ret = context_send(L, 2, top - 1, handle, LUA_REFNIL, CONTEXT_QUERY);
@@ -1072,6 +1073,9 @@ int32_t context_lua_t::context_query_yield_continue(lua_State* L, int status, lu
 int32_t context_lua_t::context_query(lua_State *L, bool timed_query)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
+	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to query to an illegal context:0x%08x", handle);
+	}
 	int32_t top = lua_gettop(L);
 	uint64_t timeout = 0;
 	if (timed_query) {
@@ -1130,6 +1134,9 @@ int32_t context_lua_t::context_timed_query(lua_State *L)
 int32_t context_lua_t::context_reply(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
+	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to reply to an illegal context:0x%08x", handle);
+	}
 	int32_t session = luaL_checkinteger(L, 2);
 	luaL_checkany(L, 3);
 	int32_t ret = context_send(L, 3, lua_gettop(L) - 2, handle, session, CONTEXT_REPLY);
@@ -1193,6 +1200,9 @@ int32_t context_lua_t::context_recv(lua_State *L)
 {
 	context_lua_t* lctx = (context_lua_t*)lua_get_context(L);
 	uint32_t handle = luaL_checkunsigned(L, 1);
+	if (handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to recv from an illegal context:0x%08x", handle);
+	}
 	int32_t top = lua_gettop(L);
 	uint64_t timeout = 0;
 	if (top >= 2) { //nonblocking
@@ -1250,9 +1260,8 @@ int32_t context_lua_t::context_wait(lua_State *L)
 {
 	context_lua_t* lctx = (context_lua_t*)lua_get_context(L);
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0) {
-		luaL_error(L, "invalid context handle to wait");
-		return 0;
+	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+		luaL_error(L, "attempt to wait an illegal context:0x%08x", handle);
 	}
 	if (handle == lctx->get_handle()) {
 		luaL_error(L, "can't wait self to die away");

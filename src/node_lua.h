@@ -200,7 +200,7 @@ public:
 	{
 		uint32_t ctx_size = m_ctx_mgr->get_context_count();
 		if (ctx_size == 1) {
-			context_destroy(m_logger, src_handle, NULL);
+			context_destroy(m_logger->get_handle(), src_handle, NULL);
 			return;
 		}
 		if (ctx_size == 0) {
@@ -208,12 +208,16 @@ public:
 			return;
 		}
 	}
+	
+	uint32_t get_logger_handle() const {
+		return m_logger->get_handle();
+	}
 
 private:
 	network_t *m_network;
 	context_mgr_t *m_ctx_mgr;
 	worker_mgr_t *m_worker_mgr;
-	uint32_t m_logger;
+	context_t *m_logger;
 
 public:
 	static int32_t m_cpu_count;

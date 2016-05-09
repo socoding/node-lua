@@ -38,6 +38,21 @@ void context_log_t::on_dropped(message_t& message)
 
 void context_log_t::log_message(message_t& message)
 {
-	//to be fixed
+	switch (message_data_type(message)) {
+	case SDS:
+		if (message_sds(message)) {
+			lua_writestring(message_sds(message), sdslen(message_sds(message)));
+			lua_writeline();
+		}
+		break;
+	case STRING:
+		if (message_string(message)) {
+			lua_writestring(message_string(message), strlen(message_string(message)));
+			lua_writeline();
+		}
+		break;
+	default:
+		break;
+	}
 }
 

@@ -70,6 +70,10 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
+context.log(1, {})
+
+do return end
+
 local result, server = udp.open("127.0.0.1", 8081)
 server:read(function(result, buffer, remote_addr, remote_port, remote_ipv6, server)
 	print("server read callback: ", result, buffer, remote_addr, remote_port, remote_ipv6, server)

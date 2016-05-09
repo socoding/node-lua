@@ -179,7 +179,7 @@ public:
 		uint32_t handle = ctx->get_handle();
 		if (handle == 0) return;
 
-		char buffer[512] = { '\0' };
+		char buffer[1024] = { '\0' };
 		int32_t used = sprintf(buffer, "killed by context:0x%08x", src_handle);
 		if (reason) {
 			strcat(buffer + used, ", ");
@@ -209,8 +209,46 @@ public:
 		}
 	}
 	
-	uint32_t get_logger_handle() const {
-		return m_logger->get_handle();
+	bool log_sds_release(uint32_t src_handle, sds buffer) {
+		message_t message(src_handle, 0, LOG_MESSAGE, (char*)buffer, sdslen(buffer));
+		if (m_logger && context_send(m_logger, message)) {
+			return true;
+		}
+		sdsfree(buffer);
+		return false;
+	}
+
+	bool log_fmt(uint32_t src_handle, const char* fmt, ...) {
+		if (m_logger && fmt) {
+			char *buf = NULL;
+			size_t buflen = 64;
+			va_list argp;
+			va_list copy;
+			va_start(argp, fmt);
+			while (1) {
+				buf = (char *)nl_malloc(buflen);
+				if (buf == NULL) break;
+				buf[buflen - 2] = '\0';
+				va_copy(copy, argp);
+				vsnprintf(buf, buflen, fmt, copy);
+				if (buf[buflen - 2] != '\0') {
+					nl_free(buf);
+					buflen *= 2;
+					continue;
+				}
+				break;
+			}
+			va_end(argp);
+			if (buf && context_send(m_logger, src_handle, 0, LOG_MESSAGE, buf)) {
+				return true;
+			}
+			nl_free(buf);
+		}
+		return false;
+	}
+
+	FORCE_INLINE uint32_t is_handle_illegal(uint32_t handle) const {
+		return handle == m_logger->get_handle();
 	}
 
 private:

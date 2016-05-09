@@ -35,12 +35,12 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 {
 	m_lstate = luaL_newstateex(this);
 	if (argc <= 0) {
-		printf("[error] context:0x%08x init failed: lua file is needed to initialize lua context\n", m_handle);			/* to be implemented : put reason to another context and output it */
+		nl.log_fmt(m_handle, "[error] context:0x%08x init failed: lua file is needed to initialize lua context", m_handle);
 		return false;
 	}
 	int32_t envc = 2;
 	if (argc > MAX_CTX_ARGC || !lua_checkstack(m_lstate, argc + envc)) {
-		printf("[error] context:0x%08x init failed: too many arguments to initialize lua context %s\n", m_handle, argv[0]); /* to be implemented : put reason to another context and output it */
+		nl.log_fmt(m_handle, "[error] context:0x%08x init failed: too many arguments to initialize lua context %s", m_handle, argv[0]);
 		return false;
 	}
 	int32_t total_length = 0;
@@ -70,7 +70,7 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 		argp += lengths[i];
 		*argp++ = (i != argc - 1) ? ' ' : '\0';
 	}
-	printf("[alert] context:0x%08x init: %s\n", m_handle, args); /* to be implemented : put reason to another context and output it */
+	nl.log_fmt(m_handle, "[alert] context:0x%08x init: %s", m_handle, args);
 	nl_free(args);
 	return singleton_ref(node_lua_t).context_send(this, m_handle, 0, LUA_CTX_INIT, (int64_t)argc);
 }
@@ -85,7 +85,7 @@ bool context_lua_t::deinit(const char *arg)
 		lua_close(m_lstate);
 		m_lstate = NULL;
 	}
-	printf("[alert] context:0x%08x deinit: %s\n", m_handle, arg);	/* to be implemented : put reason to another context and output it */
+	nl.log_fmt(m_handle, "[alert] context:0x%08x deinit: %s", m_handle, arg);
 	return true;
 }
 
@@ -394,8 +394,7 @@ int32_t context_lua_t::lua_ref_callback_entry_finish(lua_State *L, int32_t statu
 	if (!status) { /* error message is at top */
 		uint32_t handle = lua_get_context_handle(L);
 		const char* error = lua_tostring(L, -1);
-		/* to be implemented : put reason to another context and output it */
-		printf("[error] context:0x%08x error: %s\n", handle, error ? error : "unknown error");
+		nl.log_fmt(handle, "[error] context:0x%08x error: %s", handle, error ? error : "unknown error");
 	}
 	return 0; //return none result out!!!
 }
@@ -903,7 +902,7 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 		return 0;
 	}
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (handle == 0 || singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to destroy an illegal context:0x%08x", handle);
 	}
 	singleton_ref(node_lua_t).context_destroy(handle, src_handle, lua_tostring(L, 2));
@@ -1012,7 +1011,7 @@ int32_t context_lua_t::context_send(lua_State *L, int32_t idx, uint32_t count, u
 int32_t context_lua_t::context_send(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (handle == 0 || singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to send to an illegal context:0x%08x", handle);
 	}
 	int32_t top = lua_gettop(L);
@@ -1073,7 +1072,7 @@ int32_t context_lua_t::context_query_yield_continue(lua_State* L, int status, lu
 int32_t context_lua_t::context_query(lua_State *L, bool timed_query)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (handle == 0 || singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to query to an illegal context:0x%08x", handle);
 	}
 	int32_t top = lua_gettop(L);
@@ -1134,7 +1133,7 @@ int32_t context_lua_t::context_timed_query(lua_State *L)
 int32_t context_lua_t::context_reply(lua_State *L)
 {
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (handle == 0 || singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to reply to an illegal context:0x%08x", handle);
 	}
 	int32_t session = luaL_checkinteger(L, 2);
@@ -1200,7 +1199,7 @@ int32_t context_lua_t::context_recv(lua_State *L)
 {
 	context_lua_t* lctx = (context_lua_t*)lua_get_context(L);
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to recv from an illegal context:0x%08x", handle);
 	}
 	int32_t top = lua_gettop(L);
@@ -1260,7 +1259,7 @@ int32_t context_lua_t::context_wait(lua_State *L)
 {
 	context_lua_t* lctx = (context_lua_t*)lua_get_context(L);
 	uint32_t handle = luaL_checkunsigned(L, 1);
-	if (handle == 0 || handle == singleton_ref(node_lua_t).get_logger_handle()) {
+	if (handle == 0 || singleton_ref(node_lua_t).is_handle_illegal(handle)) {
 		luaL_error(L, "attempt to wait an illegal context:0x%08x", handle);
 	}
 	if (handle == lctx->get_handle()) {
@@ -1317,7 +1316,27 @@ int32_t context_lua_t::context_thread(lua_State *L)
 int32_t context_lua_t::context_log(lua_State *L)
 {
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
-
+	int32_t n = lua_gettop(L);  /* number of arguments */
+	int32_t i;
+	sds buffer = sdsnewlen(NULL, 64);
+	sdsclear(buffer);
+	lua_getglobal(L, "tostring");
+	for (i = 1; i <= n; i++) {
+		const char *s;
+		size_t l;
+		lua_pushvalue(L, -1);  /* function to be called */
+		lua_pushvalue(L, i);   /* value to print */
+		lua_call(L, 1, 1);
+		s = lua_tolstring(L, -1, &l);  /* get result */
+		if (s == NULL) {
+			sdsfree(buffer);
+			return luaL_error(L, "'tostring' must return a string to 'context.log'");
+		}
+		if (i > 1) buffer = sdscatlen(buffer, "\t", 1);
+		buffer = sdscatlen(buffer, s, l);
+		lua_pop(L, 1);  /* pop result */
+	}
+	singleton_ref(node_lua_t).log_sds_release(lctx->get_handle(), buffer);
 	return 0;
 }
 

@@ -112,6 +112,7 @@ public:
 	static int32_t lua_ref_callback_entry(lua_State *L);				/* for lua_ref_callback */
 	static int32_t lua_ref_callback_entry_continue(lua_State *L, int status, lua_KContext ctx);		/* for lua_ref_callback */
 	static int32_t lua_ref_callback_entry_finish(lua_State *L, int32_t status);
+	static int32_t lua_ref_callback_error_handler(lua_State *L);		/* for lua_ref_callback */
 
 public:
 	static uint32_t lua_get_context_handle(lua_State *L);

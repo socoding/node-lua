@@ -70,7 +70,8 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
-context.log(1, {})
+assert(false, {})
+-- context.log(1, {}) --test bson
 
 do return end
 

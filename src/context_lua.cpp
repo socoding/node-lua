@@ -35,12 +35,12 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 {
 	m_lstate = luaL_newstateex(this);
 	if (argc <= 0) {
-		nl.log_fmt(m_handle, "[error] context:0x%08x init failed: lua file is needed to initialize lua context", m_handle);
+		singleton_ref(node_lua_t).log_fmt(m_handle, "[error] context:0x%08x init failed: lua file is needed to initialize lua context", m_handle);
 		return false;
 	}
 	int32_t envc = 2;
 	if (argc > MAX_CTX_ARGC || !lua_checkstack(m_lstate, argc + envc)) {
-		nl.log_fmt(m_handle, "[error] context:0x%08x init failed: too many arguments to initialize lua context %s", m_handle, argv[0]);
+		singleton_ref(node_lua_t).log_fmt(m_handle, "[error] context:0x%08x init failed: too many arguments to initialize lua context %s", m_handle, argv[0]);
 		return false;
 	}
 	int32_t total_length = 0;
@@ -70,7 +70,7 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 		argp += lengths[i];
 		*argp++ = (i != argc - 1) ? ' ' : '\0';
 	}
-	nl.log_fmt(m_handle, "[alert] context:0x%08x init: %s", m_handle, args);
+	singleton_ref(node_lua_t).log_fmt(m_handle, "[alert] context:0x%08x init: %s", m_handle, args);
 	nl_free(args);
 	return singleton_ref(node_lua_t).context_send(this, m_handle, 0, LUA_CTX_INIT, (int64_t)argc);
 }
@@ -85,7 +85,7 @@ bool context_lua_t::deinit(const char *arg)
 		lua_close(m_lstate);
 		m_lstate = NULL;
 	}
-	nl.log_fmt(m_handle, "[alert] context:0x%08x deinit: %s", m_handle, arg);
+	singleton_ref(node_lua_t).log_fmt(m_handle, "[alert] context:0x%08x deinit: %s", m_handle, arg);
 	return true;
 }
 
@@ -394,7 +394,7 @@ int32_t context_lua_t::lua_ref_callback_entry_finish(lua_State *L, int32_t statu
 	if (!status) { /* error message is at top */
 		uint32_t handle = lua_get_context_handle(L);
 		const char* error = lua_tostring(L, -1);
-		nl.log_fmt(handle, "[error] context:0x%08x error: %s", handle, error ? error : "unknown error");
+		singleton_ref(node_lua_t).log_fmt(handle, "[error] context:0x%08x error: %s", handle, error ? error : "unknown error");
 	}
 	return 0; //return none result out!!!
 }
@@ -402,6 +402,21 @@ int32_t context_lua_t::lua_ref_callback_entry_finish(lua_State *L, int32_t statu
 int32_t context_lua_t::lua_ref_callback_entry_continue(lua_State *L, int status, lua_KContext ctx)
 {
 	return lua_ref_callback_entry_finish(L, (status == LUA_YIELD));
+}
+
+int32_t context_lua_t::lua_ref_callback_error_handler(lua_State *L)
+{
+	const char *msg = lua_tostring(L, 1);
+	if (msg == NULL) {  /* is error object not a string? */
+		if (luaL_callmeta(L, 1, "__tostring") &&  /* does it have a metamethod */
+			lua_type(L, -1) == LUA_TSTRING)  /* that produces a string? */
+			return 1;  /* that is the message */
+		else
+			msg = lua_pushfstring(L, "(error object is a %s value)",
+			luaL_typename(L, 1));
+	}
+	luaL_traceback(L, L, msg, 1);  /* append a standard traceback */
+	return 1;  /* return the traceback */
 }
 
 int32_t context_lua_t::lua_ref_callback_entry(lua_State *L)
@@ -416,15 +431,17 @@ int32_t context_lua_t::lua_ref_callback_entry(lua_State *L)
 		adjust_resume_args(L);
 	}
 	--upvalue_count;
-	int resume_count = lua_gettop(L);
-	lua_checkstack(L, upvalue_count);
+	int resume_count = lua_gettop(L); /* record resume arg count */
+	lua_checkstack(L, upvalue_count + 1); /* reserve `upvalue_count + 1` stack size */
+	lua_pushcclosure(L, lua_ref_callback_error_handler, 0);
+	lua_insert(L, 1); /* put error handler function at bottom (the `1st` arg) */
 	lua_pushvalue(L, lua_upvalueindex(upvalue_count));
-	lua_insert(L, 1); /* put callback closure as first arg */
-	for (int i = 1; i < upvalue_count; ++i) {
+	lua_insert(L, 2); /* put callback closure as the first arg behind error handler */
+	for (int i = 1; i < upvalue_count; ++i) { /* put `upvalue_count - 1` args */
 		lua_pushvalue(L, lua_upvalueindex(i));
 	}
 	/* lua_callback_entry_continue makes the coroutine can be recovered. */
-	int status = lua_pcallk(L, upvalue_count + resume_count - 1, LUA_MULTRET, 0, 0, lua_ref_callback_entry_continue);
+	int status = lua_pcallk(L, upvalue_count + resume_count - 1, LUA_MULTRET, 1, 0, lua_ref_callback_entry_continue);
 	return lua_ref_callback_entry_finish(L, (status == LUA_OK));
 }
 

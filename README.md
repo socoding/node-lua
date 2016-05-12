@@ -66,10 +66,13 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
     *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*  
     *`--callback is a once callback, blocking if callback is nil.`*  
 
-13.	error = **context.strerror**(errno)  
+13.	result, error = **context.log**(...)  
+    *`--almost equivalent to print except the output won't be disordered(node-lua runs in a muti-thread mode).`*    
+
+14.	error = **context.strerror**(errno)  
     *`--convert error number to error string. Error number is always the next argument after result in most apis.`*  
 
-14.	thread = **context.thread**()  
+15.	thread = **context.thread**()  
     *`--return the running thread index.`*  
 
 ### tcp api  

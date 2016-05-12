@@ -70,8 +70,14 @@ print("value", value1, value2)]]
 -- # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
 -- #endif
 
-assert(false, {})
--- context.log(1, {}) --test bson
+--assert(false, 1, 2, 3)
+local data = bson.encode({ a = 1, b = 2, })
+local t = bson.decode(data)
+print(type(data), t, t.a, t.b)
+
+local buffer = buffer.new("hello world!")
+context.log(1, buffer, type(buffer))
+assert(false, buffer)
 
 do return end
 

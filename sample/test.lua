@@ -1,7 +1,12 @@
 --print(package.path)
 -- print(context.parent)
-package.path = package.path .. ";..\\lualib\\?.lua"
-package.cpath = package.cpath .. ";..\\luaclib\\?.dll"
+if context.winos then
+	package.path = package.path .. ";..\\lualib\\?.lua"
+	package.cpath = package.cpath .. ";..\\luaclib\\?.dll"
+else
+	package.path = package.path .. ";../lualib/?.lua"
+	package.cpath = package.cpath .. ";../luaclib/?.so"
+end
 
 print(require "cjson")
 print(require "lfs")

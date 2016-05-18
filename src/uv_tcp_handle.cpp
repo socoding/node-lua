@@ -185,7 +185,7 @@ void uv_tcp_socket_handle_t::connect_tcp(request_tcp_connect_t& request)
 		hints.ai_protocol = IPPROTO_TCP;
 		hints.ai_flags = 0;
 		uv_addr_resolver_t* resolver = (uv_addr_resolver_t*)nl_malloc(sizeof(uv_addr_resolver_t));
-		itoa(request.m_remote_port, port, 10);
+		sprintf(port, "%u", request.m_remote_port);
 		resolver->m_client = this;
 		resolver->m_session = request.m_session;
 		resolver->m_request.data = resolver;

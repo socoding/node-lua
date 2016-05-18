@@ -932,7 +932,7 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 	bson_t* bson_ptr;
 	int32_t* bson_data;
 	const char* data;
-	uint32_t length;
+	size_t length;
 	switch (lua_type(L, idx)) {
 	case LUA_TNUMBER:
 		if (lua_isinteger(L, idx)) {

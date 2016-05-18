@@ -7,7 +7,7 @@ print(require "cjson")
 print(require "lfs")
 print(require "lpeg")
 print(require "mime")
-print(require "protobuf")
+print(require "protobuf.c")
 
 
 do return end

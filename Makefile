@@ -14,8 +14,6 @@ define MAKE_PLATFORM
 	cd deps/lua  && make $(2); cd $(ROOT_PATH)
 	cd deps/uv   && make PLATFORM=$(1) HAVE_DTRACE=0; rm -f libuv.so libuv.dylib; cd $(ROOT_PATH)
 	cd src       && make PLATFORM=$(1) HAVE_DTRACE=0 RELEASE=$(3); cd $(ROOT_PATH)
-	##not essential builds
-	cd clib/mime && make PLATFORM=$(1) RELEASE=$(3); cd $(ROOT_PATH)
 endef
 
 ifeq (darwin,$(PLATFORM)) 
@@ -35,8 +33,6 @@ clean:
 	cd deps/lua  && make clean; cd $(ROOT_PATH)
 	cd deps/uv   && make clean; cd $(ROOT_PATH)
 	cd src       && make clean; cd $(ROOT_PATH)
-	##not essential builds
-	cd clib/mime && make clean; cd $(ROOT_PATH)
 
 # Where to install. The installation starts in the src and doc directories,
 # so take care if INSTALL_TOP is not an absolute path.
@@ -53,5 +49,3 @@ install:
 	cp -f src/node-lua /usr/local/bin/node-lua
 	cp deps/lua/libnlua.so ./libnlua.so
 	cp deps/lua/libnlua.so /usr/local/lib/libnlua.so
-	##not essential install
-	cp clib/mime/mime.so clib/mime.so

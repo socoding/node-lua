@@ -10,11 +10,11 @@ ROOT_PATH = $(shell pwd)
 
 define MAKE_PLATFORM
 	##not essential builds
-	cd mime  && make PLATFORM=$(1); cd $(ROOT_PATH)
-	cd cjson && make PLATFORM=$(1); cd $(ROOT_PATH)
-	cd lfs   && make PLATFORM=$(1); cd $(ROOT_PATH)
-	cd lpeg  && make PLATFORM=$(1); cd $(ROOT_PATH)
-	cd pb    && make PLATFORM=$(1); cd $(ROOT_PATH)
+	cd mime  && make PLATFORM=$(1) RELEASE=1; cd $(ROOT_PATH)
+	cd cjson && make PLATFORM=$(1) RELEASE=1; cd $(ROOT_PATH)
+	cd lfs   && make PLATFORM=$(1) RELEASE=1; cd $(ROOT_PATH)
+	cd lpeg  && make PLATFORM=$(1) RELEASE=1; cd $(ROOT_PATH)
+	cd pb    && make PLATFORM=$(1) RELEASE=1; cd $(ROOT_PATH)
 endef
 
 all:

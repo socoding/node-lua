@@ -15,7 +15,7 @@
 
 initialise_singleton(network_t);
 
-network_t::network_t() : m_exiting(0), m_shared_read_buffer({ 0, NULL, })
+network_t::network_t() : m_exiting(0)
 {
 	int rc;
 	rc = make_socketpair(&m_request_r_fd, &m_request_w_fd);
@@ -27,6 +27,7 @@ network_t::network_t() : m_exiting(0), m_shared_read_buffer({ 0, NULL, })
 	assert(rc == 0);
 	rc = uv_poll_start(&m_request_handle, UV_READABLE, on_request_polled_in);
 	assert(rc == 0);
+	memset(&m_shared_read_buffer, 0, sizeof(m_shared_read_buffer));
 }
 
 network_t::~network_t()

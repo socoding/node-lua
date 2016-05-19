@@ -8,7 +8,8 @@ extern "C" {
 }
 #endif
 
-#include <malloc.h>
+//MAC_OS do not have <malloc.h> 
+//#include <malloc.h>
 
 #ifndef _MSC_VER
 #include <stdbool.h>

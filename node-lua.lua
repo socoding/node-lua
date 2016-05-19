@@ -61,3 +61,10 @@ snprintf()函数并不是标准c/c++中规定的函数，所以在许多编译�
 #define __STDC_LIMIT_MACROS
 
 
+    将VS2010工程提交给Git管理时需要哪些文件：
+    *.h  *.cpp  *.sln  *.vcxproj  *.vcxproj.filters  *.qrc
+    以及Resources目录下的资源文件。
+    如果使用Git的过滤配置，则还需要.gitignore文件。
+    其他的诸如*.suo  *.sdf  *.opensdf  *.vcxproj.user均可以过滤掉！
+
+

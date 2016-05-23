@@ -20,7 +20,7 @@ LIBRARY_PATH := ../deps/lua ../deps/uv
 LIBS := nlua uv m
 
 ## define CFLAGS
-CFLAGS += -g -pedantic -O3 -Wall -Wextra -Wno-unused-parameter -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
+CFLAGS += -g -O3 -Wall -Wextra -Wno-unused-parameter -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
 ifeq (RELEASE,$(RELEASE))
 CFLAGS += -D RELEASE
 endif

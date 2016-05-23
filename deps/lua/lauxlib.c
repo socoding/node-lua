@@ -1050,7 +1050,7 @@ static shared_lstate_t shared_closure[] = {
 static atomic_t shared_lstate_count = 0;
 
 static shared_lstate_t* get_shared_lstate() {
-	int i;
+	size_t i;
 	shared_lstate_t* sl;
 	for (;;) {
 		for (i = 1; i < array_size(shared_closure); ++i) {
@@ -1192,7 +1192,7 @@ static int luaL_loadfilex_clone (lua_State *L, const char *filename, const char 
 
 /* warning: need to wait for all threads to be terminated in muti-thread situation */
 LUALIB_API int luaL_closesharedclosure() {
-	int i;
+	size_t i;
 	shared_lstate_t* sl;
 
 	clear_shared_closure();
@@ -1208,6 +1208,7 @@ LUALIB_API int luaL_closesharedclosure() {
 
 static int
 cache_clear(lua_State *L) {
+	(void)L;  /* not used */
 	clear_shared_closure();
 	return 0;
 }

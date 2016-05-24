@@ -47,6 +47,7 @@ void* nl_memdup(const void* src, uint32_t len)
 bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, bool* ipv6, uint16_t* port)
 {
 	union sock_name_u {
+		sockaddr sock;
 		sockaddr_in sock4;
 		sockaddr_in6 sock6;
 	} sock_name;
@@ -58,7 +59,7 @@ bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, b
 #endif
 	if (result != 0)
 		return false;
-	uint16_t family = ((sockaddr*)&sock_name)->sa_family;
+	uint16_t family = sock_name.sock.sa_family;
 	if (family == AF_INET) {
 		if (host != NULL) {
 			uv_ip4_name(&sock_name.sock4, host, host_len);

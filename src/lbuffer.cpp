@@ -91,9 +91,10 @@ static int32_t lbuffer_find(lua_State* L)
 	if (buffer_is_valid(*buffer)) {
 		int32_t top = lua_gettop(L);
 		if (top >= 2) {
-			const char* find = strstr(buffer_data_ptr(*buffer), luaL_checklstring(L, 2, NULL));
+			const char* ptr = buffer_data_ptr(*buffer);
+			const char* find = strstr(ptr, luaL_checklstring(L, 2, NULL));
 			if (find) {
-				lua_pushinteger(L, (int32_t)(find - buffer_data_ptr(*buffer)) + 1);
+				lua_pushinteger(L, (int32_t)(find - ptr) + 1);
 				return 1;
 			}
 			return 0;

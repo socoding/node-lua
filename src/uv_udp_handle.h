@@ -72,7 +72,7 @@ private:
 		m_write_cached_reqs.push_back(request);
 	}
 	void clear_write_cached_requests() {
-		for (int i = 0; i < m_write_cached_reqs.size(); ++i) {
+		for (size_t i = 0; i < m_write_cached_reqs.size(); ++i) {
 			nl_free(m_write_cached_reqs[i]);
 		}
 		m_write_cached_reqs.clear();

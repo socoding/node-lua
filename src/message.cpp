@@ -8,7 +8,7 @@ message_array_t* message_array_create(uint32_t count) {
 
 void message_array_release(message_array_t* array) {
 	if (array != NULL) {
-		for (int32_t i = 0; i < array->m_count; ++i) {
+		for (uint32_t i = 0; i < array->m_count; ++i) {
 			message_clean(array->m_array[i]);
 		}
 		nl_free(array);

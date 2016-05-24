@@ -79,7 +79,7 @@ void uv_udp_handle_t::on_write(uv_udp_send_t* req, int status)
 	} else {
 		buffer_release(uv_request->m_buffer);
 	}
-	if (uv_request->m_session != LUA_REFNIL) {
+	if (uv_request->m_session != (uint32_t)LUA_REFNIL) {
 		singleton_ref(node_lua_t).context_send(uv_request->m_source, 0, uv_request->m_session, RESPONSE_UDP_WRITE, status == 0 ? UV_OK : singleton_ref(network_t).last_error());
 	}
 	socket_handle->put_write_cached_request(uv_request);
@@ -91,7 +91,6 @@ void uv_udp_handle_t::write(request_udp_write_t& request)
 	if (request.m_shared_write) {
 		uv_udp_handle_t* handle = (uv_udp_handle_t*)singleton_ref(network_t).get_shared_write_socket(request.m_socket_fd);
 		if (handle != NULL) {
-			uint32_t length = request.m_length > 0 ? request.m_length : (uint32_t)buffer_data_length(request.m_buffer);
 			if (uv_is_closing((uv_handle_t*)handle)) {
 				err = NL_EUDPSCLOSED;
 			} else {
@@ -109,7 +108,7 @@ void uv_udp_handle_t::write(request_udp_write_t& request)
 		} else {
 			buffer_release(request.m_buffer);
 		}
-		if (request.m_session != LUA_REFNIL) {
+		if (request.m_session != (uint32_t)LUA_REFNIL) {
 			singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_UDP_WRITE, (nl_err_code)err);
 		}
 	}

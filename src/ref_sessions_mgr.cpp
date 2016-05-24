@@ -153,7 +153,7 @@ void ref_sessions_mgr_t::put_cached_sessions(ref_sessions_t* ref_sessions)
 
 void ref_sessions_mgr_t::clear_cached_sessions()
 {
-	for (int32_t i = 0; i < m_cached_sessions.size(); ++i) {
+	for (size_t i = 0; i < m_cached_sessions.size(); ++i) {
 		delete (m_cached_sessions[i]);
 	}
 	m_cached_sessions.clear();

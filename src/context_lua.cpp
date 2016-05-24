@@ -604,7 +604,7 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 		array = message_array(message);
 		if (array != NULL && array->m_count > 0) {
 			lua_checkstack(L, array->m_count);
-			for (int32_t i = 0; i < array->m_count; ++i) { //extract them
+			for (uint32_t i = 0; i < array->m_count; ++i) { //extract them
 				lua_pushmessage(L, array->m_array[i]);
 			}
 		} else {
@@ -929,7 +929,6 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message)
 {
 	buffer_t* buffer;
-	bson_t* bson_ptr;
 	int32_t* bson_data;
 	const char* data;
 	size_t length;
@@ -1001,7 +1000,7 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 	message.m_type = MAKE_MESSAGE_TYPE(msg_type, ARRAY);
 	message.m_data.m_array = array;
 	message.m_source = lua_get_context_handle(L);
-	for (int32_t i = 0; i < count; ++i) {
+	for (uint32_t i = 0; i < count; ++i) {
 		if (context_check_message(L, idx + i, msg_type, array->m_array[i]) == 0) {
 			return 0;
 		}

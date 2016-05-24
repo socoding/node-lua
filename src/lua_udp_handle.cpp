@@ -268,6 +268,7 @@ int32_t lua_udp_handle_t::read(lua_State* L)
 	request.m_length = REQUEST_SIZE(request_udp_read_t, 0);
 	request.m_udp_read.m_socket_handle = (uv_udp_handle_t*)socket->m_uv_handle;
 	singleton_ref(network_t).send_request(request);
+	return 0;
 }
 
 int32_t lua_udp_handle_t::read_callback_adjust(lua_State* L)

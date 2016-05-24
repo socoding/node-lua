@@ -221,7 +221,7 @@ void uv_tcp_socket_handle_t::on_write(uv_write_t* req, int status)
 	} else {
 		buffer_release(uv_request->m_buffer);
 	}
-	if (uv_request->m_session != LUA_REFNIL) {
+	if (uv_request->m_session != (uint32_t)LUA_REFNIL) {
 		singleton_ref(node_lua_t).context_send(uv_request->m_source, 0, uv_request->m_session, RESPONSE_TCP_WRITE, status == 0 ? UV_OK : socket_handle->m_write_error);
 	}
 	socket_handle->put_write_cached_request(uv_request);
@@ -253,7 +253,7 @@ void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
 		} else {
 			buffer_release(request.m_buffer);
 		}
-		if (request.m_session != LUA_REFNIL) {
+		if (request.m_session != (uint32_t)LUA_REFNIL) {
 			singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_WRITE, (nl_err_code)err);
 		}
 	}

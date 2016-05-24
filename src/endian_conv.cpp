@@ -1,12 +1,15 @@
 #include "common.h"
 #include "endian_conv.h"
 
-#define LITTLE_ENDIAN_VAL		((char)'L')
-#define BIG_ENDIAN_VAL			((char)'B')
 static union { char c[4]; unsigned long mylong; } endian_test = { { LITTLE_ENDIAN_VAL, '?', '?', BIG_ENDIAN_VAL } };
 #define ENV_ENDIAN_VAL			((char)endian_test.mylong)
 #define ENV_IS_LITTEL_ENDIAN	(ENV_ENDIAN_VAL == LITTLE_ENDIAN_VAL)
 #define ENV_IS_BIG_ENDIAN		(ENV_ENDIAN_VAL == BIG_ENDIAN_VAL)
+
+char env_endian()
+{
+	return ENV_ENDIAN_VAL;
+}
 
 int16_t endian_to_int16(char *src, char src_endian)
 {

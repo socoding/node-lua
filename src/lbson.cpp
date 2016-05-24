@@ -765,7 +765,7 @@ lreplace(lua_State *L) {
 	int type = id & ((1<<(BSON_TYPE_SHIFT)) - 1);
 	int offset = id >> BSON_TYPE_SHIFT;
 	uint8_t * start = (uint8_t *)lua_touserdata(L, 1);
-	struct bson b = { false, 0, 16, start + offset };
+	struct bson b = { false, 0, 16, start + offset, { 0 } };
 	switch (type) {
 	case BSON_REAL:
 		write_double(&b, luaL_checknumber(L, 3));
@@ -951,7 +951,7 @@ lsubtype(lua_State *L, int subtype, const uint8_t * buf, size_t sz) {
 		char oid[24];
 		int i;
 		const uint8_t * id = buf;
-		static char *hex = "0123456789abcdef";
+		static const char *hex = "0123456789abcdef";
 		for (i=0;i<12;i++) {
 			oid[i*2] = hex[id[i] >> 4];
 			oid[i*2+1] = hex[id[i] & 0xf];
@@ -1091,7 +1091,7 @@ init_oid_header() {
 	uint32_t h = 0;
 	char hostname[256];
 	if (gethostname(hostname, sizeof(hostname))==0) {
-		int i;
+		size_t i;
 		for (i=0;i<sizeof(hostname) && hostname[i];i++) {
 			h = h ^ ((h<<5)+(h>>2)+hostname[i]);
  		}
@@ -1245,7 +1245,6 @@ static int bson_encode_safe(lua_State *L) {
 
 bool bson_encode(bson_t* bson_ptr, lua_State *L, int idx) {
 	if (lua_istable(L, idx)) {
-		int status;
 		lua_checkstack(L, 3);
 		lua_pushcfunction(L, bson_encode_safe);
 		lua_pushvalue(L, idx);

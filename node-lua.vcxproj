@@ -140,6 +140,7 @@
     <ClCompile Include="src\lbson.cpp" />
     <ClCompile Include="src\lbuffer.cpp" />
     <ClCompile Include="src\lcororep.cpp" />
+    <ClCompile Include="src\ltpack.cpp" />
     <ClCompile Include="src\lua_handle_base.cpp" />
     <ClCompile Include="src\lua_timer_handle.cpp" />
     <ClCompile Include="src\lua_udp_handle.cpp" />

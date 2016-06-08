@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "lbson.h"
 #include "lbinary.h"
+#include "ltpack.h"
 
 #define  MESSAGE_TYPE_BIT	24
 #define	 MAKE_MESSAGE_TYPE(mtype, dtype) (((uint32_t)(dtype) << MESSAGE_TYPE_BIT) | ((mtype) & (((uint32_t)1 << MESSAGE_TYPE_BIT) - 1)))
@@ -21,9 +22,10 @@ enum data_type {
 	BUFFER			= 5, //need to be freed
 	STRING			= 6, //need to be freed
 	BINARY			= 7, //need to be freed
-	BSON			= 8, //need to be freed
-	ARRAY			= 9, //need to be freed
-	TERROR			= 10 //
+	TPACK			= 8, //need to be freed
+	BSON			= 9, //need to be freed
+	ARRAY			= 10,//need to be freed
+	TERROR			= 11 //
 };
 
 typedef union data_t {

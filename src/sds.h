@@ -56,6 +56,7 @@ static inline size_t sdsavail(const sds s) {
 
 sds sdsnewlen(const void *init, size_t initlen);
 sds sdsnew(const char *init);
+sds sdsnewempty(size_t capacity);
 sds sdsempty(void);
 size_t sdslen(const sds s);
 sds sdsdup(const sds s);

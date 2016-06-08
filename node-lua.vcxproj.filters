@@ -114,6 +114,12 @@
     <ClInclude Include="src\sds.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\ltpack.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lbinary.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\buffer.cpp">

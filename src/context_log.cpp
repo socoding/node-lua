@@ -39,9 +39,9 @@ void context_log_t::on_dropped(message_t& message)
 void context_log_t::log_message(message_t& message)
 {
 	switch (message_data_type(message)) {
-	case SDS:
-		if (message_sds(message)) {
-			lua_writestring(message_sds(message), sdslen(message_sds(message)));
+	case BINARY:
+		if (message_binary(message).m_data) {
+			lua_writestring(message_binary(message).m_data, sdslen(message_binary(message).m_data));
 			lua_writeline();
 		}
 		break;

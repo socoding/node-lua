@@ -103,8 +103,10 @@
     <ClInclude Include="src\errors.h" />
     <ClInclude Include="src\context_queue.h" />
     <ClInclude Include="src\handle_base_def.h" />
+    <ClInclude Include="src\lbinary.h" />
     <ClInclude Include="src\lbson.h" />
     <ClInclude Include="src\lbuffer.h" />
+    <ClInclude Include="src\ltpack.h" />
     <ClInclude Include="src\lua_handle_base.h" />
     <ClInclude Include="src\lua_timer_handle.h" />
     <ClInclude Include="src\lua_udp_handle.h" />

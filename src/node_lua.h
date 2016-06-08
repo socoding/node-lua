@@ -5,7 +5,7 @@
 #include "context_mgr.h"
 #include "worker_mgr.h"
 #include "context.h"
-#include "sds.h"
+#include "lbinary.h"
 
 class message_t;
 class network_t;
@@ -55,20 +55,20 @@ public:
 	}
 
 	/* specific context send interface */
-	FORCE_INLINE bool context_send_sds_safe(uint32_t handle, uint32_t source, int session, int msg_type, const char *data, int32_t length)
+	FORCE_INLINE bool context_send_binary_safe(uint32_t handle, uint32_t source, int session, int msg_type, const char *data, int32_t length)
 	{
-		char* str = data ? sdsnewlen(data, length) : NULL;
-		message_t msg(source, session, msg_type, str, length);
+		binary_t binary = { data ? sdsnewlen(data, length) : NULL };
+		message_t msg(source, session, msg_type, binary);
 		if (context_send(handle, msg))
 			return true;
 		message_clean(msg);
 		return false;
 	}
 
-	FORCE_INLINE bool context_send_sds_safe(context_t* ctx, uint32_t source, int session, int msg_type, const char *data, int32_t length)
+	FORCE_INLINE bool context_send_binary_safe(context_t* ctx, uint32_t source, int session, int msg_type, const char *data, int32_t length)
 	{
-		char* str = data ? sdsnewlen(data, length) : NULL;
-		message_t msg(source, session, msg_type, str, length);
+		binary_t binary = { data ? sdsnewlen(data, length) : NULL };
+		message_t msg(source, session, msg_type, binary);
 		if (context_send(ctx, msg))
 			return true;
 		message_clean(msg);
@@ -209,12 +209,11 @@ public:
 		}
 	}
 	
-	bool log_sds_release(uint32_t src_handle, sds buffer) {
-		message_t message(src_handle, 0, LOG_MESSAGE, (char*)buffer, sdslen(buffer));
-		if (m_logger && context_send(m_logger, message)) {
+	bool log_binary_release(uint32_t src_handle, binary_t binary) {
+		if (m_logger && context_send(m_logger, src_handle, 0, LOG_MESSAGE, binary)) {
 			return true;
 		}
-		sdsfree(buffer);
+		sdsfree(binary.m_data);
 		return false;
 	}
 

@@ -583,9 +583,9 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 			lua_pushstring(L, "");
 		}
 		return;
-	case SDS:
-		if (message_sds(message)) {
-			lua_pushlstring(L, message_sds(message), sdslen(message_sds(message)));
+	case BINARY:
+		if (message_binary(message).m_data) {
+			lua_pushlstring(L, message_binary(message).m_data, sdslen(message_binary(message).m_data));
 		} else {
 			lua_pushstring(L, "");
 		}
@@ -945,8 +945,8 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 		return 1;
 	case LUA_TSTRING:
 		data = lua_tolstring(L, idx, &length);
-		message.m_type = MAKE_MESSAGE_TYPE(msg_type, SDS);	
-		message.m_data.m_sds = sdsnewlen(data, length);
+		message.m_type = MAKE_MESSAGE_TYPE(msg_type, BINARY);	
+		message.m_data.m_binary.m_data = sdsnewlen(data, length);
 		message.m_source = lua_get_context_handle(L);
 		return 1;
 	case LUA_TBOOLEAN:
@@ -1334,8 +1334,7 @@ int32_t context_lua_t::context_log(lua_State *L)
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
 	int32_t n = lua_gettop(L);  /* number of arguments */
 	int32_t i;
-	sds buffer = sdsnewlen(NULL, 64);
-	sdsclear(buffer);
+	binary_t binary = { sdsnewempty(64) };
 	lua_getglobal(L, "tostring");
 	for (i = 1; i <= n; i++) {
 		const char *s;
@@ -1345,14 +1344,14 @@ int32_t context_lua_t::context_log(lua_State *L)
 		lua_call(L, 1, 1);
 		s = lua_tolstring(L, -1, &l);  /* get result */
 		if (s == NULL) {
-			sdsfree(buffer);
+			sdsfree(binary.m_data);
 			return luaL_error(L, "'tostring' must return a string to 'context.log'");
 		}
-		if (i > 1) buffer = sdscatlen(buffer, "\t", 1);
-		buffer = sdscatlen(buffer, s, l);
+		if (i > 1) binary.m_data = sdscatlen(binary.m_data, "\t", 1);
+		binary.m_data = sdscatlen(binary.m_data, s, l);
 		lua_pop(L, 1);  /* pop result */
 	}
-	singleton_ref(node_lua_t).log_sds_release(lctx->get_handle(), buffer);
+	singleton_ref(node_lua_t).log_binary_release(lctx->get_handle(), binary);
 	return 0;
 }
 

@@ -77,6 +77,16 @@ sds sdsnew(const char *init) {
     return sdsnewlen(init, initlen);
 }
 
+/* Create an empty sds string with capacity. Even in this case the string
+* always has an implicit null term. */
+sds sdsnewempty(size_t capacity) {
+	struct sdshdr *sh = (struct sdshdr *)nl_calloc(sizeof(struct sdshdr) + capacity + 1);
+    if (sh == NULL) return NULL;
+    sh->len = 0;
+	sh->free = capacity;
+    return (char*)sh->buf;
+}
+
 /* Duplicate an sds string. */
 sds sdsdup(const sds s) {
     return sdsnewlen(s, sdslen(s));

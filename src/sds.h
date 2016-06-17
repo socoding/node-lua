@@ -34,6 +34,7 @@
 #define SDS_MAX_PREALLOC (1024*1024)
 
 //#include <sys/types.h>
+#include <stdio.h>
 #include <stdarg.h>
 
 typedef char *sds;
@@ -97,5 +98,21 @@ sds sdsMakeRoomFor(sds s, size_t addlen);
 void sdsIncrLen(sds s, int incr);
 sds sdsRemoveFreeSpace(sds s);
 size_t sdsAllocSize(sds s);
+
+template <typename T>
+sds sdscat(sds s, T t) {
+	struct sdshdr *sh;
+	size_t curlen = sdslen(s);
+	size_t len = sizeof(t);
+
+	s = sdsMakeRoomFor(s, len);
+	if (s == NULL) return NULL;
+	sh = (struct sdshdr*) (s - (sizeof(struct sdshdr)));
+	*(T*)(s + curlen) = t;
+	sh->len = curlen + len;
+	sh->free = sh->free - len;
+	s[curlen + len] = '\0';
+	return s;
+}
 
 #endif

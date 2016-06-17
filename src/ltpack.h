@@ -3,7 +3,7 @@
 #include "sds.h"
 
 typedef struct tpack_t {
-	char* m_data;
+	sds m_data;
 } tpack_t;
 
 #endif

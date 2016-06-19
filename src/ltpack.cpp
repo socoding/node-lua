@@ -5,7 +5,7 @@
 # include <unistd.h>
 #endif
 
-#define MAX_DEPTH 128
+#define MAX_DEPTH 256
 
 #define TYPE_INT8   0
 #define TYPE_INT16  1
@@ -108,38 +108,38 @@ pack_lua_data(tpack_t *pack, lua_State *L, int idx, int depth) {
 static int8_t
 unpack_lua_data(tpack_t *pack, size_t& rpos, lua_State *L) {
 	luaL_checkstack(L, 1, NULL);
-	int8_t data_type = *(int8_t*)(pack->m_data + rpos);
+	int8_t data_type = sdsread<int8_t>(pack->m_data, rpos);
 	size_t len;
 	++rpos;
 	switch (data_type) {
 	case TYPE_INT8:
-		lua_pushinteger(L, *(int8_t*)(pack->m_data + rpos));
+		lua_pushinteger(L, sdsread<int8_t>(pack->m_data, rpos));
 		rpos += 1;
 		break;
 	case TYPE_INT16:
-		lua_pushinteger(L, *(int16_t*)(pack->m_data + rpos));
+		lua_pushinteger(L, sdsread<int16_t>(pack->m_data, rpos));
 		rpos += 2;
 		break;
 	case TYPE_INT32:
-		lua_pushinteger(L, *(int32_t*)(pack->m_data + rpos));
+		lua_pushinteger(L, sdsread<int32_t>(pack->m_data, rpos));
 		rpos += 4;
 		break;
 	case TYPE_INT64:
-		lua_pushinteger(L, *(int64_t*)(pack->m_data + rpos));
+		lua_pushinteger(L, sdsread<int64_t>(pack->m_data, rpos));
 		rpos += 8;
 		break;
 	case TYPE_DOUBLE:
-		lua_pushnumber(L, *(double*)(pack->m_data + rpos));
+		lua_pushnumber(L, sdsread<double>(pack->m_data, rpos));
 		rpos += sizeof(double);
 		break;
 	case TYPE_STRING:
-		len = *(size_t*)(pack->m_data + rpos);
+		len = sdsread<size_t>(pack->m_data, rpos);
 		rpos += sizeof(size_t);
-		lua_pushlstring(L, pack->m_data + rpos, len);
+		lua_pushlstring(L, sdsread(pack->m_data, rpos, len), len);
 		rpos += len;
 		break;
 	case TYPE_BOOL:
-		lua_pushboolean(L, *(bool*)(pack->m_data + rpos));
+		lua_pushboolean(L, sdsread<bool>(pack->m_data, rpos));
 		rpos += sizeof(bool);
 		break;
 	case TYPE_TABLE_BEG:
@@ -156,3 +156,19 @@ unpack_lua_data(tpack_t *pack, size_t& rpos, lua_State *L) {
 	}
 	return data_type;
 }
+
+/////////////////////////////////////////////////////////////////////////
+
+//static int pack_safe(lua_State *L) {
+//	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 2); //arg1: table, arg2: bson_t ptr.
+//	lua_settop(L, 1);
+//	pack_dict(L, bson_ptr, false, 0);
+//	return 0;
+//}
+
+
+tpack_t* bson_encode(lua_State *L, int idx) {
+
+}
+
+extern bool bson_decode(tpack_t* pack, lua_State *L);

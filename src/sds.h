@@ -35,6 +35,7 @@
 
 //#include <sys/types.h>
 #include <stdio.h>
+#include <assert.h>
 #include <stdarg.h>
 
 typedef char *sds;
@@ -113,6 +114,22 @@ sds sdscat(sds s, T t) {
 	sh->free = sh->free - len;
 	s[curlen + len] = '\0';
 	return s;
+}
+
+template <typename T> inline
+T sdsread(sds s, size_t& rpos) {
+	struct sdshdr *sh;
+	sh = (struct sdshdr*) (s - (sizeof(struct sdshdr)));
+	assert((size_t)sh->len >= rpos + sizeof(T));
+	return *(T*)(s + rpos);
+}
+
+static inline
+const char* sdsread(sds s, size_t& rpos, size_t len) {
+	struct sdshdr *sh;
+	sh = (struct sdshdr*) (s - (sizeof(struct sdshdr)));
+	assert((size_t)sh->len >= rpos + len);
+	return (s + rpos);
 }
 
 #endif

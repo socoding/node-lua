@@ -64,6 +64,7 @@ pack_table(tpack_t *pack, lua_State *L, int idx, int depth) {
 	if (depth > MAX_DEPTH) {
 		luaL_error(L, "too deep(%d, limit %d) while packing table", depth, MAX_DEPTH);
 	}
+	idx = lua_absindex(L, idx);
 	pack->m_data = sdscat(pack->m_data, (int8_t)TYPE_TABLE_BEG);
 	luaL_checkstack(L, 2, NULL);
 	lua_pushnil(L);

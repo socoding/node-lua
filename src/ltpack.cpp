@@ -1,5 +1,4 @@
 #include "ltpack.h"
-#include "common.h"
 #define __STDC_LIMIT_MACROS
 #ifndef _WIN32
 # include <unistd.h>
@@ -63,7 +62,7 @@ pack_lua_data(tpack_t *pack, lua_State *L, int idx, int depth);
 static void
 pack_table(tpack_t *pack, lua_State *L, int idx, int depth) {
 	if (depth > MAX_DEPTH) {
-		luaL_error(L, "Too depth while encoding bson");
+		luaL_error(L, "too deep(%d, limit %d) while packing table", depth, MAX_DEPTH);
 	}
 	pack->m_data = sdscat(pack->m_data, (int8_t)TYPE_TABLE_BEG);
 	luaL_checkstack(L, 2, NULL);
@@ -159,16 +158,40 @@ unpack_lua_data(tpack_t *pack, size_t& rpos, lua_State *L) {
 
 /////////////////////////////////////////////////////////////////////////
 
-//static int pack_safe(lua_State *L) {
-//	bson_t* bson_ptr = (bson_t*)lua_touserdata(L, 2); //arg1: table, arg2: bson_t ptr.
-//	lua_settop(L, 1);
-//	pack_dict(L, bson_ptr, false, 0);
-//	return 0;
-//}
-
-
-tpack_t* bson_encode(lua_State *L, int idx) {
-
+static int pack_safe(lua_State *L) {
+	tpack_t* pack = (tpack_t*)lua_touserdata(L, 2); //arg1: table, arg2: tpack_t ptr.
+	lua_settop(L, 1);
+	pack_lua_data(pack, L, 1, 0);
+	return 0;
 }
 
-extern bool bson_decode(tpack_t* pack, lua_State *L);
+bool ltpack(tpack_t* pack, lua_State *L, int idx) {
+	if (lua_istable(L, idx)) {
+		lua_checkstack(L, 3);
+		lua_pushcfunction(L, pack_safe);
+		lua_pushvalue(L, idx);
+		lua_pushlightuserdata(L, pack);
+		if (lua_pcall(L, 2, LUA_MULTRET, NULL) == LUA_OK) {
+			return true;
+		}
+		return false;
+	}
+	lua_checkstack(L, 1);
+	lua_pushstring(L, "table expected");
+	return false;
+}
+
+static int unpack_safe(lua_State *L) {
+	size_t rpos = 0;
+	tpack_t* pack = (tpack_t*)lua_touserdata(L, 1); //arg1: tpack_t ptr.
+	lua_settop(L, 1);
+	unpack_lua_data(pack, rpos, L);
+	return 1;
+}
+
+extern bool ltunpack(tpack_t* pack, lua_State *L) {
+	lua_checkstack(L, 3);
+	lua_pushcfunction(L, unpack_safe);
+	lua_pushlightuserdata(L, pack);
+	return lua_pcall(L, 1, LUA_MULTRET, NULL) == LUA_OK;
+}

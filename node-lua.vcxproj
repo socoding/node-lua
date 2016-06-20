@@ -104,7 +104,6 @@
     <ClInclude Include="src\context_queue.h" />
     <ClInclude Include="src\handle_base_def.h" />
     <ClInclude Include="src\lbinary.h" />
-    <ClInclude Include="src\lbson.h" />
     <ClInclude Include="src\lbuffer.h" />
     <ClInclude Include="src\ltpack.h" />
     <ClInclude Include="src\lua_handle_base.h" />
@@ -139,7 +138,6 @@
     <ClCompile Include="src\endian_conv.cpp" />
     <ClCompile Include="src\errors.cpp" />
     <ClCompile Include="src\context_queue.cpp" />
-    <ClCompile Include="src\lbson.cpp" />
     <ClCompile Include="src\lbuffer.cpp" />
     <ClCompile Include="src\lcororep.cpp" />
     <ClCompile Include="src\ltpack.cpp" />

@@ -117,8 +117,6 @@ LUAMOD_API int (luaopen_buffer)(lua_State *L);
 LUAMOD_API int (luaopen_context)(lua_State *L);
 #define LUA_TIMERLIBNAME	"timer"
 LUAMOD_API int (luaopen_timer)(lua_State *L);
-#define LUA_BSONLIBNAME	    "bson"
-LUAMOD_API int (luaopen_bson)(lua_State *L);
 
 void context_lua_t::lua_open_libs(lua_State *L)
 {
@@ -141,7 +139,6 @@ void context_lua_t::lua_open_libs(lua_State *L)
 		{LUA_BUFFERLIBNAME, luaopen_buffer},
 		{LUA_CONTEXTLIBNAME, luaopen_context},
 		{LUA_TIMERLIBNAME, luaopen_timer},
-		{LUA_BSONLIBNAME, luaopen_bson},
 		{NULL, NULL}
 	};
 	static const luaL_Reg preloadedlibs[] = {
@@ -590,12 +587,8 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 			lua_pushstring(L, "");
 		}
 		return;
-	case BSON:
-		if (message_bson(message)->extract) {
-			bson_decode(message_bson(message), L);
-		} else {
-			create_bson(message_bson(message), L);
-		}
+	case TPACK:
+		ltunpack(&message_tpack(message), L);
 		return;
 	case TERROR:
 		lua_pushinteger(L, message_error(message));
@@ -966,13 +959,6 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 			message.m_source = lua_get_context_handle(L);
 			return 1;
 		}
-		bson_data = (int32_t*)luaL_testudata(L, idx, BSON_METATABLE);
-		if (bson_data) {
-			message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
-			message.m_data.m_bson = bson_new(bson_data, false);
-			message.m_source = lua_get_context_handle(L);
-			return 1;
-		}
 		lua_pushstring(L, "transfer data type not supported");
 		return 0;
 	case LUA_TLIGHTUSERDATA:
@@ -981,10 +967,10 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 		message.m_source = lua_get_context_handle(L);
 		return 1;
 	case LUA_TTABLE:
-		message.m_type = MAKE_MESSAGE_TYPE(msg_type, BSON);
-		message.m_data.m_bson = bson_new(NULL, true);
+		message.m_type = MAKE_MESSAGE_TYPE(msg_type, TPACK);
+		message.m_data.m_tpack.m_data = sdsnewempty(64);
 		message.m_source = lua_get_context_handle(L);
-		return bson_encode(message.m_data.m_bson, L, idx) ? 1 : 0;
+		return ltpack(&message.m_data.m_tpack, L, idx) ? 1 : 0;
 	default:
 		lua_pushstring(L, "transfer data type not supported");
 		return 0;

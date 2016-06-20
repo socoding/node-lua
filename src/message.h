@@ -1,7 +1,6 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
 #include "buffer.h"
-#include "lbson.h"
 #include "lbinary.h"
 #include "ltpack.h"
 
@@ -23,9 +22,8 @@ enum data_type {
 	STRING			= 6, //need to be freed
 	BINARY			= 7, //need to be freed
 	TPACK			= 8, //need to be freed
-	BSON			= 9, //need to be freed
-	ARRAY			= 10,//need to be freed
-	TERROR			= 11 //
+	ARRAY			= 9, //need to be freed
+	TERROR			= 10 //
 };
 
 typedef union data_t {
@@ -36,7 +34,7 @@ typedef union data_t {
 	buffer_t		  m_buffer;
 	char			 *m_string;
 	binary_t		  m_binary;
-	bson_t			 *m_bson;
+	tpack_t			  m_tpack;
 	message_array_t  *m_array;
 	int32_t			  m_error;
 } data_t;
@@ -77,7 +75,7 @@ enum message_type {
 #define message_buffer(msg)			((msg).m_data.m_buffer)
 #define message_string(msg)			((msg).m_data.m_string)
 #define message_binary(msg)			((msg).m_data.m_binary)
-#define message_bson(msg)			((msg).m_data.m_bson)
+#define message_tpack(msg)			((msg).m_data.m_tpack)
 #define message_array(msg)			((msg).m_data.m_array)
 #define message_error(msg)			((msg).m_data.m_error)
 
@@ -90,7 +88,7 @@ enum message_type {
 #define message_is_buffer(msg)		(BUFFER == message_data_type(msg))
 #define message_is_string(msg)		(STRING == message_data_type(msg))
 #define message_is_binary(msg)		(BINARY == message_data_type(msg))
-#define message_is_bson(msg)		(BSON == message_data_type(msg))
+#define message_is_tpack(msg)		(TPACK == message_data_type(msg))
 #define message_is_array(msg)		(ARRAY == message_data_type(msg))
 #define message_is_error(msg)		(TERROR == message_data_type(msg))
 #define message_is_pure_error(msg)	(TERROR == message_data_type(msg) && message_error(msg) != 0)
@@ -110,10 +108,10 @@ enum message_type {
 												sdsfree((msg).m_data.m_binary.m_data);				\
 												(msg).m_data.m_binary.m_data = NULL;				\
 											}														\
-										} else if (message_is_bson(msg)) {					     	\
-											if ((msg).m_data.m_bson) {								\
-												bson_release((msg).m_data.m_bson);					\
-												(msg).m_data.m_bson = NULL;							\
+										} else if (message_is_tpack(msg)) {					     	\
+											if ((msg).m_data.m_tpack.m_data) {						\
+												sdsfree((msg).m_data.m_tpack.m_data);				\
+												(msg).m_data.m_tpack.m_data = NULL;					\
 											}														\
 										} else if (message_is_array(msg)) {					     	\
 											if ((msg).m_data.m_array) {								\
@@ -165,9 +163,9 @@ public:
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, TERROR)) { m_data.m_error = err; }
 
-	message_t(uint32_t source, int32_t session, uint32_t msg_type, bson_t *bson)
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, tpack_t tpack)
 			: m_source(source), m_session(session),
-			  m_type(MAKE_MESSAGE_TYPE(msg_type, BSON)) { m_data.m_bson = bson; }
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, TPACK)) { m_data.m_tpack = tpack; }
 
 	message_t(uint32_t source, int32_t session, uint32_t msg_type, binary_t binary)
 			: m_source(source), m_session(session),

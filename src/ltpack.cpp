@@ -53,7 +53,7 @@ static inline void
 pack_string(tpack_t *pack, const char* v, size_t len) {
 	pack->m_data = sdscat(pack->m_data, (int8_t)TYPE_STRING);
 	pack->m_data = sdscat(pack->m_data, len);
-	pack->m_data = sdscpylen(pack->m_data, v, len);
+	pack->m_data = sdscatlen(pack->m_data, v, len);
 }
 
 static void

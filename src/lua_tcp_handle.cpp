@@ -587,7 +587,7 @@ int32_t lua_tcp_socket_handle_t::write_fd(lua_State* L)
 		request.m_tcp_write.m_length = length; /* length > 0 */
 		request.m_tcp_write.m_string = (const char*)nl_memdup(s, length);
 		if (!request.m_tcp_write.m_string) {
-			return luaL_error(L, "attempt to send data(length %lu) failed: memory not enough", length);
+			return luaL_error(L, "attempt to send data(length %d) failed: memory not enough", length);
 		}
 	} else {
 		request.m_tcp_write.m_length = 0;
@@ -625,7 +625,7 @@ int32_t lua_tcp_socket_handle_t::write_handle(lua_State* L)
 	}
 	uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)socket->m_uv_handle;
 	if (!check_head_option_max(handle->m_write_head_option, length)) {
-		return luaL_error(L, "attempt to send data(length %lu) too long(max %lu)", length, handle->m_write_head_option.max);
+		return luaL_error(L, "attempt to send data(length %d) too long(max %d)", length, handle->m_write_head_option.max);
 	}
 	bool safety = false;
 	bool nonblocking = false;
@@ -661,7 +661,7 @@ int32_t lua_tcp_socket_handle_t::write_handle(lua_State* L)
 		request.m_tcp_write.m_length = length; /* length > 0 */
 		request.m_tcp_write.m_string = (const char*)nl_memdup(s, length);
 		if (!request.m_tcp_write.m_string) {
-			return luaL_error(L, "attempt to send data(length %lu) failed: memory not enough", length);
+			return luaL_error(L, "attempt to send data(length %d) failed: memory not enough", length);
 		}
 	} else {
 		request.m_tcp_write.m_length = 0;

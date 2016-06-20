@@ -211,7 +211,7 @@ int32_t lua_udp_handle_t::_write(lua_State* L, bool ipv6)
 		request.m_udp_write.m_length = length; /* length > 0 */
 		request.m_udp_write.m_string = (const char*)nl_memdup(s, length);
 		if (!request.m_udp_write.m_string) {
-			return luaL_error(L, "attempt to send data(length %lu) failed: memory not enough", length);
+			return luaL_error(L, "attempt to send data(length %d) failed: memory not enough", length);
 		}
 	} else {
 		request.m_udp_write.m_length = 0;

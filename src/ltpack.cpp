@@ -100,7 +100,7 @@ pack_lua_data(tpack_t *pack, lua_State *L, int idx, int depth) {
 		pack_table(pack, L, idx, depth + 1);
 		return;
 	default:
-		luaL_error(L, "Invalid data type : %s", lua_typename(L, data_type));
+		luaL_error(L, "attempt to pack a %s value", lua_typename(L, data_type));
 		return;
 	}
 }

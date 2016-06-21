@@ -178,7 +178,7 @@ bool network_t::recv_request()
 	int32_t need_read = 0, readed = 0;
 	int32_t processed = 0, nbytes = 0;
 	request_t request;
-	for (;;) { //to be fixed : 优化读取次数
+	for (;;) {
 		if (need_read == 0) {
 			nbytes = ::recv(m_request_r_fd, (char*)(&request.m_length), sizeof(request.m_length), 0);
 			if (nbytes > 0) {

@@ -685,6 +685,9 @@ void context_lua_t::on_received(message_t& message)
 	case LUA_CTX_WAKEUP:
 		response_context_wakeup(message);
 		break;
+	case LUA_CTX_RUN:
+		response_context_run(message);
+		break;
 	case RESPONSE_TCP_LISTEN:
 		response_tcp_listen(message);
 		break;
@@ -805,6 +808,11 @@ void context_lua_t::response_context_wait(message_t& response)
 void context_lua_t::response_context_wakeup(message_t& response)
 {
 	m_context_wait_sessions.wakeup_all(response.m_source, this, response, true);
+}
+
+void context_lua_t::response_context_run(message_t& response)
+{
+	wakeup_ref_session(response.m_session, response, true);
 }
 
 void context_lua_t::response_tcp_listen(message_t& response)
@@ -1341,6 +1349,27 @@ int32_t context_lua_t::context_log(lua_State *L)
 	return 0;
 }
 
+int32_t context_lua_t::context_run_callback_adjust(lua_State* L)
+{
+	lua_pop(L, 4);
+	return 0;
+}
+
+int32_t context_lua_t::context_run(lua_State *L)
+{
+	int32_t top = lua_gettop(L);
+	luaL_checktype(L, 1, LUA_TFUNCTION);
+	if (top > 1) {
+		lua_rotate(L, 1, top - 1);
+	}
+	int32_t session = context_lua_t::lua_ref_callback(L, top - 1, LUA_REFNIL, context_run_callback_adjust);
+	context_lua_t* lctx = context_lua_t::lua_get_context(L);
+	if (!singleton_ref(node_lua_t).context_send(lctx, lctx->get_handle(), session, LUA_CTX_RUN, UV_OK)) {
+		context_lua_t::lua_free_ref_session(L, session);
+	}
+	return 0;
+}
+
 int luaopen_context(lua_State *L)
 {
 	luaL_Reg l[] = {
@@ -1355,6 +1384,7 @@ int luaopen_context(lua_State *L)
 			{ "recv", context_lua_t::context_recv },
 			{ "wait", context_lua_t::context_wait },
 			{ "log", context_lua_t::context_log },
+			{ "run", context_lua_t::context_run },
 			{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

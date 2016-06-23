@@ -75,6 +75,9 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 15.	thread = **context.thread**()  
     *`--return the running thread index.`*  
 
+16.	**context.run**(func[, ...])  
+    *`--run the func at next tick(in other words next processing period).`*  
+
 ### tcp api  
 
 1.	result, listen_socket = **tcp.listen**(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])  

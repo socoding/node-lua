@@ -133,3 +133,12 @@ uv_err_code host_sockaddr(bool ipv6, const char* host, uint16_t port, struct soc
 		return uv_inet_pton(AF_INET6, host, (void*)&addr6->sin6_addr).code;
 	}
 }
+
+extern int get_pid()
+{
+#ifdef _WIN32
+	return GetCurrentProcessId();
+#else
+	return getpid();
+#endif
+}

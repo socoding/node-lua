@@ -19,6 +19,7 @@ private:
 	uv_os_sock_t m_request_r_fd;
 	uv_os_sock_t m_request_w_fd;
 	uv_poll_t m_request_handle;
+	uv_pipe_t m_remoter_handle;
 	uv_buf_t m_shared_read_buffer;				/* tcp and udp shared read buffer in network thread */
 	shared_write_map_t m_shared_write_sockets;  /* tcp and udp shared write socket in network thread */
 	atomic_t m_exiting;

@@ -27,6 +27,8 @@ network_t::network_t() : m_exiting(0)
 	assert(rc == 0);
 	rc = uv_poll_start(&m_request_handle, UV_READABLE, on_request_polled_in);
 	assert(rc == 0);
+	//rc = uv_pipe_init(m_uv_loop, &m_remoter_handle, 1);
+	//assert(rc == 0);
 	memset(&m_shared_read_buffer, 0, sizeof(m_shared_read_buffer));
 }
 

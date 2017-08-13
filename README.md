@@ -76,7 +76,7 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
     *`--return the running thread index.`*  
 
 16.	**context.run**(func[, ...])  
-    *`--run the func at next tick(in other words next processing period).`*  
+    *`--run the func(...) at next tick(in other words next processing period).`*  
 
 ### tcp api  
 

@@ -437,7 +437,7 @@ int32_t lua_tcp_socket_handle_t::_connect(lua_State* L, bool ipv6)
 	*local_host = '\0'; /* we don't support it at this version */
 	if (callback > 0) { /* nonblocking callback */
 		lua_settop(L, callback);
-		request.m_tcp_connect.m_session = context_lua_t::lua_ref_callback(L, callback - 1, LUA_REFNIL, context_lua_t::common_callback_adjust);
+		request.m_tcp_connect.m_session = context_lua_t::lua_ref_callback(L, callback - 1, LUA_REFNIL, connect_callback_adjust);
 		singleton_ref(network_t).send_request(request);
 		if (timeout > 0) {
 			context_lua_t::lua_ref_timer(L, request.m_tcp_connect.m_session, timeout, 0, false);
@@ -477,7 +477,7 @@ int32_t lua_tcp_socket_handle_t::connects(lua_State* L)
 	memcpy(REQUEST_SPARE_PTR(request.m_tcp_connects), sock, sock_len + 1);
 	if (callback > 0) { /* nonblocking callback */
 		lua_settop(L, callback);
-		request.m_tcp_connects.m_session = context_lua_t::lua_ref_callback(L, callback - 1, LUA_REFNIL, context_lua_t::common_callback_adjust);
+		request.m_tcp_connects.m_session = context_lua_t::lua_ref_callback(L, callback - 1, LUA_REFNIL, connect_callback_adjust);
 		singleton_ref(network_t).send_request(request);
 		if (timeout > 0) {
 			context_lua_t::lua_ref_timer(L, request.m_tcp_connects.m_session, timeout, 0, false);

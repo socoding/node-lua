@@ -19,6 +19,7 @@
 *.opensdf
 *.vcxproj.user
 Debug/
+Release/
 lua
 luac
 node-lua

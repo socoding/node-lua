@@ -1,5 +1,8 @@
 #include "common.h"
 #include "utils.h"
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 char* filter_arg(char **param, int32_t *len) {
 	char *begptr = *param;

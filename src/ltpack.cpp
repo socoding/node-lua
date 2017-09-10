@@ -1,7 +1,7 @@
-#include "ltpack.h"
 #define __STDC_LIMIT_MACROS
+#include "ltpack.h"
 #ifndef _WIN32
-# include <unistd.h>
+#include <unistd.h>
 #endif
 
 #define MAX_DEPTH 256

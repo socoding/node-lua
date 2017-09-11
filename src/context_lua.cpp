@@ -930,7 +930,6 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message)
 {
 	buffer_t* buffer;
-	int32_t* bson_data;
 	const char* data;
 	size_t length;
 	switch (lua_type(L, idx)) {

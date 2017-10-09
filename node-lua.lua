@@ -1,12 +1,14 @@
-14. 考虑lua_service的gc[考虑一直没有唤醒的服务的lua垃圾回收]
+14. 考虑lua_service的定时gc[考虑一直没有唤醒的服务的lua垃圾回收]
 
-17. 研究lua hook，如何中断死循环和调试(输入)
+17. 研究lua hook，如何中断死循环和远程调试(输入)
 
 22.to be implemented  / to be fixed
 
 23.udp http https
 
 24.lua socket tcp socket 迁移
+
+25.如何支持数据共享，解决内存过大问题：提供共享api
 
 io 阻塞非阻塞？ setvbuf
 {"__tostring", f_tostring},

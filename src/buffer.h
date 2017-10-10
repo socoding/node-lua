@@ -19,12 +19,15 @@ typedef struct {
 
 extern buffer_t buffer_new(size_t cap, const char *init, size_t init_len);
 extern bool buffer_append(buffer_t& buffer_ref, const char *data, size_t data_len);
+extern char* buffer_reserve(buffer_t& buffer_ref, size_t data_len);
+extern bool buffer_append_char(buffer_t& buffer_ref, char ch);
 extern bool buffer_clear(buffer_t& buffer_ref);
 extern buffer_t& buffer_grab(buffer_t& buffer_ref);
 extern void buffer_release(buffer_t& buffer_ref);
 extern bool buffer_concat(buffer_t& dest_ref, const buffer_t& src_ref);
 extern bool buffer_adjust_len(buffer_t& buffer_ref, size_t add);
 extern buffer_t buffer_split(buffer_t& buffer_ref, size_t len);
+extern size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len);
 
 #define invalid_buffer						{ NULL }
 #define buffer_is_valid(buffer_ref)			((buffer_ref).m_ptr != NULL)

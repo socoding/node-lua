@@ -92,6 +92,87 @@ bool buffer_append(buffer_t& buffer_ref, const char *data, size_t data_len) {
 	return buffer ? true : false;
 }
 
+char* buffer_reserve(buffer_t& buffer_ref, size_t data_len) {
+    buffer_data_ptr_t buffer = buffer_ref.m_ptr;
+	if (buffer) {
+		if (buffer->m_ref == 1) {
+			if (data_len <= (size_t)(buffer->m_cap - buffer->m_len)) {
+				return buffer->m_data + buffer->m_len;
+			}
+			size_t new_cap = buffer_gen_capacity(buffer_ref, data_len);
+			if (new_cap > 0) {
+				buffer_data_ptr_t new_buffer = (buffer_data_ptr_t)nl_realloc(buffer, sizeof(buffer_data_t) + new_cap + 1);
+				if (new_buffer) {
+					new_buffer->m_cap = new_cap;
+					buffer_ref.m_ptr = new_buffer;
+					return new_buffer->m_data + new_buffer->m_len;
+				}
+			}
+			return NULL;
+		} else {
+			size_t new_cap = buffer_gen_capacity(buffer_ref, data_len);
+			if (new_cap > 0) {
+				buffer_data_ptr_t new_buffer = (buffer_data_ptr_t)nl_malloc(sizeof(buffer_data_t) + new_cap + 1);
+				if (new_buffer) {
+					new_buffer->m_cap = new_cap;
+					new_buffer->m_ref = 1;
+					new_buffer->m_len = buffer->m_len;
+					memcpy(new_buffer->m_data, buffer->m_data, buffer->m_len);
+					new_buffer->m_data[new_buffer->m_len] = 0;
+					buffer_release(buffer_ref);
+					buffer_ref.m_ptr = new_buffer;
+					return new_buffer->m_data + new_buffer->m_len;
+				}
+			}
+			return NULL;
+		}
+	}
+	return NULL;
+}
+
+bool buffer_append_char(buffer_t& buffer_ref, char ch) {
+    buffer_data_ptr_t buffer = buffer_ref.m_ptr;
+	if (buffer) {
+		if (buffer->m_ref == 1) {
+			if (1 <= (size_t)(buffer->m_cap - buffer->m_len)) {
+				buffer->m_data[buffer->m_len] = ch;
+				buffer->m_data[++buffer->m_len] = 0;
+				return true;
+			}
+			size_t new_cap = buffer_gen_capacity(buffer_ref, 1);
+			if (new_cap > 0) {
+				buffer_data_ptr_t new_buffer = (buffer_data_ptr_t)nl_realloc(buffer, sizeof(buffer_data_t) + new_cap + 1);
+				if (new_buffer) {
+					new_buffer->m_cap = new_cap;
+					new_buffer->m_data[new_buffer->m_len] = ch;
+					new_buffer->m_data[++new_buffer->m_len] = 0;
+					buffer_ref.m_ptr = new_buffer;
+					return true;
+				}
+			}
+			return false;
+		} else {
+			size_t new_cap = buffer_gen_capacity(buffer_ref, 1);
+			if (new_cap > 0) {
+				buffer_data_ptr_t new_buffer = (buffer_data_ptr_t)nl_malloc(sizeof(buffer_data_t) + new_cap + 1);
+				if (new_buffer) {
+					new_buffer->m_cap = new_cap;
+					new_buffer->m_ref = 1;
+					new_buffer->m_len = buffer->m_len;
+					memcpy(new_buffer->m_data, buffer->m_data, buffer->m_len);
+					new_buffer->m_data[new_buffer->m_len] = ch;
+					new_buffer->m_data[++new_buffer->m_len] = 0;
+					buffer_release(buffer_ref);
+					buffer_ref.m_ptr = new_buffer;
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	return false;
+}
+
 bool buffer_clear(buffer_t& buffer_ref) {
     buffer_data_ptr_t buffer = buffer_ref.m_ptr;
 	if (!buffer) return true;
@@ -172,4 +253,40 @@ buffer_t buffer_split(buffer_t& buffer_ref, size_t len)
 		}
 	}
 	return buffer_new(DEFAULT_BUFFER_CAPACITY, NULL, 0);
+}
+
+size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len)
+{
+	buffer_data_ptr_t buffer = buffer_ref.m_ptr;
+	if (buffer && len > 0 && buffer->m_len > start) {
+		int32_t remove_len = len < ((size_t)buffer->m_len - start) ? (int32_t)len : ((size_t)buffer->m_len - start);
+		if (buffer->m_ref == 1) {
+			buffer->m_len -= remove_len;
+			if (buffer->m_len > start) {
+				memcpy(buffer->m_data + start, buffer->m_data + start + remove_len, buffer->m_len - start);
+			}
+			buffer->m_data[buffer->m_len] = 0;
+		} else {
+			if (remove_len < buffer->m_len) {
+				buffer_t new_buffer = buffer_new(buffer->m_len - remove_len, NULL, 0);
+				buffer_data_ptr_t nbuffer = new_buffer.m_ptr;
+				if (nbuffer) {
+					nbuffer->m_len = buffer->m_len - remove_len;
+					if (start > 0) {
+						memcpy(nbuffer->m_data, buffer->m_data, start);
+					}
+					if (nbuffer->m_len > start) {
+						memcpy(nbuffer->m_data + start, buffer->m_data + start + remove_len, nbuffer->m_len - start);
+					}
+					nbuffer->m_data[nbuffer->m_len] = 0;
+				}
+				buffer_release(buffer_ref);
+				buffer_ref = new_buffer;
+			} else { //remove_len == buffer->m_len
+				buffer_ref = buffer_new(DEFAULT_BUFFER_CAPACITY, NULL, 0);
+			}
+		}
+		return remove_len;
+	}
+	return 0;
 }

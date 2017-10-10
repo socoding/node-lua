@@ -547,7 +547,7 @@ static int lbuffer_unpack(lua_State *L) {
 	const char *data = buffer_data_ptr(*b);
 	size_t pos = (size_t)posrelat(luaL_optinteger(L, 3, 1), ld) - 1;
 	int n = 0;  /* number of results */
-	luaL_argcheck(L, pos <= ld, 3, "initial position out of string");
+	luaL_argcheck(L, pos <= ld, 3, "initial position out of lbuffer");
 	initheader(L, &h);
 	while (*fmt != '\0') {
 		int size, ntoalign;

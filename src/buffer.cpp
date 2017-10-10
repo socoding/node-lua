@@ -258,11 +258,11 @@ buffer_t buffer_split(buffer_t& buffer_ref, size_t len)
 size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len)
 {
 	buffer_data_ptr_t buffer = buffer_ref.m_ptr;
-	if (buffer && len > 0 && buffer->m_len > start) {
+	if (buffer && len > 0 && (size_t)buffer->m_len > start) {
 		int32_t remove_len = len < ((size_t)buffer->m_len - start) ? (int32_t)len : ((size_t)buffer->m_len - start);
 		if (buffer->m_ref == 1) {
 			buffer->m_len -= remove_len;
-			if (buffer->m_len > start) {
+			if ((size_t)buffer->m_len > start) {
 				memcpy(buffer->m_data + start, buffer->m_data + start + remove_len, buffer->m_len - start);
 			}
 			buffer->m_data[buffer->m_len] = 0;
@@ -275,7 +275,7 @@ size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len)
 					if (start > 0) {
 						memcpy(nbuffer->m_data, buffer->m_data, start);
 					}
-					if (nbuffer->m_len > start) {
+					if ((size_t)nbuffer->m_len > start) {
 						memcpy(nbuffer->m_data + start, buffer->m_data + start + remove_len, nbuffer->m_len - start);
 					}
 					nbuffer->m_data[nbuffer->m_len] = 0;

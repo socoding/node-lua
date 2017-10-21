@@ -623,6 +623,7 @@ static luaL_Reg lbuffer[] = {
 	{ "valid", lbuffer_valid },
 	{ "release", lbuffer_release },
 	{ "__gc", lbuffer_release },
+	{ "__len", lbuffer_length },
 	{ "__tostring", lbuffer_tostring },
 	{ NULL, NULL },
 };

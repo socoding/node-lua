@@ -21,7 +21,7 @@ CFLAGS += -D RELEASE
 endif
 
 ## get all source files  
-SRCS += buffer.cpp 
+SRCS += $(SRC_PATH)/buffer.cpp 
 
 ## all .o based on all .cpp
 OBJS := $(SRCS:.cpp=.o)

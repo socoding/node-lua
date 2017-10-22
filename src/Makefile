@@ -47,7 +47,7 @@ LDFLAGS += -undefined dynamic_lookup \
 endif
 
 ifeq (linux,$(PLATFORM))
-LIBS += dl rt
+LIBS += dl rt pthread
 endif
 
 ifeq (freebsd,$(PLATFORM))

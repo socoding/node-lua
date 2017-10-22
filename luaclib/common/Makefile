@@ -20,16 +20,13 @@ ifeq (RELEASE,$(RELEASE))
 CFLAGS += -D RELEASE
 endif
 
-## get all source files  
-SRCS += $(SRC_PATH)/buffer.cpp 
-
-## all .o based on all .cpp
-OBJS := $(SRCS:.cpp=.o)
-
 ## get all include path  
 CFLAGS += $(foreach dir, $(INCLUDE_PATH), -I$(dir))  
-.cpp.o:
+
+buffer.o : $(SRC_PATH)/buffer.cpp 
 	$(CC) -c $(CFLAGS) -o $@ $< 
+
+OBJS := buffer.o
 
 $(TARGET): $(OBJS) 
 	ar cr $@ $(OBJS)

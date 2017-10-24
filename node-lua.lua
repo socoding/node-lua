@@ -10,6 +10,8 @@
 
 25.如何支持数据共享，解决内存过大问题：提供共享api
 
+26.热更新
+
 io 阻塞非阻塞？ setvbuf
 {"__tostring", f_tostring},
 

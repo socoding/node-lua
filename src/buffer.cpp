@@ -47,7 +47,7 @@ bool buffer_append(buffer_t& buffer_ref, const char *data, size_t data_len) {
 	if (buffer && data) {
 		if (buffer->m_ref == 1) {
 			if (data_len <= (size_t)(buffer->m_cap - buffer->m_len)) {
-				memcpy(buffer->m_data + buffer->m_len, data, data_len);
+				memmove(buffer->m_data + buffer->m_len, data, data_len);
 				buffer->m_len += data_len;
 				buffer->m_data[buffer->m_len] = 0;
 				return true;
@@ -62,7 +62,7 @@ bool buffer_append(buffer_t& buffer_ref, const char *data, size_t data_len) {
 				if (new_buffer) {
 					if (offset >= 0) data = (char*)new_buffer + offset;
 					new_buffer->m_cap = new_cap;
-					memcpy(new_buffer->m_data + new_buffer->m_len, data, data_len);
+					memmove(new_buffer->m_data + new_buffer->m_len, data, data_len);
 					new_buffer->m_len += data_len;
 					new_buffer->m_data[new_buffer->m_len] = 0;
 					buffer_ref.m_ptr = new_buffer;
@@ -237,7 +237,7 @@ buffer_t buffer_split(buffer_t& buffer_ref, size_t len)
 			if (buffer->m_ref == 1) {
 				buffer->m_len -= split_len;
 				if (buffer->m_len > 0) {
-					memcpy(buffer->m_data, buffer->m_data + split_len, buffer->m_len);
+					memmove(buffer->m_data, buffer->m_data + split_len, buffer->m_len);
 				}
 				buffer->m_data[buffer->m_len] = 0;
 			} else {
@@ -263,7 +263,7 @@ size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len)
 		if (buffer->m_ref == 1) {
 			buffer->m_len -= remove_len;
 			if ((size_t)buffer->m_len > start) {
-				memcpy(buffer->m_data + start, buffer->m_data + start + remove_len, buffer->m_len - start);
+				memmove(buffer->m_data + start, buffer->m_data + start + remove_len, buffer->m_len - start);
 			}
 			buffer->m_data[buffer->m_len] = 0;
 		} else {

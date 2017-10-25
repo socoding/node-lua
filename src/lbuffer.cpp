@@ -14,7 +14,7 @@ static int32_t lbuffer_new(lua_State* L)
 	} else if (type == LUA_TSTRING) {
 		init = lua_tolstring(L, 1, &init_len);
 		cap = init_len + DEFAULT_BUFFER_CAPACITY;
-	} else if (type != LUA_TNIL) {
+	} else if (type != LUA_TNIL && type != LUA_TNONE) {
 		buffer_t* buffer = (buffer_t*)luaL_testudata(L, 1, BUFFER_METATABLE);
 		if (!buffer) {
 			luaL_argerror(L, 1, "unexpected argument type");

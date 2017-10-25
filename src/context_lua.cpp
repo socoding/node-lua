@@ -915,7 +915,7 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 {
 	int32_t type = lua_type(L, 1);
 	uint32_t src_handle = lua_get_context_handle(L);	
-	if (type == LUA_TNIL || type == LUA_TSTRING) { //kill self
+	if (type == LUA_TNONE || type == LUA_TNIL || type == LUA_TSTRING) { //kill self
 		singleton_ref(node_lua_t).context_destroy(src_handle, src_handle, lua_tostring(L, 1));
 		return 0;
 	}

@@ -155,6 +155,9 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 
 22. fd = **tcp.fd**(socket)  
 	*`--get tcp socket lua fd`*
+    
+23. context_id = **tcp.fd_src**(fd)  
+	*`--get socket fd source context id`*
 
 ### udp api  
 
@@ -205,6 +208,9 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 
 15. fd = **udp.fd**(socket)  
 	*`--get udp socket lua fd`*  
+    
+16. context_id = **udp.fd_src**(fd)  
+	*`--get socket fd source context id`*
 
 ### timer api	
 

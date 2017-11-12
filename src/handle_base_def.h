@@ -9,5 +9,6 @@ typedef enum
 } handle_set;
 
 #define SOCKET_MAKE_FD(lua_ref, context_id) ((int64_t)(lua_ref)%1000000 + 1000000*(int64_t)(context_id))
+#define SOCKET_FD_SOURCE(fd) ((int64_t)(fd)/1000000)
 
 #endif

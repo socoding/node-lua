@@ -56,6 +56,13 @@ static int32_t lua_tcp_get_fd(lua_State* L)
 	return 0;
 }
 
+static int32_t lua_tcp_fd_src(lua_State* L)
+{
+	int64_t fd = luaL_checkinteger(L, 1);
+	lua_pushinteger(L, SOCKET_FD_SOURCE(fd));
+	return 1;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 lua_tcp_listen_handle_t* lua_tcp_listen_handle_t::create_tcp_listen_socket(uv_tcp_listen_handle_t* handle, lua_State* L)
@@ -1123,6 +1130,7 @@ int luaopen_tcp(lua_State *L)
 		{ "close", lua_tcp_close },
 		{ "is_closed", lua_tcp_is_closed },
 		{ "fd", lua_tcp_get_fd },
+		{ "fd_src", lua_tcp_fd_src },
 		{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

@@ -423,6 +423,13 @@ int32_t lua_udp_handle_t::wakeup_read(lua_State* L, message_t& message)
 	return 0;
 }
 
+static int32_t lua_udp_fd_src(lua_State* L)
+{
+	int64_t fd = luaL_checkinteger(L, 1);
+	lua_pushinteger(L, SOCKET_FD_SOURCE(fd));
+	return 1;
+}
+
 int luaopen_udp(lua_State *L)
 {
 	luaL_Reg l[] = {
@@ -439,6 +446,7 @@ int luaopen_udp(lua_State *L)
 			{ "close", lua_udp_handle_t::close },
 			{ "is_closed", lua_udp_handle_t::udp_is_closed },
 			{ "fd", lua_udp_handle_t::get_fd },
+			{ "fd_src", lua_udp_fd_src },
 			{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

@@ -361,9 +361,11 @@ int network_t::make_tcp_socket(uv_os_sock_t *sock, bool ipv6, bool reuseport)
 	return -1;
 }
 #else
-extern int uv__socket(int domain, int type, int protocol);
+extern "C" {
+	extern int uv__socket(int domain, int type, int protocol);
+}
 
-int network_t::make_tcp_socket(uv_os_sock_t *sock, bool reuseport)
+int network_t::make_tcp_socket(uv_os_sock_t *sock, bool ipv6, bool reuseport)
 {
 	*sock = uv__socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, IPPROTO_IP);
 	if (*sock >= 0) {
@@ -371,7 +373,7 @@ int network_t::make_tcp_socket(uv_os_sock_t *sock, bool reuseport)
 			int yes = 1;
 			if (setsockopt(*sock, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof yes) != 0) {
 				close_socket(*sock);
-				sock = -1;
+				*sock = -1;
 				return -1;
 			}
 		}

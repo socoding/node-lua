@@ -83,6 +83,9 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 1.	result, listen_socket = **tcp.listen**(addr, port[, reuse, [listen_callback(result, listen_socket, addr, port[, reuse])]])  
 	*`--listen on a ipv4 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
+    *`--reuse option allows you to listen on the same specified port.`*  
+    *`--If you are listening on the same port among several sockets at unix system, you will accept the connecting socket in round-robin sequence among all the listening sockets.`*  
+    *`--If you are listening on the same port among several sockets at windows system, you will most likely accept the connecting socket at the first listening socket!`*  
 	
 2.	result, listen_socket = **tcp.listens**(sock_name[, listen_callback(result, listen_socket, sock_name)])  
     *`--listen on a windows named pipe or unix domain socket.`*  
@@ -91,6 +94,9 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 3.	result, listen_socket = **tcp.listen6**(addr, port[, reuse, [listen_callback(result, listen_socket, addr, port[, reuse])]])  
 	*`--listen on a ipv6 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
+    *`--reuse option allows you to listen on the same specified port.`*  
+    *`--If you are listening on the same port among several sockets at unix system, you will accept the connecting socket in round-robin sequence among all the listening sockets.`*  
+    *`--If you are listening on the same port among several sockets at windows system, you will most likely accept the connecting socket at the first listening socket!`*  
 	
 4.	result, accept_socket = **tcp.accept**(listen_socket[, timeout])  
 	*`--accept on a listen socket in blocking mode, timeout is activated if timeout is set.`*  

@@ -87,14 +87,14 @@ int32_t lua_tcp_listen_handle_t::_listen(lua_State* L, bool ipv6)
 		luaL_argerror(L, 1, "listen host invalid(too long)");
 	}
 	uint16_t port = luaL_checkunsigned(L, 2);
-	uint16_t backlog = (uint16_t)-1;
+	bool reuse = false;
 	int32_t top = lua_gettop(L);
 	int32_t callback = 0;
 	if (top >= 3) {
 		if (lua_isfunction(L, 3)) {
 			callback = 3;
 		} else {
-			backlog = luaL_checkunsigned(L, 3);
+			reuse = lua_toboolean(L, 3);
 			if (top >= 4) {
 				luaL_checktype(L, 4, LUA_TFUNCTION);
 				callback = 4;
@@ -106,7 +106,7 @@ int32_t lua_tcp_listen_handle_t::_listen(lua_State* L, bool ipv6)
 	request.m_type = REQUEST_TCP_LISTEN;
 	request.m_length = REQUEST_SIZE(request_tcp_listen_t, host_len + 1);
 	request.m_tcp_listen.m_source = lctx->get_handle();
-	request.m_tcp_listen.m_backlog = backlog;
+	request.m_tcp_listen.m_reuse = reuse;
 	request.m_tcp_listen.m_port = port;
 	request.m_tcp_listen.m_ipv6 = ipv6;
 	memcpy(REQUEST_SPARE_PTR(request.m_tcp_listen), host, host_len + 1);

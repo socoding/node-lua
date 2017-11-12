@@ -343,6 +343,44 @@ fail:
 #endif
 }
 
+#ifdef CC_MSVC
+int network_t::make_tcp_socket(uv_os_sock_t *sock, bool ipv6, bool reuseport)
+{
+	*sock = socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, IPPROTO_IP);
+	if (*sock != INVALID_SOCKET) {
+		if (reuseport) {
+			DWORD yes = 1;
+			if (setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char*)&yes, sizeof yes) == SOCKET_ERROR) {
+				close_socket(*sock);
+				*sock = INVALID_SOCKET;
+				return -1;
+			}
+		}
+		return 0;
+	}
+	return -1;
+}
+#else
+extern int uv__socket(int domain, int type, int protocol);
+
+int network_t::make_tcp_socket(uv_os_sock_t *sock, bool reuseport)
+{
+	*sock = uv__socket(ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, IPPROTO_IP);
+	if (*sock >= 0) {
+		if (reuseport) {
+			int yes = 1;
+			if (setsockopt(*sock, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof yes) != 0) {
+				close_socket(*sock);
+				sock = -1;
+				return -1;
+			}
+		}
+		return 0;
+	}
+	return -1;
+}
+#endif
+
 int network_t::set_noneblocking( uv_os_sock_t sock )
 {
 #if defined CC_MSVC

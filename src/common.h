@@ -6,7 +6,13 @@
 #include <string.h>
 #include "config.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(WINCE) || defined(_WIN32_WCE) || defined(_WIN64)
+#ifndef CC_MSVC
+#define CC_MSVC
+#endif
+#endif
+
+#ifdef CC_MSVC
 #define FORCE_INLINE __forceinline
 #else
 #define FORCE_INLINE inline

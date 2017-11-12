@@ -19,6 +19,7 @@
   XX( 211, ETRANSTYPE,		"transfer data type not supported")						\
   XX( 212, ENOREPLY,		"no reply")												\
   XX( 213, ETIMEOUT,		"timeout")												\
+  XX( 214, ESOCKFAIL,		"socket create failed")									\
 
 #define NL_ERRNO_GEN(val, name, s) NL_##name = val,
 typedef enum {

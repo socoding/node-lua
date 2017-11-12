@@ -1,6 +1,6 @@
 #include "common.h"
 #include "utils.h"
-#ifndef _WIN32
+#ifndef CC_MSVC
 #include <unistd.h>
 #endif
 
@@ -55,7 +55,7 @@ bool socket_host(uv_os_sock_t sock, bool local, char* host, uint32_t host_len, b
 		sockaddr_in6 sock6;
 	} sock_name;
 	int sock_len = sizeof(sock_name);
-#ifdef _WIN32
+#ifdef CC_MSVC
 	int result = local ? getsockname(sock, (sockaddr*)&sock_name, &sock_len) : getpeername(sock, (sockaddr*)&sock_name, &sock_len);
 #else
 	int result = local ? getsockname(sock, (sockaddr*)&sock_name, (socklen_t*)&sock_len) : getpeername(sock, (sockaddr*)&sock_name, (socklen_t*)&sock_len);
@@ -137,9 +137,9 @@ uv_err_code host_sockaddr(bool ipv6, const char* host, uint16_t port, struct soc
 	}
 }
 
-extern int get_pid()
+int get_pid()
 {
-#ifdef _WIN32
+#ifdef CC_MSVC
 	return GetCurrentProcessId();
 #else
 	return getpid();

@@ -16,10 +16,12 @@
     ((__GNUC_MINOR__ > (minor)) || ((__GNUC_MINOR__ == (minor)) && \
     (__GNUC_PATCHLEVEL__ >= (patch)) ) ) ) )
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(WINCE) || defined(_WIN32_WCE)
-#   define CC_MSVC
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(WINCE) || defined(_WIN32_WCE) || defined(_WIN64)
+#ifndef CC_MSVC
+#define CC_MSVC
+#endif
 #elif CHECK_GNUC(4, 1, 2)						/* >= 4.1.2 */
-#   define CC_GNUC
+#define CC_GNUC
 #else
 #   error "This Compiler is unsupported!"
 #endif

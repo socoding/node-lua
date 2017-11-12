@@ -40,6 +40,7 @@ private:
 public:
     static int make_socketpair(uv_os_sock_t *r, uv_os_sock_t *w);
     static int close_socketpair(uv_os_sock_t *r, uv_os_sock_t *w);
+	static int make_tcp_socket(uv_os_sock_t *sock, bool ipv6, bool reuseport);
 	static int set_noneblocking(uv_os_sock_t sock);
 	static int close_socket(uv_os_sock_t sock);
 public:

@@ -1,6 +1,6 @@
 #define __STDC_LIMIT_MACROS
 #include "ltpack.h"
-#ifndef _WIN32
+#ifndef CC_MSVC
 #include <unistd.h>
 #endif
 

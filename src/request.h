@@ -42,9 +42,9 @@ struct request_exit_t {
 struct request_tcp_listen_t {
 	uint32_t m_source;
 	uint32_t m_session;
-	uint16_t m_backlog;
 	uint16_t m_port;
 	bool m_ipv6;
+	bool m_reuse;
 	REQUEST_SPARE_REGION
 };
 

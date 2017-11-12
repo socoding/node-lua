@@ -80,7 +80,7 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 
 ### tcp api  
 
-1.	result, listen_socket = **tcp.listen**(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])  
+1.	result, listen_socket = **tcp.listen**(addr, port[, reuse, [listen_callback(result, listen_socket, addr, port[, reuse])]])  
 	*`--listen on a ipv4 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
 	
@@ -88,7 +88,7 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
     *`--listen on a windows named pipe or unix domain socket.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
 
-3.	result, listen_socket = **tcp.listen6**(addr, port[, backlog, [listen_callback(result, listen_socket, addr, port[, backlog])]])  
+3.	result, listen_socket = **tcp.listen6**(addr, port[, reuse, [listen_callback(result, listen_socket, addr, port[, reuse])]])  
 	*`--listen on a ipv6 address.`*  
     *`--listen_callback is a once callback, blocking if listen_callback is nil.`*  
 	

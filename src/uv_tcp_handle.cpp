@@ -32,7 +32,21 @@ void uv_tcp_listen_handle_t::listen_tcp(request_tcp_listen_t& request)
 #ifdef CC_MSVC
 	uv_tcp_simultaneous_accepts(server, 0);
 #endif
-	if ((!request.m_ipv6 ? uv_tcp_bind(server, uv_ip4_addr(REQUEST_SPARE_PTR(request), request.m_port)) == 0 : uv_tcp_bind6(server, uv_ip6_addr(REQUEST_SPARE_PTR(request), request.m_port)) == 0) && uv_listen((uv_stream_t*)server, request.m_backlog, on_accept) == 0) {
+
+	uv_os_sock_t sock;
+	if (network_t::make_tcp_socket(&sock, request.m_ipv6, request.m_reuse)) {
+		singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_LISTEN, NL_ESOCKFAIL);
+		uv_close((uv_handle_t*)server, on_closed);
+		return;
+	}
+	if (uv_tcp_open(server, sock)) {
+		network_t::close_socket(sock);
+		singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_LISTEN, singleton_ref(network_t).last_error());
+		uv_close((uv_handle_t*)server, on_closed);
+		return;
+	}
+
+	if ((!request.m_ipv6 ? uv_tcp_bind(server, uv_ip4_addr(REQUEST_SPARE_PTR(request), request.m_port)) == 0 : uv_tcp_bind6(server, uv_ip6_addr(REQUEST_SPARE_PTR(request), request.m_port)) == 0) && uv_listen((uv_stream_t*)server, 0x7fffffff, on_accept) == 0) {
 		if (!singleton_ref(node_lua_t).context_send(request.m_source, 0, request.m_session, RESPONSE_TCP_LISTEN, (void*)this)) {
 			uv_close((uv_handle_t*)server, on_closed);
 		}

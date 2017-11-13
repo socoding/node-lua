@@ -1398,6 +1398,8 @@ int luaopen_context(lua_State *L)
 	lua_setfield(L, -2, "self");
 	lua_pushinteger(L, lctx->get_parent());
 	lua_setfield(L, -2, "parent");
+	lua_pushinteger(L, node_lua_t::m_cpu_count);
+	lua_setfield(L, -2, "ncpu");
 	return 1;
 }
 

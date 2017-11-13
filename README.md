@@ -32,50 +32,53 @@ Contact with **Email: xdczju@sina.com** or **QQ: 443231647**
 
 3.	**context.winos**  
     *`--whether the running system is windows.`*  
+    
+4.	**context.ncpu**  
+    *`--number of cpu.`*  
 
-4.	handle = **context.create**(file_name[, arg1[, ...]])  
+5.	handle = **context.create**(file_name[, arg1[, ...]])  
     *`--create a new context with file_name as the context entry. arg1, arg2, ... will be the argument for the context.`*  
 
-5.	handle = **context.destroy**([handle[, message]])  
+6.	handle = **context.destroy**([handle[, message]])  
     *`--destroy a context specified by handle with a string message. You'll kill the context itself if handle is nil and message is a optional argument.`*  
 
-6.	result, error = **context.send**(handle, data1[, ...])  
+7.	result, error = **context.send**(handle, data1[, ...])  
     *`--send data1, data2, ... directy to context specified by handle noblocking.`*  
 
-7.	result, query_data1, ... = **context.query**(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])  
+8.	result, query_data1, ... = **context.query**(handle, data1[, ... [, query_callback(result, query_data1[, ...])]])  
     *`--query context specified by handle with data1, data2, ... and query_data1, query_data2, ... is the queried datas.`*  
 	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
 
-8.	result, query_data1, ... = **context.timed_query**(handle, timeout, data1[, ... [, query_callback(result, query_data1[, ...])]])  
+9.	result, query_data1, ... = **context.timed_query**(handle, timeout, data1[, ... [, query_callback(result, query_data1[, ...])]])  
     *`--query context specified by handle with data1, data2, ... in timeout seconds`*  
 	*`--query_callback is a once callback, blocking if query_callback is nil.`*  
 	
-9.	result, error = **context.reply**(handle, session, data1[, ...])  
+10.	result, error = **context.reply**(handle, session, data1[, ...])  
     *`--reply session(received by context.recv) context specified by handle with data1, data2, ...`*  
 
-10.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, timeout])  
+11.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, timeout])  
     *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
     *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
 	
-11.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, recv_callback(result, recv_handle, session, recv_data1, ...)])  
+12.	result, recv_handle, session, recv_data1, ... = **context.recv**(handle[, recv_callback(result, recv_handle, session, recv_data1, ...)])  
     *`--receive data from context specified by handle(receive data from all contexts if handle equals 0).`*  
     *`--recv_handle specifies the source context id. It's a query action if session >= 0, where you'd better reply this query action.`*  
     *`--recv_callback is a continues callback, blocking if recv_callback is nil.`*  
 	
-12.	result, error = **context.wait**(handle[, timeout[, callback(result, error, handle[, timeout])]])  
+13.	result, error = **context.wait**(handle[, timeout[, callback(result, error, handle[, timeout])]])  
     *`--wait context to quit or to be destroyed in blocking or nonblocking mode.`*  
     *`--callback is a once callback, blocking if callback is nil.`*  
 
-13.	result, error = **context.log**(...)  
+14.	result, error = **context.log**(...)  
     *`--almost equivalent to print except the output won't be disordered(node-lua runs in a muti-thread mode).`*    
 
-14.	error = **context.strerror**(errno)  
+15.	error = **context.strerror**(errno)  
     *`--convert error number to error string. Error number is always the next argument after result in most apis.`*  
 
-15.	thread = **context.thread**()  
+16.	thread = **context.thread**()  
     *`--return the running thread index.`*  
 
-16.	**context.run**(func[, ...])  
+17.	**context.run**(func[, ...])  
     *`--run the func(...) at next tick(in other words next processing period).`*  
 
 ### tcp api  

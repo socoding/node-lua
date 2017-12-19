@@ -17,7 +17,8 @@ char context_lua_t::m_ref_session_table_key = 0;
 char context_lua_t::m_ref_timer_table_key = 0;
 
 context_lua_t::context_lua_t() 
-	: m_lstate(NULL),
+	: m_name(NULL),
+	  m_lstate(NULL),
 	  m_ref_session_count(0),
 	  m_ref_session_base(INT_MAX)
 {
@@ -28,6 +29,10 @@ context_lua_t::~context_lua_t()
 	if (m_lstate) {
 		lua_close(m_lstate);
 		m_lstate = NULL;
+	}
+	if (m_name) {
+		nl_free((void*)m_name);
+		m_name = NULL;
 	}
 }
 
@@ -70,8 +75,8 @@ bool context_lua_t::init(int32_t argc, char* argv[], char* env[])
 		argp += lengths[i];
 		*argp++ = (i != argc - 1) ? ' ' : '\0';
 	}
+	m_name = args;
 	singleton_ref(node_lua_t).log_fmt(m_handle, "[alert] context:0x%08x init: %s", m_handle, args);
-	nl_free(args);
 	return singleton_ref(node_lua_t).context_send(this, m_handle, 0, LUA_CTX_INIT, (int64_t)argc);
 }
 
@@ -84,6 +89,10 @@ bool context_lua_t::deinit(const char *arg)
 	if (m_lstate) {
 		lua_close(m_lstate);
 		m_lstate = NULL;
+	}
+	if (m_name) {
+		nl_free((void*)m_name);
+		m_name = NULL;
 	}
 	singleton_ref(node_lua_t).log_fmt(m_handle, "[alert] context:0x%08x deinit: %s", m_handle, arg);
 	return true;
@@ -1396,6 +1405,8 @@ int luaopen_context(lua_State *L)
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
 	lua_pushinteger(L, lctx->get_handle());
 	lua_setfield(L, -2, "self");
+	lua_pushstring(L, lctx->get_name());
+	lua_setfield(L, -2, "name");
 	lua_pushinteger(L, lctx->get_parent());
 	lua_setfield(L, -2, "parent");
 	lua_pushinteger(L, node_lua_t::m_cpu_count);

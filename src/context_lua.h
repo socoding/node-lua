@@ -35,6 +35,7 @@ public:
 	void on_worker_attached();
 	void on_worker_detached();
 
+	const char* get_name() const { return m_name; }
 	bool is_active() const { return m_ref_session_count > 0; }
 	uint32_t yielding_up() { return (m_shared->m_yielding_depth) ? ++m_shared->m_yielding_depth : 0; }
 	request_t& get_yielding_request() const { return m_shared->m_yielding_request; }
@@ -47,6 +48,11 @@ private:
 	~context_lua_t();
 	context_lua_t(const context_lua_t& lctx);
 	context_lua_t& operator=(const context_lua_t& lctx);
+
+	/* @m_name
+	** The lua context name.
+	*/
+	const char *m_name;
 
 	/* @m_lstate 
 	** The main lvm where the lua context is running.

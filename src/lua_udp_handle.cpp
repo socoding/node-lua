@@ -6,7 +6,7 @@
 #include "node_lua.h"
 #include "uv_udp_handle.h"
 
-#define UDP_SOCKET_METATABLE		"class.udp_socket_handle_t"
+#define UDP_SOCKET_METATABLE		"class udp_socket_handle_t"
 
 lua_udp_handle_t* lua_udp_handle_t::create_udp_socket(uv_udp_handle_t* handle, lua_State* L)
 {
@@ -432,7 +432,7 @@ static int32_t lua_udp_fd_src(lua_State* L)
 
 int luaopen_udp(lua_State *L)
 {
-	luaL_Reg l[] = {
+	static const luaL_Reg l[] = {
 			{ "open", lua_udp_handle_t::open },
 			{ "open6", lua_udp_handle_t::open6 },
 			{ "write", lua_udp_handle_t::write },

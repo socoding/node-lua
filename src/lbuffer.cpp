@@ -607,7 +607,7 @@ static int lbuffer_unpack(lua_State *L) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static luaL_Reg lbuffer[] = {
+static const luaL_Reg lbuffer[] = {
 	{ "new", lbuffer_new },
 	{ "append", lbuffer_append },
 	{ "pack", lbuffer_pack },

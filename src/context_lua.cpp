@@ -1,6 +1,7 @@
 #include "common.h"
 #include "utils.h"
 #include "lbuffer.h"
+#include "lshared.h"
 #include "context.h"
 #include "context_lua.h"
 #include "node_lua.h"
@@ -938,7 +939,7 @@ int32_t context_lua_t::context_destroy(lua_State *L)
 
 int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t msg_type, message_t& message)
 {
-	buffer_t* buffer;
+	void* udata;
 	const char* data;
 	size_t length;
 	switch (lua_type(L, idx)) {
@@ -968,12 +969,26 @@ int32_t context_lua_t::context_check_message(lua_State *L, int32_t idx, uint32_t
 		message.m_source = lua_get_context_handle(L);
 		return 1;
 	case LUA_TUSERDATA:
-		buffer = (buffer_t*)luaL_testudata(L, idx, BUFFER_METATABLE);
-		if (buffer) {
-			message.m_type = MAKE_MESSAGE_TYPE(msg_type, BUFFER);
-			message.m_data.m_buffer = buffer_grab(*buffer);
-			message.m_source = lua_get_context_handle(L);
-			return 1;
+		udata = lua_touserdata(L, idx);
+		if (lua_getmetatable(L, idx)) {  /* does it have a metatable? */
+			luaL_getmetatable(L, BUFFER_METATABLE);  /* get correct metatable */
+			if (lua_rawequal(L, -1, -2)) { /* not the same? */
+				lua_pop(L, 2);  /* remove both metatables */
+				message.m_type = MAKE_MESSAGE_TYPE(msg_type, BUFFER);
+				message.m_data.m_buffer = buffer_grab(*((buffer_t*)udata));
+				message.m_source = lua_get_context_handle(L);
+				return 1;
+			}
+			lua_pop(L, 1);  /* remove BUFFER_METATABLE */
+			luaL_getmetatable(L, SHARED_METATABLE);  /* get correct metatable */
+			if (lua_rawequal(L, -1, -2)) { /* not the same? */
+				lua_pop(L, 2);  /* remove both metatables */
+				message.m_type = MAKE_MESSAGE_TYPE(msg_type, SHARED);
+				message.m_data.m_shared = *(shared_t**)udata ? (*(shared_t**)udata)->grab() : NULL;
+				message.m_source = lua_get_context_handle(L);
+				return 1;
+			}
+			lua_pop(L, 2);  /* remove both metatables */
 		}
 		lua_pushstring(L, "transfer data type not supported");
 		return 0;
@@ -1380,7 +1395,7 @@ int32_t context_lua_t::context_run(lua_State *L)
 
 int luaopen_context(lua_State *L)
 {
-	luaL_Reg l[] = {
+	static const luaL_Reg l[] = {
 			{ "strerror", context_lua_t::context_strerror },
 			{ "create", context_lua_t::context_create },
 			{ "destroy", context_lua_t::context_destroy },

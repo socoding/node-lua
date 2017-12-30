@@ -17,7 +17,7 @@ public:
 	~node_lua_t();
 	/* context send by ctx */
 	bool context_send(context_t* ctx, message_t& msg);
-	template < class type>
+	template < class type >
 	FORCE_INLINE bool context_send(context_t* ctx, uint32_t source, int session, int msg_type, type data)
 	{
 		message_t msg(source, session, msg_type, data);

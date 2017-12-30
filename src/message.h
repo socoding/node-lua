@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "lbinary.h"
 #include "ltpack.h"
+#include "lshared.h"
 
 #define  MESSAGE_TYPE_BIT	24
 #define	 MAKE_MESSAGE_TYPE(mtype, dtype) (((uint32_t)(dtype) << MESSAGE_TYPE_BIT) | ((mtype) & (((uint32_t)1 << MESSAGE_TYPE_BIT) - 1)))
@@ -22,8 +23,9 @@ enum data_type {
 	STRING			= 6, //need to be freed
 	BINARY			= 7, //need to be freed
 	TPACK			= 8, //need to be freed
-	ARRAY			= 9, //need to be freed
-	TERROR			= 10 //
+	SHARED          = 9, //need to be freed
+	ARRAY			= 10,//need to be freed
+	TERROR			= 11 //
 };
 
 typedef union data_t {
@@ -35,6 +37,7 @@ typedef union data_t {
 	char			 *m_string;
 	binary_t		  m_binary;
 	tpack_t			  m_tpack;
+	shared_t	     *m_shared;
 	message_array_t  *m_array;
 	int32_t			  m_error;
 } data_t;
@@ -77,6 +80,7 @@ enum message_type {
 #define message_string(msg)			((msg).m_data.m_string)
 #define message_binary(msg)			((msg).m_data.m_binary)
 #define message_tpack(msg)			((msg).m_data.m_tpack)
+#define message_shared(msg)			((msg).m_data.m_shared)
 #define message_array(msg)			((msg).m_data.m_array)
 #define message_error(msg)			((msg).m_data.m_error)
 
@@ -90,12 +94,11 @@ enum message_type {
 #define message_is_string(msg)		(STRING == message_data_type(msg))
 #define message_is_binary(msg)		(BINARY == message_data_type(msg))
 #define message_is_tpack(msg)		(TPACK == message_data_type(msg))
+#define message_is_shared(msg)		(SHARED == message_data_type(msg))
 #define message_is_array(msg)		(ARRAY == message_data_type(msg))
 #define message_is_error(msg)		(TERROR == message_data_type(msg))
 #define message_is_pure_error(msg)	(TERROR == message_data_type(msg) && message_error(msg) != 0)
 
-#define message_buffer_grab(msg)	if (message_is_buffer(msg)) { buffer_grab(msg.m_data.m_buffer); }
-#define message_buffer_release(msg)	if (message_is_buffer(msg)) { buffer_release(msg.m_data.m_buffer); }
 #define message_clean(msg)			do {															\
 										if (message_is_buffer(msg)) {								\
 											buffer_release(msg.m_data.m_buffer);					\
@@ -113,6 +116,11 @@ enum message_type {
 											if ((msg).m_data.m_tpack.m_data) {						\
 												sdsfree((msg).m_data.m_tpack.m_data);				\
 												(msg).m_data.m_tpack.m_data = NULL;					\
+											}														\
+										} else if (message_is_shared(msg)) {					    \
+											if ((msg).m_data.m_shared) {						    \
+												(msg).m_data.m_shared->release();		    		\
+												(msg).m_data.m_shared = NULL;	    				\
 											}														\
 										} else if (message_is_array(msg)) {					     	\
 											if ((msg).m_data.m_array) {								\
@@ -172,7 +180,11 @@ public:
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, BINARY)) { m_data.m_binary = binary; }
 
-	message_t(uint32_t source, int32_t session, uint32_t msg_type, message_array_t* array)
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, shared_t *shared)
+			: m_source(source), m_session(session),
+			  m_type(MAKE_MESSAGE_TYPE(msg_type, SHARED)) { m_data.m_shared = shared; }
+
+	message_t(uint32_t source, int32_t session, uint32_t msg_type, message_array_t *array)
 			: m_source(source), m_session(session),
 			  m_type(MAKE_MESSAGE_TYPE(msg_type, ARRAY)) { m_data.m_array = array; }
 public:

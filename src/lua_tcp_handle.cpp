@@ -6,8 +6,8 @@
 #include "node_lua.h"
 #include "uv_tcp_handle.h"
 
-#define TCP_LISTEN_SOCKET_METATABLE	"class.tcp_listen_handle_t"
-#define TCP_SOCKET_METATABLE		"class.tcp_socket_handle_t"
+#define TCP_LISTEN_SOCKET_METATABLE	"class tcp_listen_handle_t"
+#define TCP_SOCKET_METATABLE		"class tcp_socket_handle_t"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1109,7 +1109,7 @@ void lua_tcp_socket_handle_t::release_read_overflow_buffers()
 
 int luaopen_tcp(lua_State *L)
 {
-	luaL_Reg l[] = {
+	static const luaL_Reg l[] = {
 		{ "listen", lua_tcp_listen_handle_t::listen },
 		{ "listen6", lua_tcp_listen_handle_t::listen6 },
 		{ "listens", lua_tcp_listen_handle_t::listens },

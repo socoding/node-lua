@@ -4,7 +4,7 @@
 #include "context_lua.h"
 #include "network.h"
 
-#define TIMER_METATABLE		"class.timer_handle_t"
+#define TIMER_METATABLE		"class timer_handle_t"
 
 int32_t lua_timer_handle_t::sleep(lua_State* L)
 {
@@ -119,7 +119,7 @@ int32_t lua_timer_handle_t::wakeup(lua_State* L, message_t& message)
 
 int luaopen_timer(lua_State *L)
 {
-	luaL_Reg l[] = {
+	static const luaL_Reg l[] = {
 		{ "sleep", lua_timer_handle_t::sleep },
 		{ "timeout", lua_timer_handle_t::timeout },
 		{ "close", lua_timer_handle_t::close },

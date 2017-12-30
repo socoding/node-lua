@@ -106,6 +106,7 @@
     <ClInclude Include="src\handle_base_def.h" />
     <ClInclude Include="src\lbinary.h" />
     <ClInclude Include="src\lbuffer.h" />
+    <ClInclude Include="src\lshared.h" />
     <ClInclude Include="src\ltpack.h" />
     <ClInclude Include="src\lua_handle_base.h" />
     <ClInclude Include="src\lua_timer_handle.h" />
@@ -141,6 +142,7 @@
     <ClCompile Include="src\context_queue.cpp" />
     <ClCompile Include="src\lbuffer.cpp" />
     <ClCompile Include="src\lcororep.cpp" />
+    <ClCompile Include="src\lshared.cpp" />
     <ClCompile Include="src\ltpack.cpp" />
     <ClCompile Include="src\lua_handle_base.cpp" />
     <ClCompile Include="src\lua_timer_handle.cpp" />

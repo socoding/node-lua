@@ -565,45 +565,48 @@ void context_lua_t::lua_pushmessage(lua_State *L, message_t& message)
 {
 	message_array_t *array = NULL;
 	switch (message_data_type(message)) {
-	case NIL:
+	case NIL :
 		lua_pushnil(L);
 		return;
-	case TBOOLEAN:
+	case TBOOLEAN :
 		lua_pushboolean(L, message_bool(message));
 		return;
-	case USERDATA:
+	case USERDATA :
 		lua_pushlightuserdata(L, message_userdata(message));
 		return;
-	case NUMBER:
+	case NUMBER :
 		lua_pushnumber(L, message_number(message));
 		return;
-	case INTEGER:
+	case INTEGER :
 		lua_pushinteger(L, message_integer(message));
 		return;
-	case BUFFER:
+	case BUFFER :
 		create_buffer(L, message_buffer(message));
 		return;
-	case STRING:
+	case SHARED :
+		shared_t::create(L, message_shared(message));
+		return;
+	case STRING :
 		if (message_string(message)) {
 			lua_pushstring(L, message_string(message));
 		} else {
 			lua_pushstring(L, "");
 		}
 		return;
-	case BINARY:
+	case BINARY :
 		if (message_binary(message).m_data) {
 			lua_pushlstring(L, message_binary(message).m_data, sdslen(message_binary(message).m_data));
 		} else {
 			lua_pushstring(L, "");
 		}
 		return;
-	case TPACK:
+	case TPACK :
 		ltunpack(&message_tpack(message), L);
 		return;
-	case TERROR:
+	case TERROR :
 		lua_pushinteger(L, message_error(message));
 		return;
-	case ARRAY:
+	case ARRAY :
 		array = message_array(message);
 		if (array != NULL && array->m_count > 0) {
 			lua_checkstack(L, array->m_count);

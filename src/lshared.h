@@ -33,14 +33,12 @@ private:
 	static int meta_gc(lua_State *L);
 
 public:
-	static shared_t** create_shared(lua_State* L);
-	static shared_t** create_shared(lua_State* L, shared_t* shared);
+	static shared_t** create(lua_State* L);
+	static shared_t** create(lua_State* L, shared_t* shared);
 
 private:
 	atomic_t m_ref;
 	const luaL_Reg* m_meta_reg;
-}; 
-
-extern shared_t** create_shared(lua_State* L, shared_t& shared);
+};
 
 #endif

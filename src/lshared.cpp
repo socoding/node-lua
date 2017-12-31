@@ -24,7 +24,7 @@ int shared_t::meta_gc(lua_State *L)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-shared_t** shared_t::create_shared(lua_State* L)
+shared_t** shared_t::create(lua_State* L)
 {
 	shared_t** ret = (shared_t**)lua_newuserdata(L, sizeof(shared_t*));
 	*ret = NULL;
@@ -38,18 +38,19 @@ shared_t** shared_t::create_shared(lua_State* L)
 	return ret;
 }
 
-shared_t** shared_t::create_shared(lua_State* L, shared_t* shared)
+shared_t** shared_t::create(lua_State* L, shared_t* shared)
 {
-	if (shared->m_meta_reg) {
-		if (luaL_newmetatable(L, typeid(*shared).name())) { /* create new metatable */
-			luaL_setfuncs(L, shared->m_meta_reg, 0);
+	shared_t** ret = create(L);
+	if (shared) {
+		if (shared->m_meta_reg) {
+			if (luaL_newmetatable(L, typeid(*shared).name())) { /* create new metatable */
+				luaL_setfuncs(L, shared->m_meta_reg, 0);
+			}
+			lua_pop(L, 1);
 		}
-		lua_pop(L, 1);
+		shared->grab();
+		*ret = shared;
 	}
-
-	shared_t** ret = create_shared(L);
-	shared->grab();
-	*ret = shared;
 	return ret;
 }
 

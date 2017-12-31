@@ -4,10 +4,15 @@
 int shared_t::meta_index(lua_State *L)
 {
 	shared_t** shared = (shared_t**)luaL_checkudata(L, 1, SHARED_METATABLE);
-	if (*shared && (*shared)->m_meta_reg && luaL_getmetatable(L, typeid(**shared).name()) != LUA_TNIL) {
-		lua_pushvalue(L, 2);
-		lua_rawget(L, -2);
-		return 1;
+	if (*shared) {
+		const char* name = lua_tostring(L, 2);
+		if (name) {
+			lua_CFunction func = (*shared)->index_function(name);
+			if (func) {
+				lua_pushcfunction(L, func);
+				return 1;
+			}
+		}
 	}
 	return 0;
 }
@@ -41,16 +46,8 @@ shared_t** shared_t::create(lua_State* L)
 shared_t** shared_t::create(lua_State* L, shared_t* shared)
 {
 	shared_t** ret = create(L);
-	if (shared) {
-		if (shared->m_meta_reg) {
-			if (luaL_newmetatable(L, typeid(*shared).name())) { /* create new metatable */
-				luaL_setfuncs(L, shared->m_meta_reg, 0);
-			}
-			lua_pop(L, 1);
-		}
-		shared->grab();
-		*ret = shared;
-	}
+	shared->grab();
+	*ret = shared;
 	return ret;
 }
 

@@ -298,6 +298,8 @@ static void addtoclib (lua_State *L, const char *path, void *plib) {
   lua_pop(L, 1);  /* pop CLIBS table */
 }
 
+//added by xdczju@sina.com
+#define lsys_unloadlib(XX)
 
 /*
 ** __gc tag method for CLIBS table: calls 'lsys_unloadlib' for all lib

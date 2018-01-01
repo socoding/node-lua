@@ -1,6 +1,7 @@
 #ifndef LSHARED_H_
 #define LSHARED_H_
 #include "common.h"
+#include <typeinfo>
 
 #define SHARED_METATABLE		"class shared_t"
 
@@ -33,6 +34,23 @@ private:
 public:
 	static shared_t** create(lua_State* L);
 	static shared_t** create(lua_State* L, shared_t* shared);
+	
+	template < class type >
+	static type* check_shared(lua_State *L, int idx, bool writable)
+	{
+		shared_t* shared = *(shared_t**)luaL_checkudata(L, idx, SHARED_METATABLE);
+		if (shared == NULL) {
+			luaL_argerror(L, 1, "shared_t invalid");
+		}
+		if (writable && !shared->writeable()) {
+			luaL_argerror(L, 1, "shared_t not writable");
+		}
+		type* p = dynamic_cast<type*>(shared);
+		if (!p) {
+			luaL_error(L, "bad argument #%d (%s expected, %s found)", idx, typeid(type).name(), typeid(*shared).name());
+		}
+		return p;
+	}
 
 private:
 	atomic_t m_ref;

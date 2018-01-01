@@ -1,5 +1,4 @@
 #include "lshared.h"
-#include <typeinfo>
 
 int shared_t::meta_index(lua_State *L)
 {

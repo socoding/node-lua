@@ -140,6 +140,7 @@ void context_lua_t::lua_open_libs(lua_State *L)
 		{LUA_STRLIBNAME, luaopen_string},
 		{LUA_BITLIBNAME, luaopen_bit32},
 		{LUA_MATHLIBNAME, luaopen_math},
+		{LUA_UTF8LIBNAME, luaopen_utf8},
 		{LUA_DBLIBNAME, luaopen_debug},
 #if defined(LUA_CACHELIB)
 		{LUA_CACHELIB, luaopen_cache},

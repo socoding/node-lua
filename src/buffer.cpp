@@ -246,6 +246,7 @@ buffer_t buffer_split(buffer_t& buffer_ref, size_t len)
 					buffer_release(buffer_ref);
 					buffer_ref = new_buffer;
 				} else { //split_len == buffer->m_len
+					buffer_release(buffer_ref);
 					buffer_ref = buffer_new(DEFAULT_BUFFER_CAPACITY, NULL, 0);
 				}
 			}
@@ -283,6 +284,7 @@ size_t buffer_remove(buffer_t& buffer_ref, size_t start, size_t len)
 				buffer_release(buffer_ref);
 				buffer_ref = new_buffer;
 			} else { //remove_len == buffer->m_len
+				buffer_release(buffer_ref);
 				buffer_ref = buffer_new(DEFAULT_BUFFER_CAPACITY, NULL, 0);
 			}
 		}

@@ -87,6 +87,11 @@ bool context_lua_t::deinit(const char *arg)
 		singleton_ref(node_lua_t).context_send(*it, m_handle, LUA_REFNIL, LUA_CTX_WAKEUP, UV_OK);
 	}
 	m_context_wait_handles.clear();
+
+	for (ref_sessions_mgr_t::ref_sessions_map_t::iterator it = m_context_wait_sessions.m_sessions_map.begin(); it != m_context_wait_sessions.m_sessions_map.end(); ++it) {
+		singleton_ref(node_lua_t).context_send(it->first, m_handle, LUA_REFNIL, LUA_CTX_WAIT_CANCEL, UV_OK);
+	}
+
 	if (m_lstate) {
 		lua_close(m_lstate);
 		m_lstate = NULL;
@@ -696,6 +701,9 @@ void context_lua_t::on_received(message_t& message)
 	case LUA_CTX_WAIT:
 		response_context_wait(message);
 		break;
+	case LUA_CTX_WAIT_CANCEL:
+		response_context_wait_cancel(message);
+		break;
 	case LUA_CTX_WAKEUP:
 		response_context_wakeup(message);
 		break;
@@ -817,6 +825,11 @@ void context_lua_t::response_context_reply(message_t& response)
 void context_lua_t::response_context_wait(message_t& response)
 {
 	m_context_wait_handles.insert(response.m_source);
+}
+
+void context_lua_t::response_context_wait_cancel(message_t& response)
+{
+	m_context_wait_handles.erase(response.m_source);
 }
 
 void context_lua_t::response_context_wakeup(message_t& response)
@@ -1288,8 +1301,16 @@ int32_t context_lua_t::context_wait_yield_continue(lua_State* L, int status, lua
 int32_t context_lua_t::context_wait_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat)
 {
 	context_lua_t* lctx = context_lua_t::lua_get_context(L);
-	message_t message(0, session, LUA_CTX_WAKEUP, NL_ETIMEOUT);
-	return lctx->m_context_wait_sessions.wakeup_one_fixed((uint64_t)userdata, lctx, message, true);
+	uint32_t handle = (uint64_t)userdata;
+	if (!lctx->m_context_wait_sessions.is_empty(handle)) {
+		message_t message(0, session, LUA_CTX_WAKEUP, NL_ETIMEOUT);
+		int32_t result = lctx->m_context_wait_sessions.wakeup_one_fixed(handle, lctx, message, true);
+		if (lctx->m_context_wait_sessions.is_empty(handle)) {
+			singleton_ref(node_lua_t).context_send(handle, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT_CANCEL, UV_OK);
+		}
+		return result;
+	}
+	return 0;
 }
 
 int32_t context_lua_t::context_wait(lua_State *L)
@@ -1309,7 +1330,12 @@ int32_t context_lua_t::context_wait(lua_State *L)
 	int32_t session;
 	if (top >= 2) {
 		if (lua_isnil(L, 2)) {
-			lctx->m_context_wait_sessions.free_nonblocking_callback(handle, L);
+			if (!lctx->m_context_wait_sessions.is_empty(handle)) {
+				lctx->m_context_wait_sessions.free_nonblocking_callback(handle, L);
+				if (lctx->m_context_wait_sessions.is_empty(handle)) {
+					singleton_ref(node_lua_t).context_send(handle, lctx->get_handle(), LUA_REFNIL, LUA_CTX_WAIT_CANCEL, UV_OK);
+				}
+			}
 			return 0;
 		}
 		if (lua_isfunction(L, 2)) {
@@ -1397,6 +1423,21 @@ int32_t context_lua_t::context_run(lua_State *L)
 	return 0;
 }
 
+int32_t context_lua_t::context_suspend_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination)
+{
+	if (root_coro != NULL) {
+		context_lua_t::lua_ref_yield_coroutine(root_coro); /* WARNINIG: this will make the coroutine dead, never go back! */
+	}
+	return UV_OK;
+}
+
+int32_t context_lua_t::context_suspend(lua_State *L)
+{
+	context_lua_t* lctx = (context_lua_t*)lua_get_context(L);
+	lua_settop(L, 0);
+	return lctx->lua_yield_send(L, lctx->get_handle(), context_suspend_yield_finalize, NULL); /* no yield continue function, never go back! */
+}
+
 int luaopen_context(lua_State *L)
 {
 	static const luaL_Reg l[] = {
@@ -1412,6 +1453,7 @@ int luaopen_context(lua_State *L)
 			{ "wait", context_lua_t::context_wait },
 			{ "log", context_lua_t::context_log },
 			{ "run", context_lua_t::context_run },
+			{ "suspend", context_lua_t::context_suspend },
 			{ NULL, NULL },
 	};
 	luaL_newlib(L, l);

@@ -99,6 +99,7 @@ private:
 	void response_context_query(message_t& response);
 	void response_context_reply(message_t& response);
 	void response_context_wait(message_t& response);
+	void response_context_wait_cancel(message_t& response);
 	void response_context_wakeup(message_t& response);
 	void response_context_run(message_t& response);
 	void response_tcp_listen(message_t& response);
@@ -159,6 +160,7 @@ public:
 	static int32_t context_wait_yield_continue(lua_State* L, int status, lua_KContext ctx);
 	static int32_t context_wait_timeout(lua_State *L, int32_t session, void* userdata, bool is_repeat);
 	static int32_t context_run_callback_adjust(lua_State* L);
+	static int32_t context_suspend_yield_finalize(lua_State *root_coro, lua_State *main_coro, void *userdata, uint32_t destination);
 	static int32_t context_strerror(lua_State *L);
 	static int32_t context_self(lua_State *L);
 	static int32_t context_thread(lua_State *L);
@@ -172,6 +174,7 @@ public:
 	static int32_t context_wait(lua_State *L);
 	static int32_t context_log(lua_State *L);
 	static int32_t context_run(lua_State *L);
+	static int32_t context_suspend(lua_State *L);
 	/************ the above are context lua api ************/
 
 public:

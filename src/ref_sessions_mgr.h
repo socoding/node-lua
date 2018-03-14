@@ -28,6 +28,7 @@ public:
 	void wakeup_all(uint32_t id, context_lua_t* lctx, message_t& message, bool free_callback = false);
 
 private:
+	friend class context_lua_t;
 	typedef std::map<uint32_t, ref_sessions_t*> ref_sessions_map_t;
 	typedef std::vector<ref_sessions_t*> ref_sessions_vec_t;
 	ref_sessions_map_t m_sessions_map;

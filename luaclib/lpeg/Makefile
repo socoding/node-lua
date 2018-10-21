@@ -19,9 +19,9 @@ LIBRARY_PATH := ../../deps/lua
 LIBS := nlua
 
 ## define CFLAGS
-CFLAGS += -g -O3 -Wall -Wextra -Wno-unused-parameter -std=c99 -fpic -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
+CFLAGS += -g -Wall -Wextra -Wno-unused-parameter -std=c99 -fpic -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
 ifeq (RELEASE,$(RELEASE))
-CFLAGS += -D RELEASE
+CFLAGS += -D RELEASE -O3
 endif
 
 ## define LDFLAGS

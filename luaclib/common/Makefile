@@ -14,10 +14,10 @@ SRC_PATH := ../../src
 INCLUDE_PATH := ../../src ../../deps/lua ../../deps/uv/include  
 
 ## define CFLAGS
-CFLAGS += -g -O3 -Wall -Wextra -Wno-unused-parameter -fpic -std=c++0x -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
+CFLAGS += -g -Wall -Wextra -Wno-unused-parameter -fpic -std=c++0x -D LUA_COMPAT_5_2 -D LUA_COMPAT_5_1 
 
 ifeq (RELEASE,$(RELEASE))
-CFLAGS += -D RELEASE
+CFLAGS += -D RELEASE -O3
 endif
 
 ## get all include path  

@@ -801,7 +801,7 @@ static void opt_check_endian(lua_State* L, int32_t idx, const char* field, char 
 	lua_getfield(L, idx, field);
 	if (!lua_isnil(L, -1)) {
 		size_t len = 0;
-		const char* head_endian = luaL_tolstring(L, -1, &len);
+		const char* head_endian = lua_tolstring(L, -1, &len);
 		if (len != 1 || (*head_endian != 'L' && *head_endian != 'B')) {
 			luaL_error(L, "option table error, field '%s' not correct", field);
 		}

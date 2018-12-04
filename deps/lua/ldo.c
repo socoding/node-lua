@@ -710,12 +710,6 @@ LUA_API int lua_yieldk (lua_State *L, int nresults, lua_KContext ctx,
   return 0;  /* return to 'luaD_hook' */
 }
 
-/* Added by xdczju@sina.com */
-LUA_API int lua_yieldable(lua_State *L)
-{
-	return L->nny == 0;
-}
-
 int luaD_pcall (lua_State *L, Pfunc func, void *u,
                 ptrdiff_t old_top, ptrdiff_t ef) {
   int status;

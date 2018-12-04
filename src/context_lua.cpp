@@ -378,7 +378,7 @@ int32_t context_lua_t::lua_yield_send(lua_State *L, uint32_t destination, yiled_
 	lctx->m_shared->m_yielding_finalize_userdata = fnz_ud;
 	lctx->m_shared->m_yielding_status = UV_OK;
 	lctx->m_shared->m_yielding_timeout = timeout;
-	if ((stacks = lua_checkstack(L, LUA_MINSTACK)) && lua_yieldable(L)) { /* reserve LUA_MINSTACK stack for resume result */
+	if ((stacks = lua_checkstack(L, LUA_MINSTACK)) && lua_isyieldable(L)) { /* reserve LUA_MINSTACK stack for resume result */
 		return lua_yieldk(L, 0, (lua_KContext)lua_gettop(L), yieldk);
 	} else {
 		if (stacks) { /* stack enough, but not yield-able */

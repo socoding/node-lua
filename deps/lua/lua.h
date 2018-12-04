@@ -297,9 +297,6 @@ LUA_API void  (lua_refsharedclosure)(void *f);
 LUA_API void  (lua_unrefsharedclosure)(void *f);
 #endif
 
-/* Added by xdczju@sina.com */
-LUA_API int   (lua_yieldable)(lua_State *L);
-
 /*
 ** coroutine functions
 */

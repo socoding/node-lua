@@ -248,9 +248,7 @@ void uv_tcp_socket_handle_t::write(request_tcp_write_t& request)
 		uv_tcp_socket_handle_t* handle = (uv_tcp_socket_handle_t*)singleton_ref(network_t).get_shared_write_socket(request.m_socket_fd);
 		if (handle != NULL) {
 			uint32_t length = request.m_length > 0 ? request.m_length : (uint32_t)buffer_data_length(request.m_buffer);
-			if (uv_is_closing((uv_handle_t*)handle)) {
-				err = NL_ETCPSCLOSED;
-			} else if (!check_head_option_max(handle->m_write_head_option, length)) {
+			if (!check_head_option_max(handle->m_write_head_option, length)) {
 				err = NL_ETCPWRITELONG;
 			} else {
 				err = handle->write_handle(request);

@@ -91,11 +91,7 @@ void uv_udp_handle_t::write(request_udp_write_t& request)
 	if (request.m_shared_write) {
 		uv_udp_handle_t* handle = (uv_udp_handle_t*)singleton_ref(network_t).get_shared_write_socket(request.m_socket_fd);
 		if (handle != NULL) {
-			if (uv_is_closing((uv_handle_t*)handle)) {
-				err = NL_EUDPSCLOSED;
-			} else {
-				err = handle->write_handle(request);
-			}
+			err = handle->write_handle(request);
 		} else {
 			err = NL_EUDPNOWSHARED;
 		}
